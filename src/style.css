@@ -1,0 +1,156 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+* {
+    font-family: "DM Sans", sans-serif;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.row {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.box-item {
+    background: rgba(122, 0, 145, 0.87);
+    width: 65%;
+    text-align: right;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    box-sizing: border-box;
+    padding: 20px 15px;
+}
+
+.specta {
+    position: relative;
+}
+
+.box-item h4 {
+    color: #fff;
+}
+
+.box-item p {
+    color: rgb(117, 105, 105);
+}
+
+.lo-input {
+    width: 100%;
+    padding: 10px;
+    outline: none;
+    box-shadow: none;
+    border: 1px solid rgb(232, 225, 225);
+    border-radius: 10px;
+}
+.tron {
+    box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+    padding: 20px 40px;
+    margin: 0 60px;
+    border: 1px solid #F3F3F3;
+}
+
+.log-btn {
+    outline: none;
+    border: 0;
+    box-shadow: none;
+    padding: 13px;
+    background: #7A0091;
+    color: #fff;
+    width: 100%;
+}
+
+/* sidebar styling */
+.sidebar {
+    background: #7A0091;
+    width: 235px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 100;
+    transition: width 300ms;
+}
+
+.sidebar-menu button {
+    /* display: block; */
+    outline: none;
+    border: 0;
+    box-shadow: none;
+    background: #7A0091;
+    font-size: 13px;
+    color: #fff;
+    width: 100%;
+    text-align: left;
+    margin: 15px 0;
+    font-weight: 500;
+}
+
+.submenu {
+    margin-left: 50px;
+    /* max-height: 0;
+    overflow: hidden;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: max-height 0.6s ease; */
+}
+
+/* .submenu.open {
+    max-height: 500px;
+    transform: scaleY(1);
+    transition-delay: 3s;
+} */
+
+.sidebar-submenu-button {
+    padding-left: 10px;
+    text-align: left;
+    display: block; 
+}
+
+.sidebar-menu {
+    padding: 5px 0 0;
+    margin: 0 10px;
+}
+
+.sidebar-menu button.active {
+    background: #fff;
+    color: #7A0091;
+    border-radius: 30px 0 0 30px;
+    font-weight: 600;
+    padding: 10px;
+}
+
+/* dashboard styling */
+
+.main-content {
+    transition: margin-left 300ms;
+    margin-left: 232px;
+}
+
+header {
+    background: #fff;
+    display: flex;
+    /* justify-content: space-between; */
+    padding: 0.5rem 1.5rem;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    left: 235px;
+    width: calc(100% - 235px);
+    top: 0;
+    z-index: 100;
+    transition: left 300ms;
+}
+
+@media screen and (max-width: 992px) {
+    .box-item {
+        width: 100%;
+    }
+    br {
+        display: none;
+    }
+    .tron {
+        margin: 0 0 20px 0;
+    }
+}
