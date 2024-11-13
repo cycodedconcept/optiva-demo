@@ -5,6 +5,9 @@ import Sidebar from './Sidebar';
 import Cards from './Cards';
 import Invoice from './Invoice';
 import Products from './Products';
+import Payment from './Payment';
+import Purchase from './Purchase';
+import Report from './Report'
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -38,6 +41,9 @@ const Dashboard = () => {
           {activeContent === 'dashboard' && <Cards /> }
           {activeContent === 'invoice/invoice list' && <Invoice /> }
           {activeContent === 'products' && <Products /> }
+          {activeContent === 'payment list' && <Payment /> }
+          {activeContent === 'purchase' && <Purchase /> }
+          {activeContent === 'sales report' && <Report /> }
       </div>
     </>
   )

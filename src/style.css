@@ -52,7 +52,7 @@ html, body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -285,6 +285,24 @@ tbody tr td:last-child {
     font-size: 18px;
 }
 
+.d-btn {
+    width: 15%;
+    background: #d7cfd8;
+    color: #7A0091;
+    border-radius: 10px;
+}
+
+.a-btn {
+    background: none;
+    color: #222;
+    width: 10%;
+}
+
+.d-btn:hover {
+    background: #7A0091;
+    color: #ccc;
+}
+
 /* product styling */
 .search-input {
     padding: 10px 20px 10px 40px; 
@@ -340,7 +358,7 @@ tbody tr td:last-child {
     color: #7A0091;
     background: #fff;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     cursor: pointer;
 }
 

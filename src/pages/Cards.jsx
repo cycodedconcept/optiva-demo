@@ -147,7 +147,7 @@ const Cards = () => {
                       </div>
                       <p style={{color: '#2A803E'}}>₦20,000</p>
                   </div>
-                  <div className="d-flex justify-content-between py-2">
+                  <div className="d-flex justify-content-between py-3">
                       <div className="d-flex">
                            <div className='mr-3'>
                             <img src={Br} alt="" />

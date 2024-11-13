@@ -104,7 +104,7 @@ const menuItems = [
         title: 'Payment',
         icon: Pay,
         submenu: [
-            { title: 'All Payment', path: 'payment' },
+            { title: 'All Payment', path: 'payment list' },
             { title: 'Pending', path: 'payment/pending' }
         ]
     },
@@ -125,7 +125,7 @@ const menuItems = [
         title: 'Reports',
         icon: Rep,
         submenu: [
-            { title: 'All Reports', path: 'report' },
+            { title: 'Sales Reports', path: 'sales report' },
             { title: 'VIP', path: 'report/vip' }
         ]
     },
