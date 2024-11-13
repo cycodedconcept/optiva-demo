@@ -52,7 +52,7 @@ html, body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -276,6 +276,93 @@ tbody tr td:last-child {
 .u-btn {
     background: none;
     color: #B34017;
+}
+
+.pro-btn {
+    width: 15%;
+    padding: 7px;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+/* product styling */
+.search-input {
+    padding: 10px 20px 10px 40px; 
+    width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-size: 20px;
+    color: #222;
+    cursor: pointer;
+}
+
+.search-container {
+    position: relative;
+    margin-top: 14px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+  
+.modal-content2 {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    position: relative;
+    width: 1050px;
+    max-width: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #7A0091;
+    background: #fff;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+input, select, textarea {
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 14px;
+    border: 1px solid #DDE5E9;
+    border-radius: 10px;
+    background-color: transparent !important;
+    width: 100%;
+    margin-bottom: 20px;
+    color: #222;
+}
+
+::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+}
+
+.head-mode {
+    display: flex;
 }
 
 @media screen and (max-width: 992px) {
