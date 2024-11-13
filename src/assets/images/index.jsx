@@ -17,10 +17,19 @@ import Ts from './ts.png';
 import Tcus from './tcus.png';
 import Tsold from './tsold.png';
 import Torder from './torder.png';
+import Br from './br.png';
+import dr from './d.png';
+import Fp from './fp.png';
+import Hair from './hair.png';
+import Sh from './sh.png';
+import Pi from './pi.png';
+import Up from './up.png';
+import Ca from './ca.png';
 
 
 export { Logo, Log, Logo2, Cus, 
     Dash, Invoice, Not, Pay, 
     Pro, Purc, Rep, Set, Sup, Use, Us,
-    Ts, Tcus, Tsold, Torder 
+    Ts, Tcus, Tsold, Torder, Br, dr, 
+    Fp, Hair, Sh, Pi, Up, Ca
 }

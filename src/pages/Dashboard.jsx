@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faBell, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from './Sidebar'
+import Sidebar from './Sidebar';
+import Cards from './Cards';
+import Invoice from './Invoice';
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -31,6 +33,10 @@ const Dashboard = () => {
                   <FontAwesomeIcon icon={faRightFromBracket} className="mt-2"/>
               </div>
           </header>
+
+          {activeContent === 'dashboard' && <Cards /> }
+          {activeContent === 'invoice/invoice list' && <Invoice /> }
+
       </div>
     </>
   )

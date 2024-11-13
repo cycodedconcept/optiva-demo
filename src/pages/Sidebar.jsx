@@ -96,7 +96,7 @@ const menuItems = [
         title: 'Invoice',
         icon: Invoice,
         submenu: [
-            { title: 'All Invoice', path: 'invoice' },
+            { title: 'All Invoice', path: 'invoice/invoice list' },
             { title: 'Add Invoice', path: 'invoice/add' }
         ]
     },
