@@ -1,5 +1,5 @@
 import React from 'react'
-import Chart from './support/Chart';
+import {BarChart} from './support/Chart';
 import { Ts, Tcus, Tsold, Torder, Br, dr, Fp, Hair, Sh } from '../assets/images';
 
 const Cards = () => {
@@ -55,7 +55,7 @@ const Cards = () => {
       <div className="row mt-5">
           <div className="col-sm-12 col-md-12 col-lg-7">
               <div className="chart-item p-4">
-                <Chart />
+                <BarChart />
               </div>
 
               <div className="table-content">

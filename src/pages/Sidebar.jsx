@@ -125,8 +125,8 @@ const menuItems = [
         title: 'Reports',
         icon: Rep,
         submenu: [
-            { title: 'Sales Reports', path: 'sales report' },
-            { title: 'VIP', path: 'report/vip' }
+            { title: 'Sales Reports', path: 'Sales Report' },
+            { title: 'Stock History', path: 'Stock History' }
         ]
     },
     {

@@ -7,7 +7,8 @@ import Invoice from './Invoice';
 import Products from './Products';
 import Payment from './Payment';
 import Purchase from './Purchase';
-import Report from './Report'
+import Report from './Report';
+import StockHistory from './StockHistory';
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -43,7 +44,8 @@ const Dashboard = () => {
           {activeContent === 'products' && <Products /> }
           {activeContent === 'payment list' && <Payment /> }
           {activeContent === 'purchase' && <Purchase /> }
-          {activeContent === 'sales report' && <Report /> }
+          {activeContent === 'Sales Report' && <Report /> }
+          {activeContent === 'Stock History' && <StockHistory /> }
       </div>
     </>
   )

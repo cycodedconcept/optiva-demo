@@ -383,6 +383,13 @@ input, select, textarea {
     display: flex;
 }
 
+/* report styling */
+.re {
+    background: #34C759;
+    color: #fff;
+    padding: 3px;
+    border-radius: 3px;
+}
 @media screen and (max-width: 992px) {
     .box-item {
         width: 100%;
