@@ -64,7 +64,7 @@ const Invoice = () => {
     )
   return (
     <>
-      <div className='text-right mt-4'>
+      <div className='text-right mt-5 mt-lg-4'>
           <button className='in-btn'>+ Create Invoice</button>
       </div>
       <div className="dash-cards mt-4">
