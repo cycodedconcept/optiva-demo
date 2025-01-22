@@ -9,11 +9,12 @@ import Payment from './Payment';
 import Purchase from './Purchase';
 import Report from './Report';
 import StockHistory from './StockHistory';
+import Users from './Users';
 import '../style.css'
 import { Us } from '../assets/images'
 
 const Dashboard = () => {
-  const [activeContent, setActiveContent] = useState('dashboard');
+  const [activeContent, setActiveContent] = useState('Dashboard');
 
   const handleButtonClick = (content) => {
     setActiveContent(content);
@@ -39,13 +40,13 @@ const Dashboard = () => {
               </div>
           </header>
 
-          {activeContent === 'dashboard' && <Cards /> }
-          {activeContent === 'invoice/invoice list' && <Invoice /> }
-          {activeContent === 'products' && <Products /> }
-          {activeContent === 'payment list' && <Payment /> }
-          {activeContent === 'purchase' && <Purchase /> }
-          {activeContent === 'Sales Report' && <Report /> }
-          {activeContent === 'Stock History' && <StockHistory /> }
+          {activeContent === 'Dashboard' && <Cards /> }
+          {activeContent === 'Invoices' && <Invoice /> }
+          {activeContent === 'Product' && <Products /> }
+          {activeContent === 'Payment' && <Payment /> }
+          {activeContent === 'Purchase' && <Purchase /> }
+          {activeContent === 'Report' && <Report /> }
+          {activeContent === 'Users' && <Users /> }
       </div>
     </>
   )

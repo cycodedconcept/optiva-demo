@@ -110,7 +110,7 @@ html, body {
 
 .sidebar-menu {
     padding: 5px 0 0;
-    margin: 0 10px;
+    /* margin: 0 10px; */
 }
 
 .sidebar-menu button.active {
@@ -299,13 +299,31 @@ tbody tr td:last-child {
     width: 3% !important;
 }
 
-.my-table tbody tr:nth-child(even) {
-    background-color: #f2ebf2;
-
+.my-table {
+    background: #fff;
 }
 
-.box, .chart-item, .table-content {
+.my-table tbody tr:nth-child(even) {
+    background-color: #f2ebf2;
+}
+
+.box {
+    height: 300px;
+    width: 100%;
+}
+
+canvas {
+    width: 100% !important;
+}
+
+.chart-item, .table-content, .box2 {
     background: #fff;
+    height: 300px;
+    width: 100%;
+}
+
+.recent-order {
+    height: 440px;
 }
 
 .table-container {
@@ -348,7 +366,7 @@ tbody tr td:last-child {
 
 .pro-btn {
     width: 15%;
-    padding: 7px;
+    padding: 11Fpx;
     border-radius: 10px;
     font-size: 18px;
 }
@@ -371,9 +389,7 @@ tbody tr td:last-child {
     color: #ccc;
 }
 
-.recent-order {
-    margin-top: 150px;
-}
+
 
 /* product styling */
 .search-input {

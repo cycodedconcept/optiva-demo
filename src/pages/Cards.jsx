@@ -54,7 +54,7 @@ const Cards = () => {
 
       <div className="row mt-5">
           <div className="col-sm-12 col-md-12 col-lg-7">
-              <div className="chart-item p-2 p-lg-4">
+              <div className="chart-item p-3">
                 <BarChart />
               </div>
 
@@ -125,7 +125,7 @@ const Cards = () => {
               
           </div>
           <div className="col-sm-12 col-md-12 col-lg-5 mt-5 mt-lg-0">
-              <div className="box p-3">
+              <div className="box2 p-2">
                   <h5>Top Selling Products</h5>
                   <div className="d-flex justify-content-between mt-3 py-2">
                       <div className="d-flex">
@@ -164,7 +164,7 @@ const Cards = () => {
                       <p style={{color: '#2A803E'}}>₦6,000</p>
                   </div>
               </div>
-              <div className="box p-3 recent-order">
+              <div className="box2 p-3 recent-order mt-lg-5">
                   <div className='d-flex justify-content-between'>
                     <h5>Recent Transaction</h5>
                     <h6>See All</h6>

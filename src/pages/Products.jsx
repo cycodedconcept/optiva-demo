@@ -25,7 +25,7 @@ const Products = () => {
     
     const handleAddInputGroup = (e) => {
         e.preventDefault();
-        setInputGroups([...inputGroups, { inche: '', price: '', discount: '', supplier: '' }]);
+        setInputGroups([...inputGroups, { inche: '', price: '', discount: '', quantity: '' }]);
     };
       
     
@@ -201,10 +201,18 @@ const Products = () => {
                                     </div>
                                 </div>
                                 
-                                <div className="col-sm-12 col-md-12 col-lg-6">
+                                <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Quantity <span style={{color: '#7A0091'}}>*</span></label>
                                         <input type="text" placeholder='Enter value' />
+                                    </div>
+                                </div>
+                                <div className="col-sm-12 col-md-12 col-lg-3">
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="exampleInputEmail1">Supplier <span style={{color: '#7A0091'}}>*</span></label>
+                                        <select>
+                                            <option>select</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -228,10 +236,11 @@ const Products = () => {
                                             style={{
                                                 outline: 'none',
                                                 background: 'none',
-                                                color: '#FF962E',
+                                                color: '#7A0091',
                                                 fontSize: '25px',
                                                 padding: '0',
                                                 border: '0',
+                                                fontWeight: 'bolder'
                                             }}
                                             >
                                             +
@@ -279,19 +288,19 @@ const Products = () => {
                                             <input
                                                 type="text"
                                                 name="input4"
-                                                value={group.supplier || ''}
+                                                value={group.quantity || ''}
                                                 onChange={(e) => {
                                                 const newInputGroups = [...inputGroups];
                                                 newInputGroups[index] = { ...group, discount: e.target.value };
                                                 setInputGroups(newInputGroups);
                                                 }}
-                                                placeholder="Supplier"
+                                                placeholder="Quantity"
                                                 className="mx-2"
                                             />
                                             <FontAwesomeIcon
                                                 icon={faTimes}
                                                 onClick={() => handleRemoveInputGroup(index)}
-                                                style={{ color: '#FF962E', cursor: 'pointer' }}
+                                                style={{ color: '#7A0091', cursor: 'pointer', fontWeight: 'bolder' }}
                                             />
                                             </div>
                                         ))}
@@ -380,12 +389,7 @@ const Products = () => {
                                         <input type="text" placeholder='Enter value' />
                                     </div>
                                 </div>
-                                {/* <div className="col-sm-12 col-md-12 col-lg-3">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="exampleInputEmail1">Discounted Price(Optional) <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter value' />
-                                    </div>
-                                </div> */}
+                                
                                 <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Quantity <span style={{color: '#7A0091'}}>*</span></label>
