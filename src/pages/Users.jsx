@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, getUserRole, getShop } from '../features/userSlice';
+import { getAllUsers, getUserRole, getShop, createUsers } from '../features/userSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Priviledge from './support/Priviledge';
@@ -9,6 +9,7 @@ import ShopSelector from './support/ShopSelector';
 const Users = () => {
 
   const [userMode, setUserMode] = useState(false);
+
   const dispatch = useDispatch();
   const { loading, error, success, allUsers, userRole, shops } = useSelector((state) => state.user);
   let token = localStorage.getItem("token");
@@ -30,6 +31,7 @@ const Users = () => {
   const showModal = () => {
     setUserMode(true)
   }
+
 
   return (
     <>

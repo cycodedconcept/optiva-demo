@@ -6,6 +6,8 @@ const Priviledge = ({ data }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [checkedPrivileges, setCheckedPrivileges] = useState({});
+  const [selectedRoles, setSelectedRoles] = useState(null); 
+  const [selectedPrivileges, setSelectedPrivileges] = useState([]);
 
   // Toggle dropdown
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
@@ -22,6 +24,20 @@ const Priviledge = ({ data }) => {
         [privilegeId]: !prevState[roleId]?.[privilegeId],
       },
     }));
+  };
+
+
+  const handleRoleSelection = (role_id) => {
+    setSelectedRoles(role_id);
+    setSelectedPrivileges([]);
+  };
+
+  const handlePrivilegeSelection = (privilege_id) => {
+    setSelectedPrivileges((prevState) =>
+      prevState.includes(privilege_id)
+        ? prevState.filter((id) => id !== privilege_id)
+        : [...prevState, privilege_id]
+    );
   };
 
   // Filter data based on search query
@@ -106,18 +122,11 @@ const Priviledge = ({ data }) => {
                 >
                 {/* Checkbox to get role_id */}
                 <input
-                    type="checkbox"
-                    checked={checkedPrivileges[role.role_id]?.isChecked || false}
+                    type="radio"
+                    name="role"
+                    checked={selectedRoles === role.role_id}
                     onClick={(e) => e.stopPropagation()}
-                    onChange={() =>
-                    setCheckedPrivileges((prevState) => ({
-                        ...prevState,
-                        [role.role_id]: {
-                        ...prevState[role.role_id],
-                        isChecked: !prevState[role.role_id]?.isChecked,
-                        },
-                    }))
-                    }
+                    onChange={() => handleRoleSelection(role.role_id)}
                     style={{ marginRight: "10px", width: "4%" }}
                 />
                 <div style={{ flex: 1 }}>{role.role_type}</div>
@@ -138,10 +147,9 @@ const Priviledge = ({ data }) => {
                     <span>{privilege.privileges}</span>
                     <input
                         type="checkbox"
-                        checked={
-                        checkedPrivileges[role.role_id]?.[privilege.id] || false
-                        }
-                        onChange={() => handleCheckboxChange(role.role_id, privilege.id)}
+                        checked={selectedPrivileges.includes(privilege.id)}
+                        
+                        onChange={() => handlePrivilegeSelection(privilege.id)}
                         style={{
                         width: "4%",
                         }}
@@ -151,11 +159,26 @@ const Priviledge = ({ data }) => {
             </div>
           ))}
 
-
+<div>
+<h3>Selected Roles and Privileges:</h3>
+<pre>
+          {JSON.stringify(
+            {
+              role_type_id: selectedRoles,
+              role_privilege_ids: selectedPrivileges,
+            },
+            null,
+            2
+          )}
+        </pre>
+      </div>
         </div>
       )}
     </div>
+    
   );
+
+  
 };
 
 export default Priviledge;
