@@ -506,6 +506,10 @@ input, select, textarea {
     .in-btn {
         width: 100%;
     }
+
+    .pro-btn {
+        width: 100%;
+    }
 }
 
 .nav-toggle {

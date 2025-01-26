@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
-const Priviledge = ({ data }) => {
+const Priviledge = ({ data, onChange }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [checkedPrivileges, setCheckedPrivileges] = useState({});
@@ -13,31 +13,30 @@ const Priviledge = ({ data }) => {
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   // Handle search input change
-  const handleSearchChange = (e) => setSearchQuery(e.target.value);
-
-  // Handle checkbox toggle
-  const handleCheckboxChange = (roleId, privilegeId) => {
-    setCheckedPrivileges((prevState) => ({
-      ...prevState,
-      [roleId]: {
-        ...prevState[roleId],
-        [privilegeId]: !prevState[roleId]?.[privilegeId],
-      },
-    }));
-  };
-
+//   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   const handleRoleSelection = (role_id) => {
     setSelectedRoles(role_id);
     setSelectedPrivileges([]);
+    onChange({ 
+      role_type_id: role_id, 
+      role_priviledge_ids: [] 
+    });
   };
 
   const handlePrivilegeSelection = (privilege_id) => {
-    setSelectedPrivileges((prevState) =>
-      prevState.includes(privilege_id)
-        ? prevState.filter((id) => id !== privilege_id)
-        : [...prevState, privilege_id]
-    );
+    const newPrivileges = selectedPrivileges.includes(privilege_id)
+      ? selectedPrivileges.filter((id) => id !== privilege_id)
+      : [...selectedPrivileges, privilege_id];
+
+    setSelectedPrivileges(newPrivileges);
+    
+    if (selectedRoles) {
+      onChange({ 
+        role_type_id: selectedRoles, 
+        role_priviledge_ids: newPrivileges 
+      });
+    }
   };
 
   // Filter data based on search query
@@ -81,7 +80,7 @@ const Priviledge = ({ data }) => {
           }}
         >
           {/* Search Input */}
-          <input
+          {/* <input
             type="text"
             placeholder="Search roles..."
             value={searchQuery}
@@ -93,7 +92,7 @@ const Priviledge = ({ data }) => {
               borderRadius: "5px",
               width: '100%'
             }}
-          />
+          /> */}
 
           {/* Accordion */}
           {filteredData.map((role) => (
@@ -147,7 +146,7 @@ const Priviledge = ({ data }) => {
                     <span>{privilege.privileges}</span>
                     <input
                         type="checkbox"
-                        checked={selectedPrivileges.includes(privilege.id)}
+                        checked={selectedPrivileges?.includes(privilege.id) || false}
                         
                         onChange={() => handlePrivilegeSelection(privilege.id)}
                         style={{

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 
-const ShopSelector = ({shops}) => {
+const ShopSelector = ({ shops, onShopSelectionChange }) => {
   const [expanded, setExpanded] = useState(false);
   const [selectedShops, setSelectedShops] = useState([]);
 
@@ -11,10 +11,18 @@ const ShopSelector = ({shops}) => {
   };
 
   const handleCheckboxChange = (id) => {
-    setSelectedShops((prev) =>
-      prev.includes(id) ? prev.filter((shopId) => shopId !== id) : [...prev, id]
-    );
+    const newSelectedShops = selectedShops.includes(id) 
+      ? selectedShops.filter(shopId => shopId !== id) 
+      : [...selectedShops, id];
+      
+    setSelectedShops(newSelectedShops);
+    onShopSelectionChange(newSelectedShops);
   };
+
+  // Log selectedShops whenever it updates
+  useEffect(() => {
+    console.log("Selected Shops:", selectedShops);
+  }, [selectedShops]);
 
   return (
     <div style={{ width: "100%", border: "1px solid #DDE5E9", borderRadius: "5px" }}>
@@ -46,12 +54,11 @@ const ShopSelector = ({shops}) => {
               <span>{shop.shop_name}</span>
               <div className="text-right">
                 <input
-                    type="checkbox"
-                    checked={selectedShops.includes(shop.id)}
-                    onChange={() => handleCheckboxChange(shop.id)}
+                  type="checkbox"
+                  checked={selectedShops.includes(shop.id)}
+                  onChange={() => handleCheckboxChange(shop.id)}
                 />
               </div>
-              
             </div>
           ))}
         </div>
@@ -61,3 +68,4 @@ const ShopSelector = ({shops}) => {
 };
 
 export default ShopSelector;
+
