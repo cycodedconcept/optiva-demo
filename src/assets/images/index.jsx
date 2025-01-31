@@ -27,11 +27,17 @@ import Up from './up.png';
 import Ca from './ca.png';
 import Prod from './prod.png';
 import Prods from './prod2.png';
+import Fil from './fil.png';
+import F1 from './f1.png';
+import F2 from './f2.png';
+
+
 
 
 export { Logo, Log, Logo2, Cus, 
     Dash, Invoice, Not, Pay, 
     Pro, Purc, Rep, Set, Sup, Use, Us,
     Ts, Tcus, Tsold, Torder, Br, dr, 
-    Fp, Hair, Sh, Pi, Up, Ca, Prod, Prods
+    Fp, Hair, Sh, Pi, Up, Ca, Prod, Prods, Fil,
+    F1, F2
 }

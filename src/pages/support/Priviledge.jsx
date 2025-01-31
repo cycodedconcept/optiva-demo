@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
-const Priviledge = ({ data, onChange }) => {
+const Priviledge = ({ data, onChange, initialRoleId, initialPrivileges }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [checkedPrivileges, setCheckedPrivileges] = useState({});
@@ -14,6 +14,15 @@ const Priviledge = ({ data, onChange }) => {
 
   // Handle search input change
 //   const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
+  useEffect(() => {
+    if (initialRoleId) {
+      setSelectedRoles(initialRoleId);
+    }
+    if (initialPrivileges && initialPrivileges.length > 0) {
+      setSelectedPrivileges(initialPrivileges);
+    }
+  }, [initialRoleId, initialPrivileges]);
 
   const handleRoleSelection = (role_id) => {
     setSelectedRoles(role_id);

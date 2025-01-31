@@ -10,6 +10,7 @@ import Purchase from './Purchase';
 import Report from './Report';
 import StockHistory from './StockHistory';
 import Users from './Users';
+import Suppliers from './Suppliers'
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -41,11 +42,12 @@ const Dashboard = () => {
           </header>
 
           {activeContent === 'Dashboard' && <Cards /> }
-          {activeContent === 'Invoices' && <Invoice /> }
-          {activeContent === 'Product' && <Products /> }
-          {activeContent === 'Payment' && <Payment /> }
+          {activeContent === 'Invoice List' && <Invoice /> }
+          {activeContent === 'Product List' && <Products /> }
+          {activeContent === 'Payment List' && <Payment /> }
           {activeContent === 'Purchase' && <Purchase /> }
           {activeContent === 'Report' && <Report /> }
+          {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
       </div>
     </>

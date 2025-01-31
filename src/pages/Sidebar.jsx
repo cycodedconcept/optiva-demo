@@ -174,7 +174,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { Dash, Logo2, Invoice, Pay, Pro, Purc, Rep, Cus, Sup, Use, Not, Set } from '../assets/images';
+import { Dash, Logo2, Invoice, Pay, Pro, Purc, Rep, Cus, Sup, Use } from '../assets/images';
 import '../style.css';
 
 const Sidebar = ({ onButtonClick, activeContent }) => {
@@ -209,45 +209,57 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
         Customers: Cus,
         Suppliers: Sup,
         Users: Use,
-        Notification: Not,
-        Settings: Set,
     };
 
-    const handleToggleExpand = (title) => {
+    const handleToggleExpand = (menuId) => {
         setExpanded((prev) => ({
             ...prev,
-            [title]: !prev[title],
+            [menuId]: !prev[menuId],
         }));
     };
 
-    const renderMenu = menus.map((menu) => {
-        const hasSubmenu = menu.submenu && menu.submenu.length > 0;
-        const isActive = activeContent === menu.menu_name;
+    const renderMenu = menus.map((menuItem) => {
+        const hasChildMenu = menuItem.child_menu && menuItem.child_menu.length > 0;
+        const isActive = activeContent === menuItem.parent_menu.menu_name;
+        const menuName = menuItem.parent_menu.menu_name;
 
         return (
-            <div key={menu.menu_name} className="sidebar-item">
+            <div key={menuItem.parent_menu.id} className="sidebar-item">
                 <button 
                     className={`sidebar-menu button ${isActive ? 'active' : ''}`}
-                    onClick={() => hasSubmenu ? handleToggleExpand(menu.menu_name) : onButtonClick(menu.menu_name)}
+                    onClick={() => hasChildMenu 
+                        ? handleToggleExpand(menuItem.parent_menu.id) 
+                        : onButtonClick(menuName)
+                    }
                 >
-                    <img src={menuIcons[menu.menu_name]} alt={menu.menu_name} className='px-3' style={{ width: '50px' }} />
-                    <span>{menu.menu_name}</span>
-                    {hasSubmenu && (
+                    <img 
+                        src={menuIcons[menuName]} 
+                        alt={menuName} 
+                        className='px-3' 
+                        style={{ width: '50px' }} 
+                    />
+                    <span>{menuName}</span>
+                    {hasChildMenu && (
                         <span className="caret mx-3">
-                            {expanded[menu.menu_name] ? <FontAwesomeIcon icon={faChevronDown} /> : <FontAwesomeIcon icon={faChevronRight} />}
+                            {expanded[menuItem.parent_menu.id] 
+                                ? <FontAwesomeIcon icon={faChevronDown} /> 
+                                : <FontAwesomeIcon icon={faChevronRight} />
+                            }
                         </span>
                     )}
                 </button>
 
-                {hasSubmenu && expanded[menu.menu_name] && (
-                    <div className={`submenu ${expanded[menu.menu_name] ? 'open' : ''}`}>
-                        {menu.submenu.map((submenu) => (
+                {hasChildMenu && expanded[menuItem.parent_menu.id] && (
+                    <div className={`submenu ${expanded[menuItem.parent_menu.id] ? 'open' : ''}`}>
+                        {menuItem.child_menu.map((childMenu) => (
                             <button
-                                key={submenu.title}
-                                className={`sidebar-submenu button ${activeContent === submenu.path ? 'active' : ''}`}
-                                onClick={() => onButtonClick(submenu.path)}
+                                key={childMenu.id}
+                                className={`sidebar-submenu button ${
+                                    activeContent === childMenu.child_menu_name ? 'active' : ''
+                                }`}
+                                onClick={() => onButtonClick(childMenu.child_menu_name)}
                             >
-                                {submenu.title}
+                                {childMenu.child_menu_name}
                             </button>
                         ))}
                     </div>

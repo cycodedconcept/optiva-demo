@@ -9,6 +9,11 @@ html, body {
     padding: 0;
 }
 
+body {
+    background: #FCF2FF !important;
+    height: 100vh;
+}
+
 .row {
     margin: 0 !important;
     padding: 0 !important;
@@ -80,7 +85,7 @@ html, body {
     box-shadow: none;
     background: #7A0091;
     font-size: 13px;
-    color: #fff;
+    color: #D6DEEA;
     width: 100%;
     text-align: left;
     margin: 15px 0;
@@ -114,8 +119,8 @@ html, body {
 }
 
 .sidebar-menu button.active {
-    background: #fff;
-    color: #7A0091;
+    background: #840a9c;
+    color: #fff;
     border-radius: 30px 0 0 30px;
     font-weight: 600;
     padding: 10px;
@@ -128,7 +133,8 @@ html, body {
     margin-left: 232px;
     margin-top: 10px;
     padding: 2rem 1rem;
-    background: #f2edf3;
+    background: #FCF2FF;
+    /* height: 100vh; */
 }
 
 header {
@@ -247,13 +253,17 @@ table {
     
 }
 
+thead {
+    border: 3px solid #6E7079;
+}
+
 thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: #fff;
+    background-color: #F9F9F9;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-    font-size: 14px;
+    font-size: 17px;
 }
 
 table th, table td{
@@ -261,7 +271,7 @@ table th, table td{
     
     color: #fff;
     
-    text-align: center;
+    text-align: left;
     font-weight: normal;
     font-size: 14px;
     outline: 0.7px solid rgb(233, 229, 229);
@@ -280,9 +290,9 @@ table th, table td {
 }
 
 table td {
-    text-align: center;
+    text-align: left;
     
-    font-size: 11px;
+    font-size: 13px;
     border: 1px solid rgb(177, 177, 177);
     padding-left: 20px;
     color: #6E7079;
@@ -291,8 +301,10 @@ table td {
 }
 
 table th {
-    font-weight: 600;
-    color: #7A0091 !important;
+    font-weight: 800;
+    color: #2E2F41 !important;
+    background: #F9F9F9;
+    border: 3px solid #f8f3f3;
 }
 
 tbody tr td:last-child {
@@ -304,7 +316,7 @@ tbody tr td:last-child {
 }
 
 .my-table tbody tr:nth-child(even) {
-    background-color: #f2ebf2;
+    background-color: #FCF2FF;
 }
 
 .box {
@@ -328,6 +340,11 @@ canvas {
 
 .table-container {
     overflow-x: auto;
+}
+
+.lp {
+    background: #fff;
+    height: 100vh;
 }
 
 
@@ -471,6 +488,20 @@ input, select, textarea {
     display: flex;
 }
 
+.d-img {
+    position: relative;
+}
+
+.sub-img {
+    position: absolute;
+    top: 43px;
+    left: 13px;
+}
+
+.user-details {
+    display: flex;
+    gap: 170px;
+}
 /* report styling */
 .re {
     background: #34C759;
@@ -510,6 +541,11 @@ input, select, textarea {
     .pro-btn {
         width: 100%;
     }
+
+    .search-input {
+        width: 100%;
+    }
+
 }
 
 .nav-toggle {

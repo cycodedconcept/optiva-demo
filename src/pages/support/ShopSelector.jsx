@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 
-const ShopSelector = ({ shops, onShopSelectionChange }) => {
+const ShopSelector = ({ shops, onShopSelectionChange, initialSelectedShops = [] }) => {
   const [expanded, setExpanded] = useState(false);
   const [selectedShops, setSelectedShops] = useState([]);
 
@@ -23,6 +23,12 @@ const ShopSelector = ({ shops, onShopSelectionChange }) => {
   useEffect(() => {
     console.log("Selected Shops:", selectedShops);
   }, [selectedShops]);
+
+  useEffect(() => {
+    if (initialSelectedShops && initialSelectedShops.length > 0) {
+      setSelectedShops(initialSelectedShops);
+    }
+  }, [initialSelectedShops]);
 
   return (
     <div style={{ width: "100%", border: "1px solid #DDE5E9", borderRadius: "5px" }}>

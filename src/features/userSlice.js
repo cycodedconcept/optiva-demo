@@ -58,6 +58,8 @@ export const getAllUsers = createAsyncThunk(
                     'Content-Type': 'application/json',
                 },
             })
+            localStorage.setItem("allUsers", JSON.stringify(response.data))
+
 
             return response.data;
         } catch (error) {
@@ -117,31 +119,71 @@ export const getShop = createAsyncThunk(
     }
 );
 
+// export const createUsers = createAsyncThunk(
+//     'user/createUsers',
+//     async ({ email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids, token }, thunkAPI) => {
+//       try {
+//         const requestData = { email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids };
+  
+//         console.log('Sending request to create user:', requestData);
+  
+//         const response = await axios.post(`${API_URL}/create_user`, 
+//             requestData, 
+//             {
+//                 headers: {
+//                     "Content-Type": "application/json",
+//                     Authorization: `Bearer ${token}`,
+//                 },
+//             })
+  
+//         return response.data;
+//       } catch (error) {
+//         console.error('Error in createUsers:', error);
+//         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+//       }
+//     }
+// );
+  
 export const createUsers = createAsyncThunk(
     'user/createUsers',
-    async ({ email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids, token }, thunkAPI) => {
-      try {
-        const requestData = { email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids };
-  
-        console.log('Sending request to create user:', requestData);
-  
-        const response = await axios.post(`${API_URL}/create_user`, 
-            requestData, 
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-  
-        return response.data;
-      } catch (error) {
-        console.error('Error in createUsers:', error);
-        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
-      }
+    async (userData, thunkAPI) => {
+        try {
+            const token = localStorage.getItem('token');
+            const myHeaders = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+
+            const raw = JSON.stringify({
+                email: userData.email,
+                phone_number: userData.phone_number,
+                user_name: userData.user_name,
+                password: userData.password,
+                role_type_id: userData.role_type_id,
+                role_privilege_ids: userData.role_priviledge_ids,
+                shop_id: userData.shop_id
+            });
+
+            const response = await fetch(`${API_URL}/create_user`, {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw
+            });
+
+            const result = await response.json();
+
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to create user');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error in createUsers:', error);
+            return thunkAPI.rejectWithValue(error.message);
+        }
     }
-  );
-  
+);
 
 export const deleteUser = createAsyncThunk(
     'user/deleteUser',
@@ -163,7 +205,71 @@ export const deleteUser = createAsyncThunk(
     }
 );
 
+export const updatePassword = createAsyncThunk(
+    'user/update',
+    async ({token, id, password}, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(`${API_URL}/update_user_password`, {
+                id,
+                password
+            },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+        return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+); 
 
+export const updateUsers = createAsyncThunk(
+    'user/updateUsers',
+    async(upUserData, thunkAPI) => {
+        try {
+            const token = localStorage.getItem('token');
+            const upId = localStorage.getItem("dtid")
+            const myHeaders = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+
+            const raw = JSON.stringify({
+                id: upId,
+                email: upUserData.email,
+                phone_number: upUserData.phone_number,
+                user_name: upUserData.user_name,
+                password: upUserData.password,
+                role_type_id: upUserData.role_type_id,
+                role_privilege_ids: upUserData.role_priviledge_ids,
+                shop_id: upUserData.shop_id
+            });
+
+            const response = await fetch(`${API_URL}/update_user`, {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw
+            });
+
+            const result = await response.json();
+
+            console.log('Payload:', raw);
+            console.log('API Response:', result);
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to update user');
+            }
+
+            return result;
+
+        } catch (error) {
+            console.error('Error in updatingUsers:', error);
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+)
 
 const loginSlice = createSlice({
     name: 'user',
@@ -263,6 +369,30 @@ const loginSlice = createSlice({
             state.message = action.payload
         })
         .addCase(deleteUser.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updatePassword.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updatePassword.fulfilled, (state, action) => {
+            state.loading = false;
+            state.message = action.payload
+        })
+        .addCase(updatePassword.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updateUsers.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updateUsers.fulfilled, (state, action) => {
+            state.loading = false;
+            state.message = action.payload
+        })
+        .addCase(updateUsers.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })
