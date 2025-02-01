@@ -11,6 +11,7 @@ import Report from './Report';
 import StockHistory from './StockHistory';
 import Users from './Users';
 import Suppliers from './Suppliers'
+import Category from './support/Category';
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -49,6 +50,7 @@ const Dashboard = () => {
           {activeContent === 'Report' && <Report /> }
           {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
+          {activeContent === 'Category' && <Category /> }
       </div>
     </>
   )

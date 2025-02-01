@@ -4,10 +4,17 @@ import axios from 'axios';
 
 const initialState = {
     supplier: [],
+    user:[],
     loading: false,
     error: null,
     success: false,
-    countryData: []
+    countryData: [],
+    supplier_name: '',
+    supplier_email: '',
+    supplier_phonenumber: '',
+    country: '',
+    state: '',
+    shop_id: []
 };
 
 export const getAllSuppliers = createAsyncThunk(
@@ -45,12 +52,98 @@ export const getCountries = createAsyncThunk(
         return rejectWithValue(error.response.data);
       }
     }
-  )
+);
+
+export const createSupplier = createAsyncThunk(
+    'supplier/createSupplier',
+    async ({token, supplier_name, supplier_email, supplier_phonenumber, shop_id, country, state}, {rejectWithValue}) => {
+        try {
+            const myHeaders = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+
+            const profile = JSON.stringify({
+                supplier_name,
+                supplier_email,
+                supplier_phonenumber,
+                shop_id,
+                country,
+                state
+            })
+
+            const response = await fetch(`${API_URL}/create_supplier`, {
+                method: "POST",
+                headers: myHeaders,
+                body: profile
+            });
+
+            const data = await response.json();
+            console.log(data)
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to create supplier");
+            }
+
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const updateSupplier = createAsyncThunk(
+    'supplier/updateSupplier',
+    async ({token, supplier_id, supplier_name, supplier_email, supplier_phonenumber, shop_id, country, state }, { rejectWithValue }) => {
+        try {
+            const myHeaders = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+            const profile = JSON.stringify({
+                supplier_id,
+                supplier_name,
+                supplier_email,
+                supplier_phonenumber,
+                shop_id,
+                country,
+                state
+            });
+
+            const response = await fetch(`${API_URL}/update_supplier`, {
+                method: "POST",
+                headers: myHeaders,
+                body: profile
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to create supplier");
+            }
+
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+)
 
 const supplierSlice = createSlice({
     name: 'supplier',
     initialState,
-    reducers: {},
+    reducers: {
+        resetSupplierState: (state) => {
+            state.supplier_name = '';
+            state.supplier_email = '';
+            state.supplier_phonenumber = '';
+            state.country = '';
+            state.state = '';
+            state.shop_id = [];
+            state.success = false;
+            state.error = null;
+        }
+    },
 
     extraReducers: (builder) => {
         builder
@@ -88,7 +181,36 @@ const supplierSlice = createSlice({
             state.success = false;
             state.error = action.payload || 'Something went wrong';
         })
+        .addCase(createSupplier.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+            state.success = false;
+        })
+        .addCase(createSupplier.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = true;
+            state.user = action.payload;
+        })
+        .addCase(createSupplier.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updateSupplier.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+            state.success = false;
+        })
+        .addCase(updateSupplier.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = true;
+            state.user = action.payload;
+        })
+        .addCase(updateSupplier.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
     }
 })
 
+export const { resetSupplierState } = supplierSlice.actions;
 export default supplierSlice.reducer;
