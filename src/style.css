@@ -498,6 +498,11 @@ input, select, textarea {
     left: 13px;
 }
 
+.page-item.active .page-link {
+    background-color: #840a9c !important;
+    border-color: #7A0091 !important;
+}
+
 .user-details {
     display: flex;
     gap: 170px;

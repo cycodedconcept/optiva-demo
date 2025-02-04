@@ -48,10 +48,10 @@ export const getCategories = createAsyncThunk(
 
 export const updateCategory = createAsyncThunk(
     'category/updateCategory',
-    async ({token, id, category_name}, {rejectWithValue}) => {
+    async ({token, cat_id, category_name}, {rejectWithValue}) => {
         try {
             const response = await axios.post(`${API_URL}/update_category`, {
-                id,
+                cat_id,
                 category_name
             },{
                 headers: {
@@ -62,6 +62,23 @@ export const updateCategory = createAsyncThunk(
 
         } catch (error) {
             return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+);
+
+export const deleteCategory = createAsyncThunk(
+    'category/deleteCategory',
+    async ({token, cat_id}, {rejectWithValue}) => {
+        try {
+            const response = await axios.get(`${API_URL}/delete_category?cat_id=${cat_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Something went wrong');
+            
         }
     }
 )
@@ -113,6 +130,21 @@ const categorySlice = createSlice({
             state.success = action.payload
         })
         .addCase(updateCategory.rejected, (state, action) => {
+            state.loading = false;
+            state.success = false;
+            state.error = action.payload;
+        })
+        .addCase(deleteCategory.pending, (state) => {
+            state.loading = true;
+            state.success = false;
+            state.error = null;
+        })
+        .addCase(deleteCategory.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = true;
+            state.success = action.payload
+        })
+        .addCase(deleteCategory.rejected, (state, action) => {
             state.loading = false;
             state.success = false;
             state.error = action.payload;

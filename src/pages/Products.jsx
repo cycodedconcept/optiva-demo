@@ -1,9 +1,20 @@
-import React, { useState } from 'react'
-import { Prod, Prods} from '../assets/images'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { getProduct } from '../features/productSlice';
+import { getAllSuppliers } from '../features/supplierSlice';
+import { Prod, Fil} from '../assets/images'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
+import Pagination from './support/Pagination';
 
 const Products = () => {
+    const dispatch = useDispatch();
+    const { products, error, success, loading, currentPage, per_page, total, total_pages } = useSelector((state) => state.product);
+    const { supplier } = useSelector((state) => state.supplier);
+    let token = localStorage.getItem("token");
+    const getId = localStorage.getItem("sid");
+
+
     const [modalVisible, setModalVisible] = useState(false);
     const [upModal, setUpModal] = useState(false);
 
@@ -35,106 +46,102 @@ const Products = () => {
         setInputGroups(newInputGroups);
     };
 
+    useEffect(() => {
+        if (token) {
+          dispatch(getProduct({token, shop_id: getId, page: currentPage, per_page: per_page}))
+        }
+      },[token, dispatch, currentPage, per_page])
+
   return (
     <>
-    <div className="mt-5 mt-lg-4 d-block d-lg-flex justify-content-between">
-        <div className="search-container">
-          <input type="text" placeholder="Search Order..." className="search-input" />
-          <span className="search-icon">&#128269;</span>
-        </div>
+    <div className="mt-5 mt-lg-4 d-block text-right">
         <button className='pro-btn' onClick={sModal}><span style={{fontSize: '20px'}}>+</span> Add Product</button>
     </div>
-    <div className="table-content">
-        <div className="table-container mt-5">
-            <table className="my-table">
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Brand Name</th>
-                        <th>Category</th>
-                        <th>Created Date</th>
-                        <th>Unit Price</th>
-                        <th>Stock</th>
-                        <th>Edit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><img src={Prod} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Lush Hair</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>30,000</td>
-                        <td>300</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prods} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Experience</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>5,000</td>
-                        <td>120</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prod} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Lush Hair</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>30,000</td>
-                        <td>300</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prods} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Experience</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>5,000</td>
-                        <td>120</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prod} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Lush Hair</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>30,000</td>
-                        <td>300</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prods} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Experience</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>5,000</td>
-                        <td>120</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prod} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Lush Hair</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>30,000</td>
-                        <td>300</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                    <tr>
-                        <td><img src={Prods} alt="Thumbnail" className='img-thumbnail'/> <span className='ml-2'>Bone Straight Wig</span></td>
-                        <td>Experience</td>
-                        <td>Wig and Attachment</td>
-                        <td>10-14-2024</td>
-                        <td>5,000</td>
-                        <td>120</td>
-                        <td><FontAwesomeIcon icon={faEdit} className="mr-2" onClick={dmodal}/> Edit</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+
+    {loading ? (
+         <div>Loading...</div>
+    ) : error ? (
+        <div>Error: {error?.message || 'Something went erong'}</div>
+    ) : (
+        <>
+           <div className="lp px-0 py-0 px-lg-5 py-lg-1">
+            <div className="search-container text-right">
+                <input type="text" placeholder="Search Supplier..." className="search-input mb-3" style={{borderRadius: '5px',}}/>
+                <span className="search-icon" style={{position: "absolute",
+                    right: "10px",
+                    top: "8px",
+                    fontSize: "20px",
+                    color: "#222",
+                    cursor: "pointer"}}>&#128269;</span>
+                </div>
+                <div className="table-content">
+                    <div className="table-container">
+                        <table className="my-table">
+                            <thead>
+                                <tr>
+                                    <th><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Product Name</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Category</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Supplier Name</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Buying Price</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Selling Price</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Unit</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Color</p><div><img src={Fil} alt="" /></div></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    products && products.length > 0 ? (
+                                        products.map((item, index) => (
+                                            <tr key={item.id} onClick={() => proDetails(item.id)} style={{cursor: 'pointer'}}>
+                                            <td>{index + 1}</td>
+                                            <td> 
+                                                <img
+                                                src={typeof item.images[0]?.filename === 'string' ? item.images[0]?.filename : 'default_image.png'}
+                                                width={60} className="img-thumbnail" alt="Thumbnail" style={{boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px'}}
+                                                />
+                                                <span className='ml-5'>{item.product_name}</span>
+                                            </td>
+                                            <td>{item.product_category || '----'}</td>
+                                            <td>{item.supplier_name.supplier_name}</td>
+                                            <td>₦{Number(item.total_buying_price).toLocaleString()}</td>
+                                            <td>₦{Number(item.total_selling_price).toLocaleString()}</td>
+                                            <td>{item.unit}</td>
+                                            <td>{item.color}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="7">No Product available</td>
+                                        </tr>
+                                    )
+                                }
+                            </tbody>
+                        </table>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={total_pages}
+                            perPage={per_page}
+                            total={total}
+                            onPageChange={(newPage) => dispatch(getProduct({
+                            token, 
+                            shop_id: getId,
+                            page: newPage,
+                            per_page: per_page
+                            }))}
+                            onPerPageChange={(newPerPage) => dispatch(getProduct({
+                            token, 
+                            shop_id: getId,
+                            page: 1,
+                            per_page: newPerPage
+                            }))}
+                        />
+                    </div>
+                </div>
+           </div>
+        </>
+    )}
+    
       
       {modalVisible ? (
           <>
@@ -158,9 +165,9 @@ const Products = () => {
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
-                                        <label htmlFor="exampleInputEmail1">Product Brand <span style={{color: '#7A0091'}}>*</span></label>
+                                        <label htmlFor="exampleInputEmail1">Shops <span style={{color: '#7A0091'}}>*</span></label>
                                         <select>
-                                            <option>--select brand--</option>
+                                            <option>select</option>
                                         </select>
                                     </div>
                                 </div>
@@ -175,39 +182,28 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Color <span style={{color: '#7A0091'}}>*</span></label>
-                                        <select>
-                                            <option>select</option>
-                                        </select>
+                                        <input type="text" placeholder='Enter Name' />
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Unit <span style={{color: '#7A0091'}}>*</span></label>
-                                        <select>
-                                            <option>select</option>
-                                        </select>
+                                        <input type="text" placeholder='Enter Name' />
                                     </div>
                                 </div>
-                                <div className="col-sm-12 col-md-12 col-lg-3">
+                                <div className="col-sm-12 col-md-12 col-lg-4">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Buying Price <span style={{color: '#7A0091'}}>*</span></label>
                                         <input type="text" placeholder='Enter value' />
                                     </div>
                                 </div>
-                                <div className="col-sm-12 col-md-12 col-lg-3">
+                                <div className="col-sm-12 col-md-12 col-lg-4">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">selling Price <span style={{color: '#7A0091'}}>*</span></label>
                                         <input type="text" placeholder='Enter value' />
                                     </div>
                                 </div>
-                                
-                                <div className="col-sm-12 col-md-12 col-lg-3">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="exampleInputEmail1">Total Quantity <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter value' />
-                                    </div>
-                                </div>
-                                <div className="col-sm-12 col-md-12 col-lg-3">
+                                <div className="col-sm-12 col-md-12 col-lg-4">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Supplier <span style={{color: '#7A0091'}}>*</span></label>
                                         <select>
@@ -225,6 +221,18 @@ const Products = () => {
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Product Sub Images <span style={{color: '#7A0091'}}>*</span></label>
                                         <input type="file" placeholder='Enter value' />
+                                    </div>
+                                </div>
+                                <div className="col-sm-12 col-md-12 col-lg-6">
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="exampleInputEmail1">Total Stock Value <span style={{color: '#7A0091'}}>*</span></label>
+                                        <input type="text" placeholder='Enter Name' />
+                                    </div>
+                                </div>
+                                <div className="col-sm-12 col-md-12 col-lg-6">
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
+                                        <input type="text" placeholder='Enter value' />
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">

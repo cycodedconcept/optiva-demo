@@ -11,7 +11,7 @@ import { Fil, F1, F2 } from '../assets/images';
 const Users = () => {
   const shop = localStorage.getItem('sid');
   const [details, setDetails] = useState(false);
-  const [selectUser, setSelectUser] = useState(null);
+  const [selectUser, setSelectUser] = useState(null); 
   const [userMode, setUserMode] = useState(false);
   const [cpassword, setcPassword] = useState('')
   const [upMode, setUpmode] = useState(false);

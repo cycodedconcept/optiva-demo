@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCategories, createCategory, updateCategory } from '../../features/categorySlice';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '../../features/categorySlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Fil } from '../../assets/images';
@@ -116,7 +116,7 @@ const Category = () => {
       else {
         Swal.fire({
           icon: "info",
-          title: "creating supplier",
+          title: "creating category",
           text: `${result.message}`,
         });
       }
@@ -144,6 +144,112 @@ const Category = () => {
         category_name: selectedCategory.category_name || ''
       })
     }
+  }
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const getId = localStorage.getItem("cid");
+
+    const validations = [
+      {
+        field: 'category_name',
+        value: upData.category_name.trim(),
+        isValid: (value) => value.length >= 3,
+        message: 'Username must be at least 3 characters long'
+      }
+    ];
+
+    for (const validation of validations) {
+      if (!validation.isValid(validation.value)) {
+          Swal.fire({
+              title: 'Validation Error',
+              text: validation.message,
+              icon: 'error'
+          });
+          return;
+      }
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Valid Input!",
+      text: "Category is being updated...",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    try {
+      Swal.fire({
+        title: "Updating Category...",
+        text: "Please wait while we process your request.",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const result = await dispatch(updateCategory({token, cat_id: getId, ...upData})).unwrap();
+      
+      if (result.message === "category updated") {
+        Swal.fire({
+          icon: "success",
+          title: "updating category",
+          text: `${result.message}`,
+        });
+
+        setUpData({
+          category_name: ""
+        })
+
+        hideModal()
+        dispatch(getCategories({token}))
+      }
+      else {
+        Swal.fire({
+          icon: "info",
+          title: "creating category",
+          text: `${result.message}`,
+        });
+      }
+
+    } catch (error) {
+      console.error("Category update failed:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error Occurred",
+        text: error.message || "Something went wrong while updating the category. Please try again.",
+      });
+    }
+  }
+
+  const deleteMode = (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#7A0091',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(
+          deleteCategory({
+            cat_id: id,
+            token,
+          })
+        ).then((response) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            Swal.fire('Deleted!', 'Category deleted successfully!', 'success');
+            dispatch(getCategories({token}))
+          } else {
+            Swal.fire('Error!', 'Failed to delete category!', 'error');
+          }
+        });
+      }
+    });
   }
 
   return (
@@ -266,7 +372,7 @@ const Category = () => {
               <button className="modal-close" onClick={hideModal}>&times;</button>
             </div>
             <div className="modal-body">
-            <form onSubmit={handleCategory}>
+            <form onSubmit={handleUpdate}>
                   <div className="row">
                     <div className="col-sm-12 col-md-12 col-lg-12">
                       <div className="form-group mb-4">

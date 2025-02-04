@@ -127,7 +127,27 @@ export const updateSupplier = createAsyncThunk(
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
-)
+);
+
+export const deleteSupplier = createAsyncThunk(
+    'supplier/deleteSupplier',
+
+    async ({token, supplier_id, shop_id}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/delete_supplier`, {
+                supplier_id,
+                shop_id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
 
 const supplierSlice = createSlice({
     name: 'supplier',
@@ -206,6 +226,20 @@ const supplierSlice = createSlice({
             state.user = action.payload;
         })
         .addCase(updateSupplier.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(deleteSupplier.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+            state.success = false;
+        })
+        .addCase(deleteSupplier.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = true;
+            state.user = action.payload;
+        })
+        .addCase(deleteSupplier.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })

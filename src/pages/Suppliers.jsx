@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllSuppliers, getCountries, createSupplier, resetSupplierState, updateSupplier } from '../features/supplierSlice';
+import { getAllSuppliers, getCountries, createSupplier, resetSupplierState, updateSupplier, deleteSupplier } from '../features/supplierSlice';
 import { getShop } from '../features/userSlice';
 import ShopSelector from './support/ShopSelector';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
-import { Fil } from '../assets/images';
+import { Fil, F1, F2 } from '../assets/images';
 
 
 const Suppliers = () => {
@@ -15,6 +15,8 @@ const Suppliers = () => {
   const getId = localStorage.getItem("sid");
   const [suMode, setSuMode] = useState(false);
   const [mode, setMode] = useState(false);
+  const [selectUser, setSelectUser] = useState(null);
+  const [details, setDetails] = useState(false);
   const [formData, setFormData] = useState({
     supplier_name: '',
     supplier_email: '',
@@ -66,6 +68,10 @@ const Suppliers = () => {
       state: "",
       st: []
   });
+  }
+
+  const hideDetails = () => {
+    setDetails(false)
   }
 
   const showSupplier = () => {
@@ -428,7 +434,7 @@ const updateSubmit = async (e) => {
     Swal.fire({
       icon: "error",
       title: "Error Occurred",
-      text: error.message || "Something went wrong while creating the supplier. Please try again.",
+      text: error.message || "Something went wrong while updating the supplier. Please try again.",
     });
   }
 }
@@ -459,8 +465,51 @@ const getUpmode = (id) => {
   }
 };
 
+
+
+
+const supDetails = (id) => {
+  const theSupplier = localStorage.getItem("allSuppliers");
+  const supply = JSON.parse(theSupplier);
+
+  const selectedUser = supply.find((item) => item.supplier_id === id);
+  console.log(selectedUser)
+
+  if (selectedUser) {
+    setSelectUser(selectedUser);
+    setDetails(true);
+  }
+}
   
-  
+
+const deleteMode = (id) => {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'You won’t be able to revert this!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#7A0091',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      dispatch(
+        deleteSupplier({
+          supplier_id: id,
+          shop_id: getId,
+          token,
+        })
+      ).then((response) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          Swal.fire('Deleted!', 'Supplier deleted successfully!', 'success');
+          dispatch(getAllSuppliers({token, id: getId}))
+        } else {
+          Swal.fire('Error!', 'Failed to delete supplier!', 'error');
+        }
+      });
+    }
+  });
+}
 
   return (
     <>
@@ -503,7 +552,7 @@ const getUpmode = (id) => {
                       {
                         supplier && supplier.length > 0 ? (
                           supplier.map((item, index) => (
-                            <tr key={item.supplier_id}>
+                            <tr key={item.supplier_id} onClick={() => supDetails(item.supplier_id)} style={{cursor: 'pointer'}}>
                               <td>{index + 1}</td>
                               <td>{item.supplier_name}</td>
                               <td>{item.supplier_email}</td>
@@ -514,14 +563,14 @@ const getUpmode = (id) => {
                               <td>
                                 <div className="d-flex gap-5">
                                   <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px', backgroundColor: '#E6FEE8', padding: '5px'}} onClick={(e) => {getUpmode(item.supplier_id); e.stopPropagation()}} title='update supplier'/>
-                                  <FontAwesomeIcon icon={faTrash} style={{color: '#DB6454', fontSize: '16px', backgroundColor: '#F4E3E3', padding: '5px'}} onClick={(e) => {deleteMode(item.supplier_id); e.stopPropagation();}} title='delete supplier'/>
+                                  <FontAwesomeIcon icon={faTrash} style={{color: '#DB6454', fontSize: '16px', backgroundColor: '#F4E3E3', padding: '5px'}} onClick={(e) => {deleteMode(item.supplier_id); e.stopPropagation()}} title='delete supplier'/>
                                 </div>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                          <td colSpan="7">No supplier available</td>
+                            <td colSpan="7">No supplier available</td>
                           </tr>
                         )
                       }
@@ -725,6 +774,68 @@ const getUpmode = (id) => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : ('')}
+
+      {details ? (
+        <>
+          <div className="modal-overlay">
+            <div className="modal-content2">
+              <div className="head-mode">
+                <h6 style={{color: '#222'}}>Supplier Details</h6>
+                <button className="modal-close" onClick={hideDetails}>
+                &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="d-img">
+                  <img src={F1} alt="" className='w-100'/>
+
+                  <div className="sub-img">
+                    <img src={F2} alt="" />
+                  </div>
+                </div>
+                <div className='mt-5'>
+                  <h5 className='mb-3'>Supplier Information</h5>
+                {selectUser && (
+                    <div className="">
+                      <div className='user-details'>
+                        <p><strong>Name:</strong></p>
+                        <p>{selectUser.supplier_name}</p>
+                      </div>
+                      <div className='user-details'>
+                        <p><strong>Email:</strong></p>
+                        <p>{selectUser.supplier_email}</p>
+                      </div>
+                      <div className='user-details'>
+                        <p><strong>Phone:</strong></p>
+                        <p>{selectUser.supplier_phonenumber}</p>
+                      </div>
+                      <div className='user-details'>
+                        <p><strong>Country:</strong></p>
+                        <p>{selectUser.country}</p>
+                      </div>
+                      <div className='user-details'>
+                        <p><strong>State:</strong></p>
+                        <p>{selectUser.state}</p>
+                      </div>
+                      <div className='user-details'>
+                        <p><strong>Created By:</strong></p>
+                        <p>{selectUser.created_by}</p>
+                      </div>
+
+                      <p><strong>Assigned Shop:</strong><span style={{marginLeft: '90px'}}>{selectUser.assigned_shops.map((item) => item.shop_name).join(", ")}</span></p>
+
+                    </div>
+                  )}
+                </div>
+                
+              </div>
+              <div className="modal-foot text-right">
+                <button className='d-btn mr-2' onClick={hideDetails} style={{color: '#222'}}>Close</button>
               </div>
             </div>
           </div>
