@@ -62,9 +62,9 @@ export const createProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
     'product/updateProduct',
-    async ({ token, uForm}, {rejectWithValue}) => {
+    async ({ token, formData}, {rejectWithValue}) => {
         try {
-            const response = await axios.post(`${API_URL}/edit_product`, uForm, {
+            const response = await axios.post(`${API_URL}/edit_product`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
@@ -75,6 +75,25 @@ export const updateProduct = createAsyncThunk(
         }
     }
 );
+
+export const deleteProduct = createAsyncThunk(
+    'product/deleteProduct',
+    async ({token, shop_id, product_id}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/delete_product`, {
+                shop_id,
+                product_id
+            },{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            })
+            return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+)
 
 const productSlice = createSlice({
     name: 'product',
@@ -119,6 +138,18 @@ const productSlice = createSlice({
             state.success = action.payload;
         })
         .addCase(updateProduct.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(deleteProduct.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(deleteProduct.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(deleteProduct.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })

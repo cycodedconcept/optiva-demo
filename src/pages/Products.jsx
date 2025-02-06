@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getProduct, createProduct, updateProduct } from '../features/productSlice';
+import { getProduct, createProduct, updateProduct, deleteProduct } from '../features/productSlice';
 import { getAllSuppliers } from '../features/supplierSlice';
 import { getCategories } from '../features/categorySlice';
 import { getShop } from '../features/userSlice';
@@ -410,7 +410,7 @@ const Products = () => {
                 didOpen: () => {
                     Swal.showLoading();
                 },
-            });
+            }); 
         
             // Add 'await' here
             const response = await dispatch(createProduct({ formData, token })).unwrap();
@@ -464,8 +464,9 @@ const Products = () => {
         
     }
 
-    const updateHandle = (e) => {
+    const updateHandle = async (e) => {
         e.preventDefault();
+        const getUpId = localStorage.getItem("prid");
 
         if (!upProductData.product_name || !upProductData.color || !upProductData.unit || !upProductData.product_category || !upProductData.total_product_stock || !upProductData.supplier_id || upProductData.shop_id.length === 0) {
             Swal.fire({
@@ -502,18 +503,114 @@ const Products = () => {
             if (!upProductData.total_buying_price || !upProductData.total_selling_price) {
                 Swal.fire({
                     icon: "info",
-                    title: "creating product",
+                    title: "updating product",
                     text: 'Please provide both total buying and total selling prices..!',
                     confirmButtonColor: '#7A0091'
                 })
                 return;
             }
         }
+
+        const formData = new FormData();
+        formData.append('product_id', getUpId);
+        formData.append('product_name', upProductData.product_name);
+        formData.append('color', upProductData.color);
+        formData.append('unit', upProductData.unit);
+        formData.append('product_category', upProductData.product_category);
+        formData.append('product_description', upProductData.product_description);
+        formData.append('total_product_stock', upProductData.total_product_stock);
+        formData.append('total_buying_price', upProductData.total_buying_price || '');
+        formData.append('total_selling_price', upProductData.total_selling_price || '');
+        formData.append('total_stock_value', upProductData.total_stock_value);
+        formData.append('supplier_id', upProductData.supplier_id);
+
+        const filteredInputGroups = inputGroups2.filter(group => 
+            Object.values(group).some(value => value !== '')
+        );
+
+        formData.append('inches', filteredInputGroups.length ? JSON.stringify(filteredInputGroups) : JSON.stringify([]));
+        formData.append('shop_id', JSON.stringify(upProductData.shop_id));
+
+        upProductData.images.forEach((image) => {
+            formData.append('images', image);
+        });
+
+        for (let pair of formData.entries()) {
+            console.log(`${pair[0]}: ${pair[1]}`);
+        }
+        
+        Swal.fire({
+            icon: "success",
+            title: "Valid Input!",
+            text: "Product is being updated...",
+            timer: 1500,
+            showConfirmButton: false,
+        });
+
+        try {
+            Swal.fire({
+                title: "Updating Product...",
+                text: "Please wait while we process your request.",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            const response = await dispatch(updateProduct({token, formData})).unwrap();
+
+            if (response.message === "product updated") {
+                Swal.fire({
+                    icon: "success",
+                    title: "Product Updated!",
+                    text: `${response.message}`,
+                });
+
+                setUpProductData({
+                    product_name: '',
+                    color: '',
+                    unit: '',
+                    total_selling_price: '',
+                    product_category: '',
+                    product_description: '',
+                    total_product_stock: '',
+                    total_buying_price: '',
+                    total_stock_value: '',
+                    supplier_id: '',
+                    shop_id: [],
+                    images: []
+                });
+                setInputGroups2([{ inche: "", buying_price: "", selling_price: "", stock: "" }]);
+                setHasInches2(false);
+
+                hideModal();
+                dispatch(getProduct({ token, shop_id: getId, page: currentPage, per_page: per_page }));
+            }
+            else {
+                Swal.fire({
+                    icon: "info",
+                    title: "Product Update",
+                    text: `${response.message}`,
+                });
+            }
+        } catch (error) {
+            console.error("Product Update failed:", error);
+        
+            Swal.fire({
+                icon: "error",
+                title: "Error Occurred",
+                text: error.message || "Something went wrong while creating the product. Please try again.",
+            });
+        }
+
+
     }
 
     const getUpmode = (id) => {
         setUpModal(true);
         const getProduct = localStorage.getItem("product");
+        localStorage.setItem("prid", id)
         const vProduct = JSON.parse(getProduct);
         const selectedProduct = vProduct.find((item) => item.id === id);
         console.log(selectedProduct);
@@ -569,7 +666,32 @@ const Products = () => {
     
 
     const deleteMode = (id) => {
-
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won’t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#7A0091',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              dispatch(
+                deleteProduct({
+                  product_id: id,
+                  shop_id: getId,
+                  token,
+                })
+              ).then((response) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                  Swal.fire('Deleted!', 'Product deleted successfully!', 'success');
+                  dispatch(getProduct({ token, shop_id: getId, page: currentPage, per_page: per_page }));
+                } else {
+                  Swal.fire('Error!', 'Failed to delete product!', 'error');
+                }
+              });
+            }
+        });
     }
 
   return (
