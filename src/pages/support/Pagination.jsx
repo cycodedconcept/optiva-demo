@@ -51,7 +51,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
                 </option>
               ))}
             </select>
-            <span className="text-secondary">entries</span>
+            <span className="text-secondary ml-3">entries</span>
           </div>
     
           {/* Pagination info */}

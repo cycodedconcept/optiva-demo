@@ -101,23 +101,6 @@ const Suppliers = () => {
     });
   };
 
-  // const handleChange2 = (e) => {
-  //   const { name, value } = e.target;
-  
-  //   setUpData((prevData) => {
-  //     let updatedSupData = { ...prevData, [name]: value };
-  
-  //     if (name === 'country') {
-  //       const countries = JSON.parse(localStorage.getItem("fetchedData")) || [];
-  //       const selectedCountry = countries.find(country => country.name === value);
-  
-  //       updatedSupData.st = selectedCountry ? selectedCountry.states || [] : [];
-  //       updatedSupData.state = ''; 
-  //     }
-  
-  //     return updatedSupData;
-  //   });
-  // };
 
   const handleChange2 = (e) => {
     const { name, value } = e.target;
