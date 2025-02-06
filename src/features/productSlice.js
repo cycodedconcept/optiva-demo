@@ -58,7 +58,23 @@ export const createProduct = createAsyncThunk(
           return rejectWithValue(error.response?.data || 'Something went wrong');
         }
     }
-)
+);
+
+export const updateProduct = createAsyncThunk(
+    'product/updateProduct',
+    async ({ token, uForm}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/edit_product`, uForm, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            })
+            return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+);
 
 const productSlice = createSlice({
     name: 'product',
@@ -91,6 +107,18 @@ const productSlice = createSlice({
             state.success = action.payload;
         })
         .addCase(createProduct.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updateProduct.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updateProduct.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(updateProduct.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })
