@@ -29,12 +29,6 @@ export const loginForm = createAsyncThunk(
 
             console.log('Response data:', response.data);
 
-            // const { user } = response.data;
-
-            // if (!token || !user) {
-            //     throw new Error('Login failed. Please check your credentials.');
-            // }
-
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user))
 
@@ -119,30 +113,6 @@ export const getShop = createAsyncThunk(
     }
 );
 
-// export const createUsers = createAsyncThunk(
-//     'user/createUsers',
-//     async ({ email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids, token }, thunkAPI) => {
-//       try {
-//         const requestData = { email, phone_number, user_name, password, role_type_id, shop_id, role_priviledge_ids };
-  
-//         console.log('Sending request to create user:', requestData);
-  
-//         const response = await axios.post(`${API_URL}/create_user`, 
-//             requestData, 
-//             {
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                     Authorization: `Bearer ${token}`,
-//                 },
-//             })
-  
-//         return response.data;
-//       } catch (error) {
-//         console.error('Error in createUsers:', error);
-//         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
-//       }
-//     }
-// );
   
 export const createUsers = createAsyncThunk(
     'user/createUsers',

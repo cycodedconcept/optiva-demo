@@ -4,6 +4,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxPagesToShow = 5; // Show max 5 page numbers at a time
+
     
         if (totalPages <= maxPagesToShow) {
           // If total pages is less than max, show all pages
@@ -55,9 +56,13 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
           </div>
     
           {/* Pagination info */}
-          <div className="text-secondary">
+          {/* <div className="text-secondary">
             Showing {Math.min((currentPage - 1) * perPage + 1, total)} to{' '}
             {Math.min(currentPage * perPage, total)} of {total} entries
+          </div> */}
+          <div className="text-secondary">
+            Showing {total > 0 ? Math.min((currentPage - 1) * perPage + 1, total) : 0} to{' '}
+            {total > 0 ? Math.min(currentPage * perPage, total) : 0} of {total} entries
           </div>
     
           {/* Page navigation */}

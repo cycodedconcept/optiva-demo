@@ -266,6 +266,35 @@ thead th {
     font-size: 17px;
 }
 
+.pagination {
+    position: sticky;
+    bottom: 0;
+    z-index: 2; 
+    background-color: white;
+    padding: 5px 0;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: right;
+}
+
+.sticky-pagination {
+    position: sticky;
+    bottom: 0px;
+    background-color: white;
+    padding: 10px;
+    text-align: right;
+    z-index: 100;
+    border-top: 1px solid #ccc;
+}
+  
+.sticky-bottom {
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    padding: 1rem; 
+    z-index: 10;
+}
+
 table th, table td{
     top: 0px;
     
@@ -465,6 +494,15 @@ canvas {
     border: none;
     font-size: 1.8rem;
     cursor: pointer;
+}
+
+.pagination-container {
+    position: sticky;
+    bottom: 0;
+    background: white; /* Ensure it's visible */
+    padding: 10px;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 input, select, textarea {

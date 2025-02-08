@@ -4,15 +4,23 @@ import axios from 'axios';
 
 const initialState = {
   products: [],
+  search: [],
   loading: false,
   error: null,
   success: false,
+  isSearching: false,
+
   currentPage: 1,
   per_page: 10,
   pre_page: null,
   next_page: null,
   total: 0,
   total_pages: 0,
+
+//   searchCurrentPage: 1,
+//   searchPerPage: 10,
+//   searchTotal: 0,
+//   searchTotalPages: 0
 }
 
 export const getProduct = createAsyncThunk(
@@ -93,12 +101,43 @@ export const deleteProduct = createAsyncThunk(
           return rejectWithValue(error.response?.data || 'Something went wrong');
         }
     }
+);
+
+export const searchProduct = createAsyncThunk(
+    'product/searchProduct',
+    async({token, shop_id, search_value, page = 1, per_page = 10}, {rejectWithValue}) => {
+        try {
+            const response = await axios.get(`${API_URL}/get_products`, {
+                params: {
+                    shop_id: shop_id,
+                    search_value,
+                    page: page,
+                    per_page: per_page
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            console.log(response.data)
+            return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
 )
 
 const productSlice = createSlice({
     name: 'product',
     initialState,
-    reducers: {},
+    reducers: {
+        clearSearch: (state) => {
+            state.isSearching = false;
+            state.search = [];
+            state.currentPage = 1;
+            state.total = 0;
+            state.total_pages = 0
+        }
+    },
     extraReducers: (builder) => {
         builder
         .addCase(getProduct.pending, (state) => {
@@ -109,9 +148,10 @@ const productSlice = createSlice({
             state.loading = false;
             state.products = action.payload.data;
             state.currentPage = action.payload.page;
-            state.per_page = action.payload.per_page;
-            state.total = action.payload.total;
             state.total_pages = action.payload.total_pages;
+            state.total = action.payload.total;
+            state.per_page = action.payload.per_page;
+            state.isSearching = false;
         })
         .addCase(getProduct.rejected, (state, action) => {
             state.loading = false;
@@ -153,7 +193,25 @@ const productSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         })
+        .addCase(searchProduct.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(searchProduct.fulfilled, (state, action) => {
+            state.loading = false;
+            state.search = action.payload.data;
+            state.currentPage = action.payload.page;
+            state.total_pages = action.payload.total_pages;
+            state.total = action.payload.total;
+            state.per_page = action.payload.per_page;
+            state.isSearching = true;
+        })
+        .addCase(searchProduct.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload || 'Something went wrong'
+        })
     }
 })
 
+export const { clearSearch } = productSlice.actions;
 export default productSlice.reducer;

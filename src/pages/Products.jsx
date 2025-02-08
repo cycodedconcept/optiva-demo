@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getProduct, createProduct, updateProduct, deleteProduct } from '../features/productSlice';
+import { getProduct, createProduct, updateProduct, deleteProduct, searchProduct, clearSearch } from '../features/productSlice';
 import { getAllSuppliers } from '../features/supplierSlice';
 import { getCategories } from '../features/categorySlice';
 import { getShop } from '../features/userSlice';
@@ -10,17 +10,23 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
 import Swal from 'sweetalert2';
+import { Carousel } from 'react-bootstrap';
+import { debounce }  from 'lodash';
+
 
 
 const Products = () => {
     const dispatch = useDispatch();
-    const { products, error, success, loading, currentPage, per_page, total, total_pages } = useSelector((state) => state.product);
+    const { products, error, isSearching, loading, currentPage, per_page, total, total_pages, search } = useSelector((state) => state.product);
     const { supplier } = useSelector((state) => state.supplier);
     const { categories } = useSelector((state) => state.category);
     const { shops } = useSelector((state) => state.user);
 
     let token = localStorage.getItem("token");
     const getId = localStorage.getItem("sid");
+    const [productDetails, setProductDetails] = useState(null);
+    const [vm, setVm] = useState(false);
+    const [inputValue, setInputValue] = useState('');
 
     const [modalVisible, setModalVisible] = useState(false);
     const [upModal, setUpModal] = useState(false);
@@ -58,12 +64,15 @@ const Products = () => {
     const [hasInches2, setHasInches2] = useState(false);
 
     const [isMainStockEditable, setIsMainStockEditable] = useState(true);
+    const [isMainStockEditable2, setIsMainStockEditable2] = useState(true);
+
 
     
 
     const hideModal = () => {
         setModalVisible(false);
         setUpModal(false);
+        setVm(false)
     }
 
     const sModal = () => {
@@ -81,11 +90,26 @@ const Products = () => {
         { input1: '', input2: '', input3: '', input4: '' },
     ]);
 
+    const images = productDetails?.images || [];
+    const [selectedImage, setSelectedImage] = useState("default_image.png");
+
+    useEffect(() => {
+        if (images.length > 0) {
+            setSelectedImage(images[0].filename);
+        }
+    }, [productDetails]);
+
     useEffect(() => {
         const hasNonZeroStock = inputGroups.some((inch) => Number(inch.stock) > 0);
         setIsMainStockEditable(!hasNonZeroStock);
         
     }, [inputGroups]);
+
+    useEffect(() => {
+        const hasNonZeroStock2 = inputGroups2.some((inch) => Number(inch.stock) > 0);
+        setIsMainStockEditable2(!hasNonZeroStock2);
+        
+    }, [inputGroups2]);
     
     const handleAddInputGroup = (e) => {
         e.preventDefault();
@@ -159,12 +183,12 @@ const Products = () => {
         setInputGroups(newInputGroups);
 
         // Calculate totals when any inch field changes
-        if (field === 'selling_price' || field === 'stock') {
+        if (field === 'buying_price' || field === 'stock') {
             // Calculate total stock value from inches (selling price * stock)
             const totalStockValue = newInputGroups.reduce((sum, group) => {
-                const sellingPrice = parseFloat(group.selling_price) || 0;
+                const buyingPrice = parseFloat(group.buying_price) || 0;
                 const stock = parseFloat(group.stock) || 0;
-                return sum + (sellingPrice * stock);
+                return sum + (buyingPrice * stock);
             }, 0);
 
             // Calculate total stock from all inches
@@ -188,9 +212,9 @@ const Products = () => {
 
         // Recalculate totals after removing an inch
         const totalStockValue = newInputGroups.reduce((sum, group) => {
-            const sellingPrice = parseFloat(group.selling_price) || 0;
+            const buyingPrice = parseFloat(group.buying_price) || 0;
             const stock = parseFloat(group.stock) || 0;
-            return sum + (sellingPrice * stock);
+            return sum + (buyingPrice * stock);
         }, 0);
 
         const totalStock = newInputGroups.reduce((sum, group) => {
@@ -226,12 +250,12 @@ const Products = () => {
         setInputGroups2(newInputGroups);
 
         // Calculate totals when any inch field changes
-        if (field === 'selling_price' || field === 'stock') {
+        if (field === 'buying_price' || field === 'stock') {
             // Calculate total stock value from inches (selling price * stock)
             const totalStockValue = newInputGroups.reduce((sum, group) => {
-                const sellingPrice = parseFloat(group.selling_price) || 0;
+                const buyingPrice = parseFloat(group.buying_price) || 0;
                 const stock = parseFloat(group.stock) || 0;
-                return sum + (sellingPrice * stock);
+                return sum + (buyingPrice * stock);
             }, 0);
 
             // Calculate total stock from all inches
@@ -255,9 +279,9 @@ const Products = () => {
 
         // Recalculate totals after removing an inch
         const totalStockValue = newInputGroups.reduce((sum, group) => {
-            const sellingPrice = parseFloat(group.selling_price) || 0;
+            const buyingPrice = parseFloat(group.buying_price) || 0;
             const stock = parseFloat(group.stock) || 0;
-            return sum + (sellingPrice * stock);
+            return sum + (buyingPrice * stock);
         }, 0);
 
         const totalStock = newInputGroups.reduce((sum, group) => {
@@ -480,10 +504,10 @@ const Products = () => {
         if (hasInches2) {
             const incompleteInches = inputGroups2.some(
                 (group) =>
-                    !(group.inche || '').trim() ||
-                    !(group.buying_price || '').trim() ||
-                    !(group.selling_price || '').trim() ||
-                    !(group.stock || '').trim()
+                    !(group.inche || '') ||
+                    !(group.buying_price || '') ||
+                    !(group.selling_price || '') ||
+                    !(group.stock || '')
             );
         
             if (incompleteInches) {
@@ -694,10 +718,75 @@ const Products = () => {
         });
     }
 
+
+    const proDetails = (id) => {
+        const getProduct = localStorage.getItem("product");
+        const vProduct = JSON.parse(getProduct);
+
+        const product = vProduct.find((item) => item.id === id);
+        console.log(product)
+        
+        if (product) {
+            setProductDetails(product);
+            setVm(true)
+        }
+    }
+
+
+    const debouncedSearch = useCallback(
+        debounce((value) => {
+            if (value.trim() === "") {
+                dispatch(clearSearch());
+                dispatch(getProduct({ 
+                    token, 
+                    shop_id: getId, 
+                    page: 1, 
+                    per_page: per_page 
+                }));
+            } else {
+                dispatch(searchProduct({ 
+                    token, 
+                    shop_id: getId, 
+                    search_value: value, 
+                    page: 1, 
+                    per_page: per_page 
+                }));
+            }
+        }, 300),
+        [dispatch, token, getId, per_page] // Add any other dependencies
+    );
+
+    // Update your handleSearch function
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+        debouncedSearch(value);
+    };
+
+    // Clean up the debounced function when component unmounts
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
+
+
+    const displayData = isSearching ? search : products;
+    
+
   return (
     <>
     <div className="mt-5 mt-lg-4 d-block text-right">
         <button className='pro-btn' onClick={sModal}><span style={{fontSize: '20px'}}>+</span> Add Product</button>
+        <div className="search-container text-right">
+                <input type="text" placeholder="Search product..." className="search-input mb-3" style={{borderRadius: '5px',}} value={inputValue} onChange={handleSearch}/>
+                <span className="search-icon" style={{position: "absolute",
+                    right: "10px",
+                    top: "8px",
+                    fontSize: "20px",
+                    color: "#222",
+                    cursor: "pointer"}}>&#128269;</span>
+              </div>
     </div>
 
     {loading ? (
@@ -707,18 +796,18 @@ const Products = () => {
     ) : (
         <>
            <div className="lp px-0 py-0 px-lg-3 py-lg-1">
-            <div className="search-container text-right">
-                <input type="text" placeholder="Search Supplier..." className="search-input mb-3" style={{borderRadius: '5px',}}/>
+              {/* <div className="search-container text-right">
+                <input type="text" placeholder="Search Supplier..." className="search-input mb-3" style={{borderRadius: '5px',}} value={inputValue} onChange={handleSearch}/>
                 <span className="search-icon" style={{position: "absolute",
                     right: "10px",
                     top: "8px",
                     fontSize: "20px",
                     color: "#222",
                     cursor: "pointer"}}>&#128269;</span>
-                </div>
+              </div> */}
                 <div className="table-content">
                     <div className="table-container">
-                        <table className="my-table">
+                        <table className="my-table" data={displayData}>
                             <thead>
                                 <tr>
                                     <th><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
@@ -732,7 +821,7 @@ const Products = () => {
                                     <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            {/* <tbody>
                                 {
                                     products && products.length > 0 ? (
                                         products.map((item, index) => (
@@ -765,26 +854,97 @@ const Products = () => {
                                         </tr>
                                     )
                                 }
-                            </tbody>
+                            </tbody> */}
+
+                                <tbody>
+                                    {loading ? (
+                                        <tr><td colSpan="9">Loading...</td></tr>
+                                    ) : (isSearching ? search : products).length > 0 ? (
+                                        (isSearching ? search : products).map((item, index) => (
+                                            <tr key={item.id} onClick={() => proDetails(item.id)} style={{ cursor: 'pointer' }}>
+                                                <td>{index + 1}</td>
+                                                <td>
+                                                    <img
+                                                        src={typeof item.images[0]?.filename === 'string' ? item.images[0]?.filename : 'default_image.png'}
+                                                        width={60} className="img-thumbnail" alt="Thumbnail"
+                                                        style={{ boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px' }}
+                                                    />
+                                                    <span className='ml-5'>{item.product_name}</span>
+                                                </td>
+                                                <td>{item.product_category || '----'}</td>
+                                                <td>{item.supplier_name.supplier_name}</td>
+                                                <td>{item.total_buying_price}</td>
+                                                <td>{item.total_selling_price}</td>
+                                                <td>{item.unit}</td>
+                                                <td>{item.color}</td>
+                                                <td>
+                                                    <div className="d-flex gap-5">
+                                                        <FontAwesomeIcon icon={faEdit} 
+                                                            style={{ color: '#379042', fontSize: '16px', marginRight: '20px', backgroundColor: '#E6FEE8', padding: '5px' }} 
+                                                            onClick={(e) => { getUpmode(item.id); e.stopPropagation(); }} title='update supplier' 
+                                                        />
+                                                        <FontAwesomeIcon icon={faTrash} 
+                                                            style={{ color: '#DB6454', fontSize: '16px', backgroundColor: '#F4E3E3', padding: '5px' }} 
+                                                            onClick={(e) => { deleteMode(item.id); e.stopPropagation(); }} title='delete supplier' 
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="9">No Products Available</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+
                         </table>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={total_pages}
-                            perPage={per_page}
-                            total={total}
-                            onPageChange={(newPage) => dispatch(getProduct({
-                            token, 
-                            shop_id: getId,
-                            page: newPage,
-                            per_page: per_page
-                            }))}
-                            onPerPageChange={(newPerPage) => dispatch(getProduct({
-                            token, 
-                            shop_id: getId,
-                            page: 1,
-                            per_page: newPerPage
-                            }))}
-                        />
+                        
+                    </div>
+                    <div className="sticky-pagination">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={total_pages}
+                        perPage={per_page}
+                        total={total}
+                        onPageChange={(newPage) => {
+                            if (isSearching) {
+                                dispatch(searchProduct({
+                                    token,
+                                    shop_id: getId,
+                                    search_value: inputValue,
+                                    page: newPage,
+                                    per_page: per_page
+                                }));
+                            } else {
+                                dispatch(getProduct({
+                                    token,
+                                    shop_id: getId,
+                                    page: newPage,
+                                    per_page: per_page
+                                }));
+                            }
+                        }}
+                        onPerPageChange={(newPerPage) => {
+                            if (isSearching) {
+                                dispatch(searchProduct({
+                                    token,
+                                    shop_id: getId,
+                                    search_value: inputValue,
+                                    page: 1,
+                                    per_page: newPerPage
+                                }));
+                            } else {
+                                dispatch(getProduct({
+                                    token,
+                                    shop_id: getId,
+                                    page: 1,
+                                    per_page: newPerPage
+                                }));
+                            }
+                        }}
+                    />
+
                     </div>
                 </div>
            </div>
@@ -1077,7 +1237,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={!isMainStockEditable}/>
+                                        <input type="text" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={!isMainStockEditable2}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">
@@ -1184,6 +1344,145 @@ const Products = () => {
             </div>
           </>
       ) : ''}
+
+      {vm ? (
+        <>
+          <div className="modal-overlay">
+            <div className="modal-content2">
+                <div className="head-mode">
+                    <h6 style={{color: '#222'}}>Product Details</h6>
+                    <button className="modal-close" onClick={hideModal}>
+                    &times;
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <div className="row">
+                        <div className="col-sm-12 col-md-12 col-lg-6">
+                            <div
+                                className="box mb-3"
+                                style={{
+                                    backgroundImage: `url(${selectedImage})`,
+                                    backgroundRepeat: "no-repeat",
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    width: "100%",
+                                    height: "400px",
+                                    borderRadius: "8px",
+                                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                                    transition: "background-image 0.3s ease-in-out",
+                                    border: '1px solid #F3B8FF'
+                                }}
+                            ></div>
+
+                            {/* Image Carousel */}
+                            <Carousel indicators={false} interval={5000} controls={false}>
+                                {images.length > 0 ? (
+                                    images.map((image, index) => (
+                                        <Carousel.Item key={index}>
+                                            <img
+                                                src={image.filename}
+                                                width={100}
+                                                height={100}
+                                                className="img-thumbnail"
+                                                alt={`Product ${index + 1}`}
+                                                style={{
+                                                    boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() => setSelectedImage(image.filename)}
+                                            />
+                                        </Carousel.Item>
+                                    ))
+                                ) : (
+                                    <Carousel.Item>
+                                        <img
+                                            src="default_image.png"
+                                            width={100}
+                                            height={100}
+                                            className="img-thumbnail"
+                                            alt="Default Image"
+                                        />
+                                    </Carousel.Item>
+                                )}
+                            </Carousel>
+                        </div>
+                        <div className="col-sm-12 col-md-12 col-lg-6">
+                            <h4>Basic Information</h4>
+                            <div className="d-flex justify-content-between">
+                                <p>Product Name:</p>
+                                <p>{productDetails.product_name}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Product Color:</p>
+                                <p>{productDetails.color}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Unit:</p>
+                                <p>{productDetails.unit}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Category:</p>
+                                <p>{productDetails.product_category}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Buying Price:</p>
+                                <p>{productDetails.total_buying_price}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Selling Price:</p>
+                                <p>{productDetails.total_selling_price}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Product Stock:</p>
+                                <p>{productDetails.total_product_stock}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Total Stock Value:</p>
+                                <p>{productDetails.total_stock_value}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Supplier Name:</p>
+                                <p>{productDetails.supplier_name.supplier_name}</p>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                                <p>Assigned Shop:</p>
+                                <p>{productDetails.assigned_shops.map((item) => item.shop_name).join(',')}</p>
+                            </div>
+
+                            {productDetails.inches && productDetails.inches.length > 0 && (
+                                <div className="table-content">
+                                    <p className='my-3'>Inches Section</p>
+                                    <div className="table-container">
+                                        <table className="my-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Inches</th>
+                                                    <th>Buying Price</th>
+                                                    <th>Selling Price</th>
+                                                    <th>Stock</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {productDetails.inches.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>{item.inche}</td>
+                                                        <td>{item.buying_price}</td>
+                                                        <td>{item.selling_price}</td>
+                                                        <td>{item.stock}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </>
+    ) : ('')}
       
     </>
   )
