@@ -8,7 +8,7 @@ import Products from './Products';
 import Payment from './Payment';
 import Purchase from './Purchase';
 import Report from './Report';
-import StockHistory from './StockHistory';
+import Customer from './Customer';
 import Users from './Users';
 import Suppliers from './Suppliers'
 import Category from './support/Category';
@@ -51,6 +51,7 @@ const Dashboard = () => {
           {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
           {activeContent === 'Category' && <Category /> }
+          {activeContent === 'Customers' && <Customer /> }
       </div>
     </>
   )
