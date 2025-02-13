@@ -1,41 +1,57 @@
-import React from 'react'
-import { Pi, Up, Ca, Torder } from '../assets/images'
+import React, {useState, useEffect} from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { Pi, Up, Ca, Torder, Fil } from '../assets/images';
+import { getInvoice, clearSearch } from '../features/invoiceSlice';
+import Pagination from './support/Pagination';
+import Swal from 'sweetalert2';
 
 const Invoice = () => {
+  const dispatch = useDispatch();
+  let token = localStorage.getItem("token");
+  const getId = localStorage.getItem("sid");
+  const {error, loading, invoice, card, currentPage, per_page, total, total_pages} = useSelector((state) => state.invoice);
+
+  useEffect(() => {
+    if (token) {
+        dispatch(getInvoice({token, shop_id: getId, page: currentPage, per_page: per_page}))
+    }
+  }, [dispatch, token, currentPage, per_page])
+
     const cardItems = [
         {
-          id: 0,
-          icon: Torder,
-          content: "TOTAL INVOICE VALUE",
-          cvalue: "₦890,790,812",
-          grp: "14",
-          sub: "Sent Invoices"
+        id: 0,
+        icon: Torder,
+        content: "TOTAL INVOICE VALUE",
+        cvalue: `₦${Number(card?.data?.totalinvoice?.total_invoice_value || 0).toLocaleString()}`,
+        grp: card?.data?.totalinvoice?.total_invoice_count || 0,
+        sub: "Sent Invoices"
         },
         {
-          id: 1,
-          icon: Pi,
-          content: "PAID INVOICES",
-          cvalue: "₦120,000.81",
-          grp: "6",
-          sub: "Paid by customers"
+        id: 1,
+        icon: Pi,
+        content: "PAID INVOICES",
+        cvalue: `₦${Number(card?.data?.totalpaidinvoice?.total_paid_value || 0).toLocaleString()}`,
+        grp: card?.data?.totalpaidinvoice?.total_paid_count || 0,
+        sub: "Paid by customers"
         },
         {
-          id: 2,
-          icon: Up,
-          content: "UNPAID INVOICES",
-          cvalue: "₦700,400.12",
-          grp: "15",
-          sub: "Unpaid by customers"
+        id: 2,
+        icon: Up,
+        content: "UNPAID INVOICES",
+        cvalue: `₦${Number(card?.data?.totalunpaidinvoice?.total_unpaid_value || 0).toLocaleString()}`,
+        grp: card?.data?.totalunpaidinvoice?.total_unpaid_count || 0,
+        sub: "Unpaid by customers"
         },
         {
-          id: 3,
-          icon: Ca,
-          content: "CANCELED INVOICES",
-          cvalue: "₦70,050.15",
-          grp: "3",
-          sub: 'Cancelled by customers'
+        id: 3,
+        icon: Ca,
+        content: "CANCELED INVOICES",
+        cvalue: `₦${Number(card?.data?.totalcancelinvoice?.total_cancel_value || 0).toLocaleString()}`,
+        grp: card?.data?.totalcancelinvoice?.total_cancel_count || 0,
+        sub: "Cancelled by customers"
         }
-    ]
+    ];
+
 
     const showCard = cardItems.map((card) => 
        <div className="card-single px-4 py-3" key={card.id}>
@@ -64,86 +80,71 @@ const Invoice = () => {
     )
   return (
     <>
-      <div className='text-right mt-5 mt-lg-4'>
+      {/* <div className='text-right mt-5 mt-lg-4'>
           <button className='in-btn'>+ Create Invoice</button>
-      </div>
-      <div className="dash-cards mt-4">
+      </div> */}
+      <div className="dash-cards mt-5">
         { showCard }
       </div>
 
       <div className="table-content">
         <div className="table-container mt-5">
-            <table className="my-table">
+            <table className="my-table w-100">
                 <thead>
                     <tr>
-                        <th>Invoice Number</th>
-                        <th>Customer Name</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Created by</th>
-                        <th>Payment Status</th>
+                        <th style={{width: '5%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Invoice Number</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Customer Name</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Date</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Total Amount</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '10%'}}><div className='d-flex justify-content-between'><p>Created By</p><div><img src={Fil} alt="" /></div></div></th>
+                        <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Payment Status</p><div><img src={Fil} alt="" /></div></div></th>
+
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='p-btn'>Paid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='u-btn'>Unpaid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='u-btn'>Unpaid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='u-btn'>Unpaid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='u-btn'>Unpaid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='u-btn'>Unpaid</button></td>
-                    </tr>
-                    <tr>
-                        <td>#27654387265</td>
-                        <td>Craig Westervelt</td>
-                        <td>08-08-2024</td>
-                        <td>10,000</td>
-                        <td>Nolan Lipshutz</td>
-                        <td><button className='p-btn'>Paid</button></td>
-                    </tr>
+                    {invoice?.length > 0 ? (
+                        invoice.map((item, index) => (
+                            <tr key={item.invoice_number}>
+                                <td>{index + 1}</td>
+                                <td>{item.invoice_number}</td>
+                                <td>{item.customer_name.name}</td>
+                                <td>{item.date}</td>
+                                <td>{item.payment_method}</td>
+                                <td>₦{Number(item.total_amount).toLocaleString()}</td>
+                                <td>{item.created_by}</td>
+                                <td><button className={item.payment_status}>{item.payment_status}</button></td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="7">No invoice available</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>
+        <div className="sticky-pagination">
+        <Pagination
+    currentPage={currentPage}
+    totalPages={total_pages}
+    perPage={per_page}
+    total={total}
+    onPageChange={(newPage) => {
+        if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
+        dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
+    }}
+    onPerPageChange={(newPerPage) => {
+        if (newPerPage < 1) return; // Prevent invalid per_page values
+        dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
+    }}
+/>
+
+
+
+
+            </div>
       </div>
     </>
   )

@@ -1,13 +1,16 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getCustomers, addCustomers, searchCustomer } from '../features/customerSlice';
+import { getCustomers, addCustomers, searchCustomer, clearSearch } from '../features/customerSlice';
 import { Fil} from '../assets/images';
 import Swal from 'sweetalert2';
+import { debounce }  from 'lodash';
+
 
 
 const Customer = () => {
-  const {loading, success, error, customers, custom} = useSelector((item) => item.customer);
+  const {loading, success, error, customers, custom, isSearching } = useSelector((item) => item.customer);
   const [modalVisible, setModalVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('')
 
   const [cData, setCdata] = useState({
     customer_name: '',
@@ -110,10 +113,51 @@ const Customer = () => {
     }
   }
 
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+        if (value.trim() === "") {
+            dispatch(clearSearch());
+            dispatch(getCustomers({ 
+                token
+            }));
+        } else {
+            dispatch(searchCustomer({ 
+                token, 
+                search_value: value, 
+            }));
+        }
+    }, 300),
+    [dispatch, token]
+);
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    debouncedSearch(value);
+  };
+
+  useEffect(() => {
+    return () => {
+        debouncedSearch.cancel();
+    };
+}, [debouncedSearch]);
+
+
+const displayData = isSearching ? custom : customers;
+
   return (
     <>
-      <div className="mt-5 mb-5 mt-lg-5 text-right">
+      <div className="mt-5 mt-lg-5 text-right">
         <button className='pro-btn' onClick={addCustomer}><span style={{fontSize: '20px'}}>+</span> Add Customer Info</button>
+        <div className="search-container text-right mt-3">
+          <input type="text" placeholder="Search Supplier..." className="search-input" style={{borderRadius: '5px'}} value={inputValue} onChange={handleSearch}/>
+          <span className="search-icon" style={{position: "absolute",
+            right: "10px",
+            top: "8px",
+            fontSize: "20px",
+            color: "#222",
+            cursor: "pointer"}}>&#128269;</span>
+        </div>
       </div>
 
       {loading ? (
@@ -122,19 +166,10 @@ const Customer = () => {
         <div>Error: {error?.message || 'Something went erong'}</div>
       ) : (
         <>
-          <div className="lp px-0 py-0 px-lg-5 py-lg-1">
-            <div className="search-container text-right mt-3">
-              <input type="text" placeholder="Search Supplier..." className="search-input mb-3" style={{borderRadius: '5px',}}/>
-              <span className="search-icon" style={{position: "absolute",
-                right: "10px",
-                top: "8px",
-                fontSize: "20px",
-                color: "#222",
-                cursor: "pointer"}}>&#128269;</span>
-            </div>
+          <div className="lp px-0 py-0 px-lg-5 py-lg-5">
             <div className="table-content">
               <div className="table-container">
-                <table className="my-table w-100">
+                <table className="my-table w-100" data={displayData}>
                   <thead>
                       <tr>
                           <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
@@ -144,22 +179,22 @@ const Customer = () => {
                       </tr>
                   </thead>
                   <tbody>
-                      {
-                        customers && customers.length > 0 ? (
-                          customers.map((item, index) => (
-                            <tr key={item.id} onClick={() => supDetails(item.id)} style={{cursor: 'pointer'}}>
+                      {loading ? (
+                         <tr><td colSpan="9">Loading...</td></tr>
+                      ) : (isSearching ? custom : customers).length > 0 ? (
+                          (isSearching ? custom : customers).map((item, index) => (
+                            <tr key={item.id}>
                               <td>{index + 1}</td>
                               <td>{item.name}</td>
                               <td>{item.email}</td>
                               <td>{item.phone_number}</td>
                             </tr>
                           ))
-                        ) : (
-                          <tr>
-                            <td colSpan="7">No Customer available</td>
-                          </tr>
-                        )
-                      }
+                      ) : (
+                        <tr>
+                          <td colSpan="7">No Customer available</td>
+                        </tr>
+                      )}
                   </tbody>
                 </table>
               </div>

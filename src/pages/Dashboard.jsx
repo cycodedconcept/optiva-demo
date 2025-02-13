@@ -4,6 +4,7 @@ import { faBars, faBell, faRightFromBracket } from '@fortawesome/free-solid-svg-
 import Sidebar from './Sidebar';
 import Cards from './Cards';
 import Invoice from './Invoice';
+import CreateInvoice from './CreateInvoice';
 import Products from './Products';
 import Payment from './Payment';
 import Purchase from './Purchase';
@@ -44,6 +45,7 @@ const Dashboard = () => {
 
           {activeContent === 'Dashboard' && <Cards /> }
           {activeContent === 'Invoice List' && <Invoice /> }
+          {activeContent === 'Create Invoice' && <CreateInvoice /> }
           {activeContent === 'Product List' && <Products /> }
           {activeContent === 'Payment List' && <Payment /> }
           {activeContent === 'Purchase' && <Purchase /> }

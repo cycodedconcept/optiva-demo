@@ -16,11 +16,6 @@ const initialState = {
   next_page: null,
   total: 0,
   total_pages: 0,
-
-//   searchCurrentPage: 1,
-//   searchPerPage: 10,
-//   searchTotal: 0,
-//   searchTotalPages: 0
 }
 
 export const getProduct = createAsyncThunk(

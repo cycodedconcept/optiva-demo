@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -348,6 +348,25 @@ tbody tr td:last-child {
     background-color: #FCF2FF;
 }
 
+.Paid {
+    color: #2A803E;
+    background: #E4F6E8;
+    padding: 5px;
+}
+.Unpaid {
+    color: #B34017;
+    background: #FCEAE4;
+    padding: 5px;
+}
+
+.add-btn {
+    color: #5965F9 !important;
+    background: #F0F1FE !important;
+    font-size: 18px !important;
+    padding: 14px !important;
+    margin-top: 31px !important;
+}
+
 .box {
     height: 300px;
     width: 100%;
@@ -411,8 +430,8 @@ canvas {
 }
 
 .pro-btn {
-    width: 15%;
-    padding: 11Fpx;
+    width: 20%;
+    padding: 9px;
     border-radius: 10px;
     font-size: 18px;
 }

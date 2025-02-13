@@ -8,6 +8,7 @@ const initialState = {
     loading: false,
     error: null,
     success: false,
+    isSearching: false
 }
 
 export const getCustomers = createAsyncThunk(
@@ -67,7 +68,12 @@ export const searchCustomer = createAsyncThunk(
 const customerSlice = createSlice({
     name: 'customer',
     initialState,
-    reducers: {},
+    reducers: {
+        clearSearch: (state) => {
+            state.isSearching = false;
+            state.custom = [];
+        }
+    },
     extraReducers: (builder) => {
         builder
         .addCase(getCustomers.pending, (state) => {
@@ -81,6 +87,7 @@ const customerSlice = createSlice({
         .addCase(getCustomers.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
+            state.isSearching = false;
         })
         .addCase(addCustomers.pending, (state) => {
             state.loading = true;
@@ -101,6 +108,7 @@ const customerSlice = createSlice({
         .addCase(searchCustomer.fulfilled, (state, action) => {
             state.loading = false;
             state.custom = action.payload
+            state.isSearching = true;
         })
         .addCase(searchCustomer.rejected, (state, action) => {
             state.loading = false;
@@ -109,4 +117,6 @@ const customerSlice = createSlice({
     }
 })
 
+
+export const { clearSearch } = customerSlice.actions;
 export default customerSlice.reducer;
