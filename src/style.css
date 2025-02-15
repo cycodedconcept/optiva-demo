@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .active, .inactive {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -65,6 +65,41 @@ body {
     background: #7A0091;
     color: #fff;
     width: 100%;
+}
+
+.active {
+    color: #34C759;
+    background: #edf5ef;
+}
+
+.inactive {
+    color: #B34017;
+    background: #f3edeb;
+}
+
+
+.qb {
+    border: 1px solid #E9EBEC !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.bb {
+    border-right: none !important;
+}
+
+.cc {
+    border-left: none !important;
+}
+
+.qb-input {
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+}
+.qb:hover {
+    background: #7A0091 !important;
+    color: #fff !important;
 }
 
 /* sidebar styling */
@@ -365,6 +400,9 @@ tbody tr td:last-child {
     font-size: 18px !important;
     padding: 14px !important;
     margin-top: 31px !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid #E9EBEC !important; 
 }
 
 .box {
@@ -571,6 +609,15 @@ input, select, textarea {
     padding: 3px;
     border-radius: 3px;
 }
+
+.card-in {
+    background: #FEFBFF;
+}
+
+.in-bg {
+    background-color: #fff;
+}
+
 @media screen and (max-width: 992px) {
     .box-item {
         width: 100%;

@@ -31,6 +31,7 @@ import Fil from './fil.png';
 import F1 from './f1.png';
 import F2 from './f2.png';
 import Thmb from './thmb.jpg';
+import Def from './def.png';
 
 
 
@@ -40,5 +41,5 @@ export { Logo, Log, Logo2, Cus,
     Pro, Purc, Rep, Set, Sup, Use, Us,
     Ts, Tcus, Tsold, Torder, Br, dr, 
     Fp, Hair, Sh, Pi, Up, Ca, Prod, Prods, Fil,
-    F1, F2, Thmb
+    F1, F2, Thmb, Def
 }

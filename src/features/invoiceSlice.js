@@ -5,6 +5,7 @@ import axios from 'axios';
 const initialState = {
   invoice: [],
   products: [],
+  discount: [],
   card: {},
   loading: false,
   error: null,
@@ -47,10 +48,10 @@ export const getInvoice = createAsyncThunk(
 );
 
 export const getProduct = createAsyncThunk(
-    'product/getProduct',
-    async ({token, shop_id}, { rejectWithValue }) => {
+    'invoice/getProduct',
+    async ({token, shop_id, page}, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}/get_products?shop_id=${shop_id}&page=All`, {
+            const response = await axios.get(`${API_URL}/get_products?shop_id=${shop_id}&page=${page}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -58,6 +59,74 @@ export const getProduct = createAsyncThunk(
             return response.data;
         } catch (error) {
             return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const createInvoice = createAsyncThunk(
+    'invoice/createProduct',
+    async ({token, invoiceData}, { rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/create_invoice`, invoiceData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const getDiscount = createAsyncThunk(
+    'invoice/getDiscount',
+    async({token}, {rejectWithValue}) => {
+        try {
+            const response = await axios.get(`${API_URL}/get_discount`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            localStorage.setItem("dis", JSON.stringify(response.data))
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const createDiscount = createAsyncThunk(
+    'invoice/createDiscount',
+    async({token, discountData}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/create_discount`, discountData, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const updateDiscount = createAsyncThunk(
+    'invoice/updateDiscount',
+    async({token, updateData}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/update_discount`, updateData, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+            
         }
     }
 );
@@ -106,6 +175,54 @@ const invoiceSlice = createSlice({
             state.products = action.payload;
         })
         .addCase(getProduct.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(createInvoice.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(createInvoice.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(createInvoice.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(getDiscount.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(getDiscount.fulfilled, (state, action) => {
+            state.loading = false;
+            state.discount = action.payload;
+        })
+        .addCase(getDiscount.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(createDiscount.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(createDiscount.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(createDiscount.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updateDiscount.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updateDiscount.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(updateDiscount.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })

@@ -13,6 +13,7 @@ import Customer from './Customer';
 import Users from './Users';
 import Suppliers from './Suppliers'
 import Category from './support/Category';
+import Discount from './Discount'
 import '../style.css'
 import { Us } from '../assets/images'
 
@@ -54,6 +55,7 @@ const Dashboard = () => {
           {activeContent === 'Users' && <Users /> }
           {activeContent === 'Category' && <Category /> }
           {activeContent === 'Customers' && <Customer /> }
+          {activeContent === 'Discount' && <Discount /> }
       </div>
     </>
   )
