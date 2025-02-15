@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCustomers, addCustomers } from '../features/customerSlice';
-import { getProduct, createInvoice } from '../features/invoiceSlice';
+import { getProduct, createInvoice, getDiscount } from '../features/invoiceSlice';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import { Def } from '../assets/images';
 import Swal from 'sweetalert2';
@@ -20,18 +20,17 @@ const CreateInvoice = () => {
         return result;
     }
      
-    const uniqueIdRef = useRef(generateUniqueId());
-    console.log(uniqueIdRef.current)
+  const uniqueIdRef = useRef(generateUniqueId());
 
   const [cmodal, setCmodal] = useState(false)  
   const {customers, error, loading } = useSelector((item) => item.customer);
-  const {products} = useSelector((item) => item.invoice);
+  const {products, discountItem} = useSelector((item) => item.invoice);
   const [items, setItems] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
   const [spro, setSpro] = useState(true)
 
   const [invoiceNumber, setInvoiceNumber] = useState(uniqueIdRef.current);
-  const [discount, setDiscount] = useState(0);
+  const [discount, setDiscount] = useState({ name: '', value: 0 });;
   const [paymentMethod, setPaymentMethod] = useState('');
   const [customerId, setCustomerId] = useState('');
 
@@ -56,6 +55,7 @@ const CreateInvoice = () => {
     if (token) {
       dispatch(getCustomers({token}))
       dispatch(getProduct({token, shop_id: getId, page: 'All'}))
+      dispatch(getDiscount({token}))
     }
   }, [dispatch, token])
 
@@ -230,25 +230,119 @@ const calculateSubTotal = () => {
     return items.reduce((sum, item) => sum + (parseInt(item.amount) || 0), 0);
 };
 
-// Handle discount change
 const handleDiscountChange = (e) => {
-    const value = e.target.value;
-    setDiscount(value ? parseFloat(value) : 0);
+    const selectedValue = e.target.value;
+    const selectedDiscount = discountItem.find(item => item.discount_value.toString() === selectedValue);
+    
+    setDiscount({
+        name: selectedDiscount ? selectedDiscount.discount_name : '',
+        value: selectedDiscount ? parseFloat(selectedDiscount.discount_value) : 0
+    });
 };
 
 // Calculate final total after discount
 const calculateTotal = () => {
     const subTotal = calculateSubTotal();
-    const discountAmount = (subTotal * discount) / 100;
+    const discountAmount = (subTotal * discount.value) / 100;
     return subTotal - discountAmount;
 };
+
+const handleInvoice = async (e) => {
+    e.preventDefault();
+    const getId = localStorage.getItem("sid");
+
+    if (!paymentMethod || !customerId || items.length === 0) {
+        return Swal.fire({
+            icon: "warning",
+            title: "All fields are required",
+            text: "You need to log in before creating invoice.",
+        });
+    }
+
+    const products_ordered_array = items.map(item => {
+        const product = products.find(p => p.id === parseInt(item.productId));
+        return {
+            product_id: item.productId,
+            product_name: product?.product_name || '',
+            product_price: item.sellingPrice,
+            quantity: item.quantity.toString(),
+            inches: item.inches || ''
+        };
+    });
+
+    Swal.fire({
+        icon: "success",
+        title: "Valid Input!",
+        text: "Invoice is being created...",
+        timer: 1500,
+        showConfirmButton: false,
+    });
+
+    try {
+        Swal.fire({
+            title: "Creating Invoice...",
+            text: "Please wait while we process your request.",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+        });
+
+        const data = {
+            invoice_number: invoiceNumber,
+            payment_method: paymentMethod,
+            total_amount: calculateTotal().toString(),
+            customer_id: customerId,
+            discount_name: discount.name,
+            shop_id: getId,
+            products_ordered_array
+        };
+
+        console.log(data)
+        console.log(token)
+
+        const response = await dispatch(createInvoice({token, invoiceData: data})).unwrap();
+
+        if (response.message === "Invoice created") {
+            Swal.fire({
+                icon: "success",
+                title: "creating invoice",
+                text: `${response.message}`,
+            });
+
+            setItems([]);
+            setSearchTerms({});
+            setPaymentMethod('');
+            setCustomerId('');
+            setDiscount({ name: '', value: 0 });
+            setSpro(true);
+            setInvoiceNumber(uniqueIdRef.current);
+
+        }
+        else {
+            Swal.fire({
+              icon: "info",
+              title: "creating discount",
+              text: `${response.message}`,
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            title: "Error Occurred",
+            text: error.message || "Something went wrong while creating invoice. Please try again.",
+        });
+    }
+
+}
   
 
   return (
     <>
 
         <div className="mt-lg-5 mt-3 in-bg py-5">
-            <form>
+            <form onSubmit={handleInvoice}>
                 <div className="row">
                     <div className="col-sm-12 col-md-12 col-lg-6">
                         <div className="form-group mb-4">
@@ -261,8 +355,8 @@ const calculateTotal = () => {
                             <label htmlFor="exampleInputEmail1">Payment Method <span style={{color: '#7A0091'}}>*</span></label>
                             <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
                                 <option>--select payment type--</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Transfer">Transfer</option>
                             </select>
                         </div>
                     </div>
@@ -442,17 +536,25 @@ const calculateTotal = () => {
                                 <p><b>₦{calculateSubTotal().toLocaleString()}</b></p>
                             </div>
                             <div className='d-flex justify-content-between'>
-                                <p>Add Discount (%):</p>
-                                <div className="form-group mb-4">
-                                    <input 
-                                        type="number" 
-                                        placeholder='Enter Discount' 
-                                        value={discount}
-                                        onChange={handleDiscountChange}
-                                        min="0"
-                                        max="100"
-                                        className="form-control"
-                                    />
+                                <p className='mt-3'>Add Discount (%):</p>
+                                <div className="form-group">
+
+                                <select 
+                                    value={discount.value} 
+                                    onChange={handleDiscountChange}
+                                    className="form-control"
+                                >
+                                    <option value="">--select discount--</option>
+                                    {discountItem.map((item, index) => 
+                                        <option 
+                                            key={index} 
+                                            value={item.discount_value} 
+                                            disabled={item.status === "inactive"}
+                                        >
+                                            {item.discount_name}
+                                        </option>
+                                    )}
+                                </select>
                                 </div>
                             </div>
                             <div className='d-flex justify-content-between'>

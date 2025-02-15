@@ -5,7 +5,7 @@ import axios from 'axios';
 const initialState = {
   invoice: [],
   products: [],
-  discount: [],
+  discountItem: [],
   card: {},
   loading: false,
   error: null,
@@ -69,6 +69,7 @@ export const createInvoice = createAsyncThunk(
         try {
             const response = await axios.post(`${API_URL}/create_invoice`, invoiceData, {
                 headers: {
+                    // "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             })
@@ -196,7 +197,7 @@ const invoiceSlice = createSlice({
         })
         .addCase(getDiscount.fulfilled, (state, action) => {
             state.loading = false;
-            state.discount = action.payload;
+            state.discountItem = action.payload;
         })
         .addCase(getDiscount.rejected, (state, action) => {
             state.loading = false;
@@ -231,3 +232,5 @@ const invoiceSlice = createSlice({
 
 export const { clearSearch } = invoiceSlice.actions;
 export default invoiceSlice.reducer;
+
+

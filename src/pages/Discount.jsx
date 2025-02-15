@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 
 
 const Discount = () => {
-  const {error, loading, discount} = useSelector((state) => state.invoice);
+  const {error, loading, discountItem} = useSelector((state) => state.invoice);
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
 
@@ -67,9 +67,6 @@ const Discount = () => {
     }
 
     const dItem = disValue / 100;
-
-    console.log(disDate)
-
 
     Swal.fire({
         icon: "success",
@@ -133,7 +130,79 @@ const Discount = () => {
   }
   
   const handleSubmitUpdate = async (e) => {
+    const getId = localStorage.getItem("did")
     e.preventDefault();
+    if (updisName === "" || updisValue === "" || updisDate === "" || updisStatus === "") {
+        return Swal.fire({
+            icon: "warning",
+            title: "All fields are required",
+            text: "You need to log in before adding a supplier.",
+        });
+    }
+
+    const dItem = updisValue / 100;
+
+    Swal.fire({
+        icon: "success",
+        title: "Valid Input!",
+        text: "Discount is being updated...",
+        timer: 1500,
+        showConfirmButton: false,
+    });
+
+    try {
+        Swal.fire({
+            title: "Updating Discount...",
+            text: "Please wait while we process your request.",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+        });
+
+        const data = JSON.stringify({
+            discount_id: getId,
+            discount_name: updisName,
+            discount_value: dItem,
+            expiration_date: updisDate,
+            status: updisStatus
+        })
+
+        const response = await dispatch(updateDiscount({token, updateData: data})).unwrap();
+
+        if (response.message === "discount updated") {
+            Swal.fire({
+                icon: "success",
+                title: "updating discount",
+                text: `${response.message}`,
+            });
+
+            setUpDisName('');
+            setUpDisValue('');
+            setUpDisDate('');
+            setUpDisStatus('');
+
+            hideModal();
+            dispatch(getDiscount({token}))
+        }
+
+        else {
+            Swal.fire({
+              icon: "info",
+              title: "updating discount",
+              text: `${response.message}`,
+            });
+        }
+    } catch (error) {
+       console.error("Discount update failed:", error);
+       Swal.fire({
+        icon: "error",
+        title: "Error Occurred",
+        text: error.message || "Something went wrong while updating discount. Please try again.",
+      });
+    }
+
   }
   return (
     <>
@@ -155,8 +224,8 @@ const Discount = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {discount && discount.length > 0 ? (
-                        discount.map((discount, index) => (
+                    {discountItem && discountItem.length > 0 ? (
+                        discountItem.map((discount, index) => (
                         <tr key={discount.id} onClick={() => userDetails(user.id)} style={{cursor: 'pointer'}}>
                             <td>{index + 1}</td>
                             <td>{discount.discount_name}</td>
