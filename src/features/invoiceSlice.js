@@ -64,7 +64,7 @@ export const getProduct = createAsyncThunk(
 );
 
 export const createInvoice = createAsyncThunk(
-    'invoice/createProduct',
+    'invoice/createInvoice',
     async ({token, invoiceData}, { rejectWithValue}) => {
         try {
             const response = await axios.post(`${API_URL}/create_invoice`, invoiceData, {
@@ -131,6 +131,22 @@ export const updateDiscount = createAsyncThunk(
         }
     }
 );
+
+export const updateInvoice = createAsyncThunk(
+    'invoice/updateInvoice',
+    async({token, updateData}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/update_invoice`, updateData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+)
 
 const invoiceSlice = createSlice({
     name: 'invoice',
@@ -224,6 +240,18 @@ const invoiceSlice = createSlice({
             state.success = action.payload;
         })
         .addCase(updateDiscount.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updateInvoice.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updateInvoice.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(updateInvoice.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })

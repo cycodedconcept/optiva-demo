@@ -27,10 +27,10 @@ const CreateInvoice = () => {
   const {products, discountItem} = useSelector((item) => item.invoice);
   const [items, setItems] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
-  const [spro, setSpro] = useState(true)
+  const [spro, setSpro] = useState(true);
 
   const [invoiceNumber, setInvoiceNumber] = useState(uniqueIdRef.current);
-  const [discount, setDiscount] = useState({ name: '', value: 0 });;
+  const [discount, setDiscount] = useState({ name: '', value: 0 });
   const [paymentMethod, setPaymentMethod] = useState('');
   const [customerId, setCustomerId] = useState('');
 
@@ -193,6 +193,14 @@ const CreateInvoice = () => {
         newItems[index].sellingPrice = defaultPrice;
         newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
         newItems[index].inches = '';
+
+        if (product.inches && product.inches.length > 0) {
+            const defaultInch = product.inches[0].inche;
+            newItems[index].inches = defaultInch;
+            // Update price based on the default inch
+            handleInchChange(index, defaultInch, product);
+            return; // Return here since handleInchChange will call setItems
+        }
       }
     }
 
@@ -240,10 +248,9 @@ const handleDiscountChange = (e) => {
     });
 };
 
-// Calculate final total after discount
 const calculateTotal = () => {
     const subTotal = calculateSubTotal();
-    const discountAmount = (subTotal * discount.value) / 100;
+    const discountAmount = subTotal * discount.value;
     return subTotal - discountAmount;
 };
 
@@ -300,7 +307,6 @@ const handleInvoice = async (e) => {
         };
 
         console.log(data)
-        console.log(token)
 
         const response = await dispatch(createInvoice({token, invoiceData: data})).unwrap();
 

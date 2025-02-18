@@ -231,7 +231,7 @@ const Discount = () => {
                             <td>{discount.discount_name}</td>
                             <td>{discount.discount_value}</td>
                             <td>{discount.expiration_date}</td>
-                            <td><button className={discount.status}>{discount.status}</button></td>
+                            <td><button className={discount.status} style={{padding: '10px'}}>{discount.status}</button></td>
                             <td>
                             <div className="d-flex gap-5">
                                 <FontAwesomeIcon icon={faEdit} style={{color: '#7A0091', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(discount.id); e.stopPropagation();}} title='update discount'/>

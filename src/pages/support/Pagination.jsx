@@ -55,11 +55,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
             <span className="text-secondary ml-3">entries</span>
           </div>
     
-          {/* Pagination info */}
-          {/* <div className="text-secondary">
-            Showing {Math.min((currentPage - 1) * perPage + 1, total)} to{' '}
-            {Math.min(currentPage * perPage, total)} of {total} entries
-          </div> */}
+          
           <div className="text-secondary">
             Showing {total > 0 ? Math.min((currentPage - 1) * perPage + 1, total) : 0} to{' '}
             {total > 0 ? Math.min(currentPage * perPage, total) : 0} of {total} entries

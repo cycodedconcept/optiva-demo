@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .active, .inactive {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -70,6 +70,10 @@ body {
 .active {
     color: #34C759;
     background: #edf5ef;
+    outline: none;
+    border: 0;
+    box-shadow: none;
+    width: 100%;
 }
 
 .inactive {
@@ -454,7 +458,7 @@ canvas {
 }
 
 .in-btn {
-    width: 15%;
+    width: 17%;
     border-radius: 5px;
 }
 
