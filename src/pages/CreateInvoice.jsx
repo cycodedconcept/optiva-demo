@@ -2,8 +2,10 @@ import React, {useState, useEffect, useRef} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCustomers, addCustomers } from '../features/customerSlice';
 import { getProduct, createInvoice, getDiscount } from '../features/invoiceSlice';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
-import { Def } from '../assets/images';
+import { Def, Inv } from '../assets/images';
 import Swal from 'sweetalert2';
 
 const CreateInvoice = () => {
@@ -33,6 +35,8 @@ const CreateInvoice = () => {
   const [discount, setDiscount] = useState({ name: '', value: 0 });
   const [paymentMethod, setPaymentMethod] = useState('');
   const [customerId, setCustomerId] = useState('');
+  const [inDetails, setInDetails] = useState(false);
+  const [ivDetails, setIvDetails] = useState(null);
 
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
@@ -60,7 +64,8 @@ const CreateInvoice = () => {
   }, [dispatch, token])
 
   const hideModal = () => {
-    setCmodal(false)
+    setCmodal(false);
+    setInDetails(false);
   }
 
   const handleSubmit = async (e) => {
@@ -306,7 +311,8 @@ const handleInvoice = async (e) => {
             products_ordered_array
         };
 
-        console.log(data)
+        console.log(data);
+        localStorage.setItem("inb", JSON.stringify(data))
 
         const response = await dispatch(createInvoice({token, invoiceData: data})).unwrap();
 
@@ -341,6 +347,13 @@ const handleInvoice = async (e) => {
         });
     }
 
+}
+
+const previewInvoince = (e) => {
+    e.preventDefault()
+    setInDetails(true)
+    const getDetails = localStorage.getItem("inb");
+    setIvDetails(JSON.parse(getDetails));
 }
   
 
@@ -572,6 +585,7 @@ const handleInvoice = async (e) => {
                 </div>
 
                 <div className="text-right">
+                    <button className='btn' onClick={previewInvoince}><FontAwesomeIcon icon={faEyeSlash} style={{color: '#7A0091', backgroundColor: '#F1EDF2', padding: '18px', marginTop: '10px'}}/></button>
                     <button className='in-btn'>
                         {loading ? (
                                 <>
@@ -629,6 +643,112 @@ const handleInvoice = async (e) => {
                     </div>
                     </div>
                 </div>
+            </>
+        ) : ('')}
+
+        {inDetails ? (
+            <>
+              <div className="modal-overlay">
+                <div className="modal-content2">
+                    <div className="head-mode">
+                        <h6 style={{color: '#7A0091'}}>Preview Invoice</h6>
+                        <button className="modal-close" onClick={hideModal}>&times;</button>
+                    </div>
+                    <div className="modal-body">
+                        {ivDetails ? (
+                            <>
+                              <div className="top-section d-flex justify-content-between">
+                                    <div>
+                                        <img src={Inv} alt="img" className='mb-3'/>
+                                        <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                                        <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>Quatum Eleven</h5>
+                                        <p style={{color: '#95799B'}}>Professional in hair making business</p>
+                                    </div>
+                                    <div className='text-right'>
+                                        <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                                        <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                                        <div className='text-right mb-5'>
+                                        <button style={{color: '#ED4343', backgroundColor: '#FFEFEF', fontSize: '12px'}} className='btn'>Unpaid</button>
+                                        </div>
+
+                                        <div className="d-flex">
+                                        <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                        <small style={{color: '#271F29'}}>#{ivDetails.invoice_number}</small>
+                                        </div>
+                                        <div className="d-flex">
+                                        <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                        <small style={{color: '#271F29'}}>07 June 2025</small>
+                                        </div>
+                                        <div className="d-flex">
+                                        <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                        <small style={{color: '#271F29'}}>30 June 2025</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div className="d-flex justify-content-between">
+                                    <div>
+                                        <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                        <div className="d-flex">
+                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
+                                            <small style={{color: '#271F29'}}>090 675 8970 789</small>
+                                            </div>
+                                            <div className="d-flex">
+                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
+                                            <small style={{color: '#271F29'}}>quantum@gmail.com</small>
+                                            </div>
+                                            <div className="d-flex">
+                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Address: </small>
+                                            <small style={{color: '#271F29'}}>Suit 78 Awolowo way, Ikeja Lagos</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                       <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
+                                       <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{ivDetails.total_amount}</h5>
+                                       <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
+                                       <small style={{color: '#7A0091', fontWeight: '900'}}>{ivDetails.discount_name}</small>
+                                    </div>
+                                </div>
+                                <hr />
+                                <table className="w-100 table-borderless bin">
+                                    <thead className='th-d'>
+                                    <tr className='m-0'>
+                                        <th className="p-2 text-light">Sr. No</th>
+                                        <th className="p-2 text-light">Product Details</th>
+                                        <th className="p-2 text-light">Price</th>
+                                        <th className="p-2 text-light">Quantity</th>
+                                        <th className="p-2 text-light">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {ivDetails.products_ordered_array.map((product, index) => (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{product.product_name} - {product.inches} inches</td>
+                                                <td>₦{product.product_price}</td>
+                                                <td>{product.quantity}</td>
+                                                <td>₦{product.product_price * product.quantity}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                    <tr className="text-right">
+                                        <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
+                                        <td className="p-2 font-semibold">₦{ivDetails.total_amount}</td>
+                                    </tr>
+                                    <tr className="text-right">
+                                        <td colSpan="4" className="p-2 font-semibold">Total:</td>
+                                        <td className="p-2 font-semibold">₦{ivDetails.total_amount}</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </>
+                            ) : (
+                              <p>Loading Invoice...</p>
+                            )}
+                    </div>
+                </div>
+              </div>
             </>
         ) : ('')}
       

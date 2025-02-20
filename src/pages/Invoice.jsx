@@ -1,14 +1,17 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Pi, Up, Ca, Torder, Fil, Def } from '../assets/images';
+import { Pi, Up, Ca, Torder, Fil, Inv } from '../assets/images';
 import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPrint } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useReactToPrint } from "react-to-print";
+
 
 const Invoice = () => {
+  const invoiceRef = useRef(null);
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
   const getId = localStorage.getItem("sid");
@@ -20,8 +23,8 @@ const Invoice = () => {
   const [discount, setDiscount] = useState({ name: '', value: 0 });
   const [invoiceNumber, setInvoiceNumber] = useState();
   const [paymentMethod, setPaymentMethod] = useState('');
-
-
+  const [inDetails, setInDetails] = useState(true);
+  const [dataItem, setDataItem] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -32,7 +35,7 @@ const Invoice = () => {
   }, [dispatch, token, currentPage, per_page])
 
   const hideModal = () => {
-    setMode(false)
+    setMode(false);
   }
 
     const cardItems = [
@@ -427,305 +430,431 @@ const Invoice = () => {
     }
 
     const showInvoiceDetails = (inNumber) => {
-        console.log(inNumber)
+        setInDetails(false);
+        const getDetails = localStorage.getItem("invoice");
+        const det = JSON.parse(getDetails);
+
+        const selectedInvoice = det.data.find((item) => item.invoice_number === inNumber);
+        console.log(selectedInvoice)
+
+        if (selectedInvoice) {
+            setDataItem(selectedInvoice)
+        }
     }
+
+    const handlePrint = useReactToPrint({
+        contentRef: invoiceRef,
+        onAfterPrint: () => console.log("Invoice printed successfully!"),
+    });
 
   return (
     <>
-      <div className='text-right mt-5 mt-lg-4'>
-          <button className='in-btn'>+ Create Discount</button>
-      </div>
-      <div className="dash-cards mt-5">
-        { showCard }
-      </div>
-
-      <div className="table-content">
-        <div className="table-container mt-5">
-            <table className="my-table w-100">
-                <thead>
-                    <tr>
-                        <th style={{width: '5%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Invoice Number</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Customer Name</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Date</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Total Amount</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '10%'}}><div className='d-flex justify-content-between'><p>Created By</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Payment Status</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {invoice?.length > 0 ? (
-                        invoice.map((item, index) => (
-                            <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showInvoiceDetails(item.invoice_number)}>
-                                <td>{index + 1}</td>
-                                <td>{item.invoice_number}</td>
-                                <td>{item.customer_name.name}</td>
-                                <td>{item.date}</td>
-                                <td>{item.payment_method}</td>
-                                <td>₦{Number(item.total_amount).toLocaleString()}</td>
-                                <td>{item.created_by}</td>
-                                <td><button className={item.payment_status}>{item.payment_status}</button></td>
-                                <td>
-                                <div className="d-flex gap-5">
-                                    <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='update discount'/>
-                                </div>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7">No invoice available</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
-            <div className="sticky-pagination">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={total_pages}
-                    perPage={per_page}
-                    total={total}
-                    onPageChange={(newPage) => {
-                        if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
-                        dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
-                    }}
-                    onPerPageChange={(newPerPage) => {
-                        if (newPerPage < 1) return; // Prevent invalid per_page values
-                        dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
-                    }}
-                />
-            </div>
-      </div>
-
-      {mode ? (
-        <>
-          <div className="modal-overlay">
-            <div className="modal-content2">
-                <div className="head-mode">
-                    <h6 style={{color: '#7A0091'}}>Update Invoice</h6>
-                    <button className="modal-close" onClick={hideModal}>&times;</button>
+        {inDetails ? (
+            <>
+                <div className="dash-cards mt-5">
+                    { showCard }
                 </div>
-                <div className="modal-body">
-                    <div className='mt-lg-5 mt-3 in-bg py-2'>
-                        <form onSubmit={handleUpdateInvoice}>
-                            <div className="row">
-                                <div className="col-sm-12 col-md-12 col-lg-6">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="exampleInputEmail1">Invoice Number <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Invoice Number' value={invoiceNumber} readOnly onChange={(e) => setInvoiceNumber(e.target.value)}/>
-                                    </div>
-                                </div>
-                                <div className="col-sm-12 col-md-12 col-lg-6">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="exampleInputEmail1">Payment Method <span style={{color: '#7A0091'}}>*</span></label>
-                                        <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                                            <option>--select payment type--</option>
-                                            <option value="Cash">Cash</option>
-                                            <option value="Transfer">Transfer</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="py-4">
-                                <div className="row p-3" style={{background: '#FCF2FF'}}>
-                                    <div className="col-sm-12 col-md-12 col-lg-4"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
-                                    <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
-                                    <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
-                                    <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
-                                    <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
-                                </div>
 
-                                <div style={{background: '#FEFBFF'}} className='py-5'>
-                                    {items.map((item, index) => {
-                                        const filteredProducts = getFilteredProducts(searchTerms[index]);
-                                            
-                                        return (
-                                        <div key={index} className="card-in mb-4 py-1">
-                                            <div className="row">
-                                                <div className="col-sm-12 col-md-12 col-lg-3">
-                                                    <div className="input-group mb-2">
-                                                        <span className="input-group-text">
-                                                            <Search size={20} />
-                                                        </span>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Search products..."
-                                                            className="form-control"
-                                                            value={searchTerms[index] || ''}
-                                                            onChange={(e) => handleSearch(index, e.target.value)}
-                                                        />
-                                                    </div>
-                                                    <select
-                                                        value={item.productId}
-                                                        onChange={(e) => updateItem(index, 'productId', e.target.value)}
-                                                        className="form-select"
-                                                    >
-                                                        <option value="">Select a product</option>
-                                                        {filteredProducts.map(product => (
-                                                            <option key={product.id} value={product.id}>
-                                                                {product.product_name}
-                                                            </option>
-                                                        ))}
+                <div className="table-content">
+                    <div className="table-container mt-5">
+                        <table className="my-table w-100">
+                            <thead>
+                                <tr>
+                                    <th style={{width: '5%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Invoice Number</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Customer Name</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Date</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Total Amount</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '10%'}}><div className='d-flex justify-content-between'><p>Created By</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Payment Status</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {invoice?.length > 0 ? (
+                                    invoice.map((item, index) => (
+                                        <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showInvoiceDetails(item.invoice_number)}>
+                                            <td>{index + 1}</td>
+                                            <td>{item.invoice_number}</td>
+                                            <td>{item.customer_info.name}</td>
+                                            <td>{item.date}</td>
+                                            <td>{item.payment_method}</td>
+                                            <td>₦{Number(item.total_amount).toLocaleString()}</td>
+                                            <td>{item.created_by}</td>
+                                            <td><button className={item.payment_status}>{item.payment_status}</button></td>
+                                            <td>
+                                            <div className="d-flex gap-5">
+                                                <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='update discount'/>
+                                            </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7">No invoice available</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                        <div className="sticky-pagination">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={total_pages}
+                                perPage={per_page}
+                                total={total}
+                                onPageChange={(newPage) => {
+                                    if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
+                                    dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
+                                }}
+                                onPerPageChange={(newPerPage) => {
+                                    if (newPerPage < 1) return; // Prevent invalid per_page values
+                                    dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
+                                }}
+                            />
+                        </div>
+                </div>
+
+                {mode ? (
+                    <>
+                    <div className="modal-overlay">
+                        <div className="modal-content2">
+                            <div className="head-mode">
+                                <h6 style={{color: '#7A0091'}}>Update Invoice</h6>
+                                <button className="modal-close" onClick={hideModal}>&times;</button>
+                            </div>
+                            <div className="modal-body">
+                                <div className='mt-lg-5 mt-3 in-bg py-2'>
+                                    <form onSubmit={handleUpdateInvoice}>
+                                        <div className="row">
+                                            <div className="col-sm-12 col-md-12 col-lg-6">
+                                                <div className="form-group mb-4">
+                                                    <label htmlFor="exampleInputEmail1">Invoice Number <span style={{color: '#7A0091'}}>*</span></label>
+                                                    <input type="text" placeholder='Enter Invoice Number' value={invoiceNumber} readOnly onChange={(e) => setInvoiceNumber(e.target.value)}/>
+                                                </div>
+                                            </div>
+                                            <div className="col-sm-12 col-md-12 col-lg-6">
+                                                <div className="form-group mb-4">
+                                                    <label htmlFor="exampleInputEmail1">Payment Method <span style={{color: '#7A0091'}}>*</span></label>
+                                                    <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                                                        <option>--select payment type--</option>
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Transfer">Transfer</option>
                                                     </select>
                                                 </div>
-
-                                                <div className="col-sm-12 col-md-12 col-lg-2">
-                                                    <label className="form-label">Selling Price</label>
-                                                    <input
-                                                        type="number"
-                                                        value={item.sellingPrice}
-                                                        readOnly
-                                                    />
-                                                </div>
-
-                                                <div className="col-sm-12 col-md-12 col-lg-3">
-                                                    <label className="form-label">Quantity</label>
-                                                    <div className="input-group">
-                                                        <button
-                                                            onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
-                                                            className="btn qb bb"
-                                                            type="button"
-                                                        >
-                                                            <Minus size={16} />
-                                                        </button>
-                                                        <input
-                                                            type="number"
-                                                            value={item.quantity}
-                                                            onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                                                            min="1"
-                                                            style={{ width: '70px' }}
-                                                            className='qb-input'
-                                                        />
-                                                        <button
-                                                            onClick={() => updateItem(index, 'quantity', item.quantity + 1)}
-                                                            className="btn qb cc"
-                                                            type="button"
-                                                        >
-                                                            <Plus size={16} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                {item.productId && products.find(p => p.id === parseInt(item.productId))?.inches.length > 0 && (
-                                                    <div className="col-sm-12 col-md-12 col-lg-2">
-                                                        <label className="form-label">Inches</label>
-                                                        <select
-                                                            value={item.inches}
-                                                            onChange={(e) => {
-                                                                const product = products.find(p => p.id === parseInt(item.productId));
-                                                                handleInchChange(index, e.target.value, product);
-                                                            }}
-                                                            className="form-select"
-                                                        >
-                                                            <option value="">Select inches</option>
-                                                            {products
-                                                                .find(p => p.id === parseInt(item.productId))
-                                                                ?.inches.map(inch => (
-                                                                    <option key={inch.inche} value={inch.inche}>
-                                                                        {inch.inche}"
-                                                                    </option>
-                                                                ))}
-                                                        </select>
-                                                    </div>
-                                                )}
-
-                                                <div className="col-md-2 d-flex">
-                                                    <div className="flex-grow-1">
-                                                        <label className="form-label">Amount</label>
-                                                        <input
-                                                            type="number"
-                                                            value={item.amount}
-                                                            readOnly
-                                                        />
-                                                    </div>
-                                                    <button
-                                                        onClick={() => removeItem(index)}
-                                                        className="btn p-1 align-self-center ms-2"
-                                                        type="button"
-                                                        style={{ 
-                                                            minWidth: 'auto',
-                                                            backgroundColor: 'transparent',
-                                                            border: 'none'
-                                                        }}
-                                                    >
-                                                        <Trash2 size={18} className="text-danger" />
-                                                    </button>
-                                                </div>
                                             </div>
                                         </div>
-                                        );
-                                    })}
-                                </div>
+                                        <div className="py-4">
+                                            <div className="row p-3" style={{background: '#FCF2FF'}}>
+                                                <div className="col-sm-12 col-md-12 col-lg-4"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
+                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
+                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
+                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
+                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
+                                            </div>
 
-                                <button 
-                                    onClick={addNewItem}
-                                    className="btn add-btn ml-3"
-                                >
-                                    + Add Item
-                                </button>
-                            </div>
+                                            <div style={{background: '#FEFBFF'}} className='py-5'>
+                                                {items.map((item, index) => {
+                                                    const filteredProducts = getFilteredProducts(searchTerms[index]);
+                                                        
+                                                    return (
+                                                    <div key={index} className="card-in mb-4 py-1">
+                                                        <div className="row">
+                                                            <div className="col-sm-12 col-md-12 col-lg-3">
+                                                                <div className="input-group mb-2">
+                                                                    <span className="input-group-text">
+                                                                        <Search size={20} />
+                                                                    </span>
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="Search products..."
+                                                                        className="form-control"
+                                                                        value={searchTerms[index] || ''}
+                                                                        onChange={(e) => handleSearch(index, e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <select
+                                                                    value={item.productId}
+                                                                    onChange={(e) => updateItem(index, 'productId', e.target.value)}
+                                                                    className="form-select"
+                                                                >
+                                                                    <option value="">Select a product</option>
+                                                                    {filteredProducts.map(product => (
+                                                                        <option key={product.id} value={product.id}>
+                                                                            {product.product_name}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
 
-                            <div className="row mt-5 p-3">
-                                <div className="col-sm-12 col-md-12 col-lg-6"></div>
-                                <div className="col-sm-12 col-md-12 offset-lg-1 col-lg-5">
-                                    <div className="total-section text-right">
-                                        <div className='d-flex justify-content-between'>
-                                            <p>Sub Total:</p>
-                                            <p><b>₦{calculateSubTotal().toLocaleString()}</b></p>
-                                        </div>
-                                        <div className='d-flex justify-content-between'>
-                                            <p className='mt-3'>Add Discount (%):</p>
-                                            <div className="form-group">
+                                                            <div className="col-sm-12 col-md-12 col-lg-2">
+                                                                <label className="form-label">Selling Price</label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={item.sellingPrice}
+                                                                    readOnly
+                                                                />
+                                                            </div>
 
-                                            <select 
-                                                value={discount.value} 
-                                                onChange={handleDiscountChange}
-                                                className="form-control"
+                                                            <div className="col-sm-12 col-md-12 col-lg-3">
+                                                                <label className="form-label">Quantity</label>
+                                                                <div className="input-group">
+                                                                    <button
+                                                                        onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
+                                                                        className="btn qb bb"
+                                                                        type="button"
+                                                                    >
+                                                                        <Minus size={16} />
+                                                                    </button>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={item.quantity}
+                                                                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                                                                        min="1"
+                                                                        style={{ width: '70px' }}
+                                                                        className='qb-input'
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => updateItem(index, 'quantity', item.quantity + 1)}
+                                                                        className="btn qb cc"
+                                                                        type="button"
+                                                                    >
+                                                                        <Plus size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            {item.productId && products.find(p => p.id === parseInt(item.productId))?.inches.length > 0 && (
+                                                                <div className="col-sm-12 col-md-12 col-lg-2">
+                                                                    <label className="form-label">Inches</label>
+                                                                    <select
+                                                                        value={item.inches}
+                                                                        onChange={(e) => {
+                                                                            const product = products.find(p => p.id === parseInt(item.productId));
+                                                                            handleInchChange(index, e.target.value, product);
+                                                                        }}
+                                                                        className="form-select"
+                                                                    >
+                                                                        <option value="">Select inches</option>
+                                                                        {products
+                                                                            .find(p => p.id === parseInt(item.productId))
+                                                                            ?.inches.map(inch => (
+                                                                                <option key={inch.inche} value={inch.inche}>
+                                                                                    {inch.inche}"
+                                                                                </option>
+                                                                            ))}
+                                                                    </select>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="col-md-2 d-flex">
+                                                                <div className="flex-grow-1">
+                                                                    <label className="form-label">Amount</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={item.amount}
+                                                                        readOnly
+                                                                    />
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => removeItem(index)}
+                                                                    className="btn p-1 align-self-center ms-2"
+                                                                    type="button"
+                                                                    style={{ 
+                                                                        minWidth: 'auto',
+                                                                        backgroundColor: 'transparent',
+                                                                        border: 'none'
+                                                                    }}
+                                                                >
+                                                                    <Trash2 size={18} className="text-danger" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            <button 
+                                                onClick={addNewItem}
+                                                className="btn add-btn ml-3"
                                             >
-                                                <option value="">--select discount--</option>
-                                                {discountItem.map((item, index) => 
-                                                    <option 
-                                                        key={index} 
-                                                        value={item.discount_value} 
-                                                        disabled={item.status === "inactive"}
-                                                    >
-                                                        {item.discount_name}
-                                                    </option>
-                                                )}
-                                            </select>
+                                                + Add Item
+                                            </button>
+                                        </div>
+
+                                        <div className="row mt-5 p-3">
+                                            <div className="col-sm-12 col-md-12 col-lg-6"></div>
+                                            <div className="col-sm-12 col-md-12 offset-lg-1 col-lg-5">
+                                                <div className="total-section text-right">
+                                                    <div className='d-flex justify-content-between'>
+                                                        <p>Sub Total:</p>
+                                                        <p><b>₦{calculateSubTotal().toLocaleString()}</b></p>
+                                                    </div>
+                                                    <div className='d-flex justify-content-between'>
+                                                        <p className='mt-3'>Add Discount (%):</p>
+                                                        <div className="form-group">
+
+                                                        <select 
+                                                            value={discount.value} 
+                                                            onChange={handleDiscountChange}
+                                                            className="form-control"
+                                                        >
+                                                            <option value="">--select discount--</option>
+                                                            {discountItem.map((item, index) => 
+                                                                <option 
+                                                                    key={index} 
+                                                                    value={item.discount_value} 
+                                                                    disabled={item.status === "inactive"}
+                                                                >
+                                                                    {item.discount_name}
+                                                                </option>
+                                                            )}
+                                                        </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className='d-flex justify-content-between'>
+                                                        <p>Total:</p>
+                                                        <p><b>₦{calculateTotal().toLocaleString()}</b></p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className='d-flex justify-content-between'>
-                                            <p>Total:</p>
-                                            <p><b>₦{calculateTotal().toLocaleString()}</b></p>
+
+                                        <div className="text-right">
+                                            <button className='in-btn'>
+                                                {loading ? (
+                                                        <>
+                                                        <div className="spinner-border spinner-border-sm text-light" role="status">
+                                                            <span className="sr-only"></span>
+                                                        </div>
+                                                        <span>Creating Invoice... </span>
+                                                        </>
+                                                    ) : (
+                                                        'Save and Continue'
+                                                )}
+                                            </button>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
-
-                            <div className="text-right">
-                                <button className='in-btn'>
-                                    {loading ? (
-                                            <>
-                                            <div className="spinner-border spinner-border-sm text-light" role="status">
-                                                <span className="sr-only"></span>
-                                            </div>
-                                            <span>Creating Invoice... </span>
-                                            </>
-                                        ) : (
-                                            'Save and Continue'
-                                    )}
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </>) : ('')}
+            </>
+        ) : (
+        <>
+          <div className='mt-5'>
+            <div className="text-right mb-4">
+                <button className='btn mr-3' style={{background: '#fff', color: '#7A0091'}} onClick={() => setInDetails(true)}>Back</button>
+                <button 
+                        className='btn px-3 no-print' 
+                        style={{background: '#7A0091', color: '#F8F6F8'}}
+                        onClick={handlePrint}
+                    >
+                        <FontAwesomeIcon icon={faPrint} className='mr-4'/>
+                        Print
+                    </button>
             </div>
+
+            {dataItem ? (
+                <>
+                    <div ref={invoiceRef} style={{background: '#fff'}} className='p-4'>
+                        <div className="top-section d-flex justify-content-between">
+                        <div>
+                            <img src={Inv} alt="img" className='mb-3'/>
+                            <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
+                            <p style={{color: '#95799B'}}>Professional in hair making business</p>
+                        </div>
+                        <div className='text-right'>
+                            <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                            <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                            <div className='text-right mb-5'>
+                                <button style={{fontSize: '12px', width: '70px'}} className={dataItem.payment_status}>{dataItem.payment_status}</button>
+                            </div>
+
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
+                            </div>
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                            </div>
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                            </div>
+                        </div>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.phone_number}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.email}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.payment_method}</small>
+                                </div>
+                            </div>
+                            <div>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
+                                <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(dataItem.total_amount).toLocaleString()}</h5>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
+                                <small style={{color: '#7A0091', fontWeight: '900'}}>{dataItem.discount_name}</small>
+                            </div>
+                        </div>
+                        <hr />
+                        <table className="w-100 table-borderless bin">
+                            <thead className='th-d'>
+                            <tr className='m-0'>
+                                <th className="p-2 text-light">Sr. No</th>
+                                <th className="p-2 text-light">Product Name </th>
+                                <th className="p-2 text-light">Price</th>
+                                <th className="p-2 text-light">Quantity</th>
+                                <th className="p-2 text-light">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {dataItem.products_ordered.map((product, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{product.product_name} - {product.inches} inches</td>
+                                    <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                    <td>{product.quantity}</td>
+                                    <td>₦{product.product_price * product.quantity}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                            <tfoot>
+                            <tr className="text-right">
+                                <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
+                                <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                            </tr>
+                            <tr className="text-right">
+                                <td colSpan="4" className="p-2 font-semibold w-50">Total:</td>
+                                <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </>
+            ) : (
+               <p>Loading invoice...</p>
+            )}
           </div>
-        </>) : ('')}
+        </>
+        )
+        }
     </>
   )
 }

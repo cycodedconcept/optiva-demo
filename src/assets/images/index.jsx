@@ -32,14 +32,12 @@ import F1 from './f1.png';
 import F2 from './f2.png';
 import Thmb from './thmb.jpg';
 import Def from './def.png';
-
-
-
+import Inv from './inv.png';
 
 export { Logo, Log, Logo2, Cus, 
     Dash, Invoice, Not, Pay, 
     Pro, Purc, Rep, Set, Sup, Use, Us,
     Ts, Tcus, Tsold, Torder, Br, dr, 
     Fp, Hair, Sh, Pi, Up, Ca, Prod, Prods, Fil,
-    F1, F2, Thmb, Def
+    F1, F2, Thmb, Def, Inv
 }

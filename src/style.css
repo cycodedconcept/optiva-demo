@@ -622,6 +622,13 @@ input, select, textarea {
     background-color: #fff;
 }
 
+.bin .th-d tr th {
+    background-color: #7A0091 !important;
+    border: none !important; /* Remove borders */
+    padding: 10px;
+    text-align: left;
+}
+
 @media screen and (max-width: 992px) {
     .box-item {
         width: 100%;
