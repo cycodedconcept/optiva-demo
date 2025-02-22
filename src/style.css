@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -392,7 +392,7 @@ tbody tr td:last-child {
     background: #E4F6E8;
     padding: 5px;
 }
-.Unpaid {
+.Unpaid, .Pending {
     color: #B34017;
     background: #FCEAE4;
     padding: 5px;
@@ -407,6 +407,10 @@ tbody tr td:last-child {
     outline: none !important;
     box-shadow: none !important;
     border: 1px solid #E9EBEC !important; 
+}
+
+hr {
+    border: 1px solid #f4d6fa !important;
 }
 
 .box {

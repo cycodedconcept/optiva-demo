@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useRef} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Pi, Up, Ca, Torder, Fil, Inv } from '../assets/images';
-import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice } from '../features/invoiceSlice';
+import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice, validatePin, invoicePaymentStatus, cancelValidatePin } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPrint, faEye } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -25,6 +25,8 @@ const Invoice = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [inDetails, setInDetails] = useState(true);
   const [dataItem, setDataItem] = useState(null);
+  const [all, setAll] = useState(false);
+  const [initem, setInItem] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -36,6 +38,7 @@ const Invoice = () => {
 
   const hideModal = () => {
     setMode(false);
+    setAll(false);
   }
 
     const cardItems = [
@@ -435,10 +438,23 @@ const Invoice = () => {
         const det = JSON.parse(getDetails);
 
         const selectedInvoice = det.data.find((item) => item.invoice_number === inNumber);
-        console.log(selectedInvoice)
 
         if (selectedInvoice) {
             setDataItem(selectedInvoice)
+        }
+    }
+
+    const showDetails = (vNumber) => {
+        setAll(true);
+
+        const getDetails = localStorage.getItem("invoice");
+        const deta = JSON.parse(getDetails);
+
+        const detailItem = deta.data.find((item) => item.invoice_number === vNumber);
+        console.log(detailItem)
+
+        if (detailItem) {
+            setInItem(detailItem)
         }
     }
 
@@ -446,6 +462,10 @@ const Invoice = () => {
         contentRef: invoiceRef,
         onAfterPrint: () => console.log("Invoice printed successfully!"),
     });
+
+    const changeStatus = (payment) => {
+        console.log(payment)
+    }
 
   return (
     <>
@@ -464,9 +484,8 @@ const Invoice = () => {
                                     <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Invoice Number</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Customer Name</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th style={{width: '15%'}}><div className='d-flex justify-content-between'><p>Date</p><div><img src={Fil} alt="" /></div></div></th>
-                                    <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th style={{width: '16%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Total Amount</p><div><img src={Fil} alt="" /></div></div></th>
-                                    <th style={{width: '10%'}}><div className='d-flex justify-content-between'><p>Created By</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Payment Status</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
                                 </tr>
@@ -474,19 +493,23 @@ const Invoice = () => {
                             <tbody>
                                 {invoice?.length > 0 ? (
                                     invoice.map((item, index) => (
-                                        <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showInvoiceDetails(item.invoice_number)}>
+                                        <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showDetails(item.invoice_number)}>
                                             <td>{index + 1}</td>
                                             <td>{item.invoice_number}</td>
                                             <td>{item.customer_info.name}</td>
                                             <td>{item.date}</td>
                                             <td>{item.payment_method}</td>
                                             <td>₦{Number(item.total_amount).toLocaleString()}</td>
-                                            <td>{item.created_by}</td>
-                                            <td><button className={item.payment_status}>{item.payment_status}</button></td>
+                                            <td><button className={item.payment_status} onClick={(e) => {changeStatus(item.payment_status); e.stopPropagation();}}>{item.payment_status}</button></td>
                                             <td>
-                                            <div className="d-flex gap-5">
-                                                <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='update discount'/>
-                                            </div>
+                                                <div className="d-flex">
+                                                    <div className="d-flex gap-5">
+                                                        <FontAwesomeIcon icon={faEye} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { showInvoiceDetails(item.invoice_number); e.stopPropagation();}} title='update discount'/>
+                                                    </div>
+                                                    <div className="d-flex gap-5">
+                                                        <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='update discount'/>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -723,7 +746,7 @@ const Invoice = () => {
                                         </div>
 
                                         <div className="text-right">
-                                            <button className='in-btn'>
+                                            <button className='in-btn p-2'>
                                                 {loading ? (
                                                         <>
                                                         <div className="spinner-border spinner-border-sm text-light" role="status">
@@ -855,6 +878,108 @@ const Invoice = () => {
         </>
         )
         }
+
+        {all ? (
+            <>
+                <div className="modal-overlay">
+                    <div className="modal-content2">
+                        <div className="head-mode">
+                            <h6 style={{color: '#7A0091'}}>Invoice Details</h6>
+                            <button className="modal-close" onClick={hideModal}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            {initem ? 
+                            (
+                            <>
+                                <div>
+
+                                    <div className='d-flex justify-content-between'>
+                                        <div>
+                                          <img src={Inv} alt="img" className='mb-3'/>
+                                        </div>
+                                        <div>
+                                            <div className='d-flex'>
+                                              <p className='mr-3'>Date: </p>
+                                              <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.date}</p>
+                                            </div>
+                                            <div className='d-flex'>
+                                              <p className='mr-3'>Payment Method: </p>
+                                              <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.payment_method}</p>
+                                            </div>
+                                            <div className='d-flex'>
+                                              <p className='mr-3'>Payment Status: </p>
+                                              <p className={initem.payment_status} style={{width: '0px', padding: '0px'}}>{initem.payment_status}</p>
+                                            </div>
+                                            <div className='d-flex'>
+                                              <p className='mr-3'>Total Amount: </p>
+                                              <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>₦{Number(initem.total_amount).toLocaleString()}</p>
+                                            </div>
+                                      </div>
+
+                                    </div>
+                                    <hr />
+                                    <div className="row">
+                                        <div className="col-sm-12 col-md-12 col-lg-6">
+                                            <div className='d-flex'>
+                                                <p className='mr-3'>Invoice Number: </p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.invoice_number}</p>
+                                                </div>
+                                                <div className='d-flex'>
+                                                <p className='mr-3'>Created By: </p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.created_by}</p>
+                                                </div>
+                                                <div className='d-flex'>
+                                                <p className='mr-3'>Discount Name: </p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.discount_name || "none"}</p>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-12 col-md-12 offset-lg-1 col-lg-5">
+                                            <div className='d-flex'>
+                                                <p className='mr-3'>Customer Name: </p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.customer_info.name}</p>
+                                                </div>
+                                                <div className='d-flex'>
+                                                <p className='mr-3'>Customer Email: </p>
+                                                <p className='m-0 p-0' style={{color: '#271F29', fontWeight: '900'}}>{initem.customer_info.email}</p>
+                                                </div>
+                                                <div className='d-flex'>
+                                                <p className='mr-3'>Customer Phone Number: </p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{(initem.customer_info.phone_number)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <table className="w-100 table-borderless bin">
+                                        <thead className='th-d'>
+                                        <tr className='m-0'>
+                                            <th className="p-2 text-light">Sr. No</th>
+                                            <th className="p-2 text-light">Product Name </th>
+                                            <th className="p-2 text-light">Price</th>
+                                            <th className="p-2 text-light">Quantity</th>
+                                            <th className="p-2 text-light">Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {initem.products_ordered.map((product, index) => (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{product.product_name} - {product.inches} inches</td>
+                                                <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                                <td>{product.quantity}</td>
+                                                <td>₦{product.product_price * product.quantity}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </>
+                            ): ('')}
+                        </div>
+                    </div>
+                </div>
+            </>
+        ) : ('')}
     </>
   )
 }

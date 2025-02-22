@@ -66,7 +66,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
             <ul className="pagination mb-0">
               <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                 <button
-                  className="page-link"
+                  className="page-link btn"
                   onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
@@ -80,7 +80,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
                   className={`page-item ${currentPage === pageNum ? 'active' : ''}`}
                 >
                   <button
-                    className="page-link"
+                    className="page-link btn"
                     onClick={() => onPageChange(pageNum)}
                   >
                     {pageNum}
@@ -90,7 +90,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
     
               <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                 <button
-                  className="page-link"
+                  className="page-link btn"
                   onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >

@@ -69,10 +69,10 @@ export const createInvoice = createAsyncThunk(
         try {
             const response = await axios.post(`${API_URL}/create_invoice`, invoiceData, {
                 headers: {
-                    // "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             })
+            localStorage.setItem("info", JSON.stringify(response.data))
             return response.data;
         } catch (error) {
             return rejectWithValue(error.message || "Something went wrong");
@@ -146,7 +146,64 @@ export const updateInvoice = createAsyncThunk(
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
-)
+);
+
+export const validatePin = createAsyncThunk(
+    'invoice/validatePin',
+    async ({token, invoice_number, pin}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/validate_invoice_payment_pin`, {
+                invoice_number,
+                pin
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const invoicePaymentStatus = createAsyncThunk(
+    'invoice/invoicePaymentStatus',
+    async ({token, invoice_number, shop_id, status}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/update_invoice_payment_status`, {
+                invoice_number,
+                shop_id,
+                status
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
+
+export const cancelValidatePin = createAsyncThunk(
+    'invoice/cancelValidatePin',
+    async ({token, invoice_number}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/cancel_validate_invoice_pin`, invoice_number, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            return response.data
+        } catch (error) {
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+);
 
 const invoiceSlice = createSlice({
     name: 'invoice',
@@ -252,6 +309,42 @@ const invoiceSlice = createSlice({
             state.success = action.payload;
         })
         .addCase(updateInvoice.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(validatePin.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(validatePin.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(validatePin.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(invoicePaymentStatus.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(invoicePaymentStatus.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(invoicePaymentStatus.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(cancelValidatePin.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(cancelValidatePin.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(cancelValidatePin.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
         })
