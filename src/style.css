@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -79,6 +79,17 @@ body {
 .inactive {
     color: #B34017;
     background: #f3edeb;
+}
+
+.p2-btn, .c-btn {
+    background: #34C759;
+    /* width: 20%; */
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.c-btn {
+    background: #B34017;
 }
 
 

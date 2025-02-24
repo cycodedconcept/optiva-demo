@@ -27,6 +27,9 @@ const Invoice = () => {
   const [dataItem, setDataItem] = useState(null);
   const [all, setAll] = useState(false);
   const [initem, setInItem] = useState(null);
+  const [statusInv, setStatusInv] = useState(false);
+  const [dvalue, setDvalue] = useState('');
+  const [second, setSecond] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -39,6 +42,8 @@ const Invoice = () => {
   const hideModal = () => {
     setMode(false);
     setAll(false);
+    setStatusInv(false);
+    setSecond(false);
   }
 
     const cardItems = [
@@ -102,45 +107,6 @@ const Invoice = () => {
            </div>
        </div>
     )
-
-    // const getUpModal = (inumber) => {
-    //     setMode(true);
-    //     const gInvoice = localStorage.getItem("invoice");
-    //     const gI = JSON.parse(gInvoice);
-
-    //     // setSpro(true);
-
-
-    //     const selectedInvoice = gI.data.find((item) => item.invoice_number === inumber);
-    //     console.log(selectedInvoice)
-
-    //     if (selectedInvoice) {
-    //         setInvoiceNumber(selectedInvoice.invoice_number || '');
-    //         setPaymentMethod(selectedInvoice.payment_method || '');
-
-    //         const matchingDiscount = discountItem.find(
-    //             item => item.discount_name === selectedInvoice.discount_name
-    //         );
-    
-    //         setDiscount({
-    //             name: selectedInvoice.discount_name || '',
-    //             value: matchingDiscount ? matchingDiscount.discount_value : 0
-    //         });
-
-    //         if (selectedInvoice.products_ordered_array && selectedInvoice.products_ordered_array.length > 0) {
-    //             const prefillItems = selectedInvoice.products_ordered_array.map(product => ({
-    //                 productId: product.product_id,
-    //                 sellingPrice: product.product_price,
-    //                 quantity: parseInt(product.quantity),
-    //                 inches: product.inches || '',
-    //                 amount: (parseInt(product.product_price) * parseInt(product.quantity)).toString()
-    //             }));
-    
-    //             setItems(prefillItems);
-    //             setSpro(false); // Hide the empty state
-    //         }
-    //     }
-    // }
 
     const getUpModal = (inumber) => {
         setMode(true);
@@ -228,7 +194,6 @@ const Invoice = () => {
           if (item.productId) {
             const product = products.find(p => p.id === parseInt(item.productId));
             if (product && item.inches) {
-              // Trigger inch change to set correct price
               handleInchChange(index, item.inches, product);
             }
           }
@@ -419,7 +384,7 @@ const Invoice = () => {
             else {
                 Swal.fire({
                   icon: "info",
-                  title: "updating discount",
+                  title: "updating invoice",
                   text: `${response.message}`,
                 });
             }
@@ -427,7 +392,7 @@ const Invoice = () => {
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while creating invoice. Please try again.",
+                text: error.message || "Something went wrong while updating invoice. Please try again.",
             });
         }
     }
@@ -463,8 +428,151 @@ const Invoice = () => {
         onAfterPrint: () => console.log("Invoice printed successfully!"),
     });
 
-    const changeStatus = (payment) => {
-        console.log(payment)
+    const changeStatus = (payment, inum) => {
+        if (payment === "Paid" || payment === "paid") {
+          setStatusInv(false)
+        }else {
+          setStatusInv(true)
+          localStorage.setItem("ivv", inum)
+        }
+    }
+
+    const handlePinChange = async (e) => {
+        e.preventDefault();
+        const getIn = localStorage.getItem("ivv");
+
+        if (dvalue === "") {
+            Swal.fire({
+                icon: "info",
+                title: "updating product",
+                text: 'All these fields are required!',
+                confirmButtonColor: '#7A0091'
+            })
+            return;
+        }
+        try {
+            Swal.fire({
+                title: "Validating Pin...",
+                text: "Please wait while we process your request.",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            const response = await dispatch(validatePin({token, invoice_number: getIn, pin: dvalue})).unwrap();
+
+            Swal.close();
+
+            if (response.message === "success") {
+                hideModal();
+                setDvalue('');
+                setSecond(true);
+            }
+            else {
+                Swal.fire({
+                    icon: "info",
+                    title: "Validating Pin",
+                    text: `${response.message}`,
+                });
+            }
+        } 
+        catch (error) {
+            Swal.close();
+            Swal.fire({
+                icon: "error",
+                title: "Error Occurred",
+                text: error.message || "Something went wrong while validating Pin. Please try again.",
+            });
+        }
+    }
+
+    const handlePaid = async (e) => {
+        e.preventDefault();
+        const getIn = localStorage.getItem("ivv");
+
+        try {
+            Swal.fire({
+                title: "Validating Payment Status...",
+                text: "Please wait while we process your request.",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            const response = await dispatch(invoicePaymentStatus({token, invoice_number: getIn, shop_id: getId, status: 'Paid'})).unwrap();
+
+            if (response.message === "Invoice updated") {
+                Swal.fire({
+                    icon: "success",
+                    title: "updating payment status",
+                    text: `${response.message}`,
+                });
+
+                hideModal();
+                dispatch(getInvoice({token, shop_id: getId, page: currentPage, per_page: per_page}))
+            }
+            else {
+                Swal.fire({
+                  icon: "info",
+                  title: "updating payment status",
+                  text: `${response.message}`,
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error Occurred",
+                text: error.message || "Something went wrong while updating invoice payment status. Please try again.",
+            });
+        }
+
+    }
+
+    const handleCancle = async (e) => {
+        e.preventDefault();
+        const getIn = localStorage.getItem("ivv");
+
+        try {
+            Swal.fire({
+                title: "canceling Payment Status...",
+                text: "Please wait while we process your request.",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            const response = await dispatch(cancelValidatePin({token, invoice_number: getIn})).unwrap();
+
+            if (response.message === "success") {
+                Swal.fire({
+                    icon: "success",
+                    title: "canceling payment status",
+                    text: `${response.message}`,
+                });
+
+                hideModal();
+                dispatch(getInvoice({token, shop_id: getId, page: currentPage, per_page: per_page}))
+            }
+            else {
+                Swal.fire({
+                  icon: "info",
+                  title: "canceling payment status",
+                  text: `${response.message}`,
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Error Occurred",
+                text: error.message || "Something went wrong while canceling invoice payment status. Please try again.",
+            });
+        }
     }
 
   return (
@@ -500,7 +608,7 @@ const Invoice = () => {
                                             <td>{item.date}</td>
                                             <td>{item.payment_method}</td>
                                             <td>₦{Number(item.total_amount).toLocaleString()}</td>
-                                            <td><button className={item.payment_status} onClick={(e) => {changeStatus(item.payment_status); e.stopPropagation();}}>{item.payment_status}</button></td>
+                                            <td><button className={item.payment_status} onClick={(e) => {changeStatus(item.payment_status, item.invoice_number); e.stopPropagation();}}>{item.payment_status}</button></td>
                                             <td>
                                                 <div className="d-flex">
                                                     <div className="d-flex gap-5">
@@ -854,7 +962,7 @@ const Invoice = () => {
                                     <td>{product.product_name} - {product.inches} inches</td>
                                     <td>₦{Number(product.product_price).toLocaleString()}</td>
                                     <td>{product.quantity}</td>
-                                    <td>₦{product.product_price * product.quantity}</td>
+                                    <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -978,6 +1086,57 @@ const Invoice = () => {
                         </div>
                     </div>
                 </div>
+            </>
+        ) : ('')}
+
+        {statusInv ? (
+            <>
+
+              <div className="modal-overlay">
+                <div className="modal-content2">
+                    <div className="head-mode">
+                       <h6 style={{color: '#7A0091'}}>Update Invoice Payment Pin</h6>
+                       <button className="modal-close" onClick={hideModal}>&times;</button>
+                    </div>
+                    <div className="modal-body">
+                        <form onSubmit={handlePinChange}>
+                            <div className="form-group mb-4">
+                                <label htmlFor="exampleInputEmail1">Invoice Pin <span style={{color: '#7A0091'}}>*</span></label>
+                                <input type="text" placeholder='Enter Pin' value={dvalue} onChange={(e) => setDvalue(e.target.value)}/>
+                            </div>
+                            <button className='in-btn'>
+                                {loading ? (
+                                        <>
+                                        <div className="spinner-border spinner-border-sm text-light" role="status">
+                                            <span className="sr-only"></span>
+                                        </div>
+                                        <span>Validating Pin... </span>
+                                        </>
+                                    ) : (
+                                        'Validate Pin'
+                                )}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+              </div>
+            </>
+        ) : ('')}
+
+        {second ? (
+            <>
+              <div className="modal-overlay">
+                <div className="modal-content2" style={{width: '35%'}}>
+                    <div className="head-mode">
+                      <h6 style={{color: '#7A0091'}}>Update Invoice Status</h6>
+                      <button className="modal-close" onClick={hideModal}>&times;</button>
+                    </div>
+                    <div className="modal-body text-center d-flex justify-content-between">
+                        <button className='in-btn w-50 mr-3' onClick={handlePaid}>Paid</button>
+                        <button className='in-btn c-btn w-50' onClick={handleCancle}>Cancel</button>
+                    </div>
+                </div>
+              </div>
             </>
         ) : ('')}
     </>

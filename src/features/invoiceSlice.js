@@ -193,7 +193,7 @@ export const cancelValidatePin = createAsyncThunk(
     'invoice/cancelValidatePin',
     async ({token, invoice_number}, {rejectWithValue}) => {
         try {
-            const response = await axios.post(`${API_URL}/cancel_validate_invoice_pin`, invoice_number, {
+            const response = await axios.post(`${API_URL}/cancel_validate_invoice_pin`, {invoice_number}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

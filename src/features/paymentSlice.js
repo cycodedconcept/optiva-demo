@@ -5,7 +5,7 @@ import axios from 'axios';
 const initialState = {
     payment: [],
     search: [],
-    success: '',
+    success: false,
     error: null,
     loading: false,
     isSearching: false,
@@ -67,6 +67,66 @@ export const searchPayment = createAsyncThunk(
     }
 );
 
+export const updatePaymentPin = createAsyncThunk(
+    'payment/updatePaymentPin',
+    async ({token, invoice_number, pin}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/validate_update_payment_pin`, {
+                invoice_number,
+                pin
+            },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+);
+
+export const updatePaymentStatus = createAsyncThunk(
+    'payment/updatePaymentStatus',
+    async ({token, invoice_number, shop_id, status}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/update_payment_status`, {
+                invoice_number,
+                shop_id,
+                status
+            },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+);
+
+export const cancelPaymentPinProcess = createAsyncThunk(
+    'payment/cancelPaymentPinProcess',
+    async ({token, invoice_number}, {rejectWithValue}) => {
+        try {
+            const response = await axios.post(`${API_URL}/cancel_validate_update_payment_pin_process`, {
+                invoice_number
+            },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response.data;
+        } catch (error) {
+          return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+)
+
 const paymentSlice = createSlice({
     name: 'payment',
     initialState,
@@ -114,6 +174,42 @@ const paymentSlice = createSlice({
         .addCase(searchPayment.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || 'Something went wrong'
+        })
+        .addCase(updatePaymentPin.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updatePaymentPin.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(updatePaymentPin.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(updatePaymentStatus.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(updatePaymentStatus.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(updatePaymentStatus.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        })
+        .addCase(cancelPaymentPinProcess.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(cancelPaymentPinProcess.fulfilled, (state, action) => {
+            state.loading = false;
+            state.success = action.payload;
+        })
+        .addCase(cancelPaymentPinProcess.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
         })
     }
 })

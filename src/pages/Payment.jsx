@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPayments, clearPayment, searchPayment } from '../features/paymentSlice';
-import { Fil} from '../assets/images';
+import { getPayments, clearPayment, searchPayment, updatePaymentPin, updatePaymentStatus, cancelPaymentPinProcess } from '../features/paymentSlice';
+import { Fil, Inv} from '../assets/images';
 import Pagination from './support/Pagination';
 import { debounce }  from 'lodash';
 
@@ -70,6 +70,10 @@ const proDetails = (iNumber) => {
 
   const selectedPayment = det.data.find((item) => item.invoice_number === iNumber);
   console.log(selectedPayment)
+
+  if (selectedPayment) {
+    setPayData(selectedPayment)
+  }
 }
 
   return (
@@ -181,10 +185,85 @@ const proDetails = (iNumber) => {
          <div className="modal-overlay">
           <div className="modal-content2">
             <div className="head-mode">
-              <h6 style={{color: '#7A0091'}}>Payment Details</h6>
+              <h6 style={{color: '#7A0091'}}>Transaction Details</h6>
               <button className="modal-close" onClick={hideModal}>&times;</button>
             </div>
-            <div className="modal-body"></div>
+            <div className="modal-body">
+              {payData ? (
+                <>
+                <div className="d-flex justify-content-between">
+                  <div>
+                    <img src={Inv} alt="img" className='mb-3'/>
+                  </div>
+                  <div>
+                    <div className="d-flex justify-content-between">
+                      <p className='mr-5 mt-2'>Transaction status:</p>
+                      <p><button className={payData.payment_status}>{payData.payment_status}</button></p>
+                    </div>
+                    <div className="d-flex justify-content-between">
+                      <p className='mr-5'>Transaction method:</p>
+                      <p>{payData.payment_method}</p>
+                    </div>
+                    <div className="d-flex justify-content-between">
+                      <p className='mr-5'>Invoice number:</p>
+                      <p style={{color: '#7A0091'}}>{payData.invoice_number}</p>
+                    </div>
+                    <div className="d-flex justify-content-between">
+                      <p className='mr-5'>Created By:</p>
+                      <p>{payData.invoicedata.created_by}</p>
+                    </div>
+                  </div>
+                </div>
+                <hr />
+
+                <div className="d-flex justify-content-between">
+                  <div>
+                    <div className="d-flex">
+                      <p className='mr-3'>Customer name:</p>
+                      <p>{payData.invoicedata.customer_name}</p>
+                    </div>
+                    <div className="d-flex">
+                      <p className='mr-3'>Date:</p>
+                      <p>{payData.invoicedata.date}</p>
+                    </div>
+                    <div className="d-flex">
+                      <p className='mr-3'>Discount name:</p>
+                      <p>{payData.invoicedata.discount_name || "none"}</p>
+                    </div>
+                  </div>
+                  <div>
+                  <div className="d-flex mt-5">
+                    <p className='mr-3'>Total Amount:</p>
+                    <p style={{color: '#7A0091', fontWeight: '700'}}>₦{Number(payData.invoicedata.total_amount).toLocaleString()}</p>
+                  </div>
+                  </div>
+                </div>
+                <hr />
+                <table className="w-100 table-borderless bin">
+                  <thead className='th-d'>
+                  <tr className='m-0'>
+                      <th className="p-2 text-light">Sr. No</th>
+                      <th className="p-2 text-light">Product Name </th>
+                      <th className="p-2 text-light">Price</th>
+                      <th className="p-2 text-light">Quantity</th>
+                      <th className="p-2 text-light">Amount</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {payData.invoicedata.products_ordered.map((product, index) => (
+                      <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>{product.product_name} - {product.inches} inches</td>
+                          <td>₦{Number(product.product_price).toLocaleString()}</td>
+                          <td>{product.quantity}</td>
+                          <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
+                      </tr>
+                  ))}
+                  </tbody>
+              </table>
+
+              </>) : ('')}
+            </div>
           </div>
          </div>
         </>
