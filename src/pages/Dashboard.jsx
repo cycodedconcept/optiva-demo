@@ -50,7 +50,7 @@ const Dashboard = () => {
           {activeContent === 'Product List' && <Products /> }
           {activeContent === 'Payment List' && <Payment /> }
           {activeContent === 'Purchase' && <Purchase /> }
-          {activeContent === 'Report' && <Report /> }
+          {activeContent === 'stock history' && <Report /> }
           {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
           {activeContent === 'Category' && <Category /> }

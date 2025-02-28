@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -75,6 +75,7 @@ body {
     box-shadow: none;
     width: 100%;
 }
+
 
 .inactive {
     color: #B34017;
@@ -403,12 +404,16 @@ tbody tr td:last-child {
     background: #E4F6E8;
     padding: 5px;
 }
-.Unpaid, .Pending {
+.Unpaid, .Pending, .Refund {
     color: #B34017;
     background: #FCEAE4;
     padding: 5px;
 }
 
+.Refund {
+    color: #ff0000;
+    background: #fcdfdf;
+}
 .add-btn {
     color: #5965F9 !important;
     background: #F0F1FE !important;
