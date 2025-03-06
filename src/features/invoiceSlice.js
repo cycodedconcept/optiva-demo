@@ -205,6 +205,7 @@ export const cancelValidatePin = createAsyncThunk(
     }
 );
 
+
 const invoiceSlice = createSlice({
     name: 'invoice',
     initialState,
@@ -238,7 +239,7 @@ const invoiceSlice = createSlice({
         })
         .addCase(getInvoice.rejected, (state, action) => {
           state.loading = false;
-          state.error = action.payload || 'Something went wrong'
+          state.error = action.payload || 'Something went wrong';
         })
         .addCase(getProduct.pending, (state) => {
             state.loading = true;

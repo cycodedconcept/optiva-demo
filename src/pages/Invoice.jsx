@@ -629,22 +629,23 @@ const Invoice = () => {
                             </tbody>
                         </table>
                     </div>
-                        <div className="sticky-pagination">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={total_pages}
-                                perPage={per_page}
-                                total={total}
-                                onPageChange={(newPage) => {
-                                    if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
-                                    dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
-                                }}
-                                onPerPageChange={(newPerPage) => {
-                                    if (newPerPage < 1) return; // Prevent invalid per_page values
-                                    dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
-                                }}
-                            />
-                        </div>
+                    <div className="sticky-pagination">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={total_pages}
+                            perPage={per_page}
+                            total={total}
+                            onPageChange={(newPage) => {
+                                if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
+                                dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
+                            }}
+                            onPerPageChange={(newPerPage) => {
+                                if (newPerPage < 1) return; // Prevent invalid per_page values
+                                dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
+                            }}
+                        />
+                    </div>
+
                 </div>
 
                 {mode ? (

@@ -1,5 +1,7 @@
-// Chart.js
-import React from 'react';
+
+import React, {useEffect} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getSalesChart } from '../../features/reportSlice'
 import { 
     Chart as ChartJS, 
     CategoryScale, 
@@ -43,34 +45,61 @@ export const BarChart = () => {
 
 // Line Chart Component
 export const LineChart = () => {
-    const lineData = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-        datasets: [
-          {
-            label: 'Revenue',
-            data: [400, 600, 150, 250, 350, 450],
-            borderColor: '#34C759',
-            backgroundColor: 'rgba(255, 87, 51, 0.2)',
-            fill: true,
-            tension: 0.4,
-          },
-          {
-            label: 'Expenses',
-            data: [320, 580, 100, 320, 410, 300],
-            borderColor: '#FC0',
-            backgroundColor: 'rgba(255, 87, 51, 0.2)',
-            fill: true,
-            tension: 0.4,
-          },
-        ],
-    };
+  const dispatch = useDispatch();
+  let token = localStorage.getItem("token");
+  const getId = localStorage.getItem("sid");
+  const { loading, error, salesCard } = useSelector((state) => state.report);
 
-    const options = {
-        responsive: true,
-        plugins: {
-          legend: { display: true, position: 'top' },
-        },
-    };
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
 
-    return <Line data={lineData} options={options} />;
+  useEffect(() => {
+      if (token) {
+          dispatch(getSalesChart({token, shop_id: getId, month: month, year: year}))
+      }
+  }, [token, dispatch])
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+
+  const labels = salesCard.yearlySales?.map((item) => item.monthName);
+  const data = salesCard.yearlySales?.map((item) => item.totalSales);
+
+
+  if (labels?.length === 0 || data?.length === 0) {
+    return <p>No data available for the chart.</p>;
+  }
+
+  // Chart configuration
+  const lineData = {
+    labels,
+    datasets: [
+      {
+        label: "Total Purchases",
+        data,
+        borderColor: "#34C759",
+        backgroundColor: "rgba(52, 199, 89, 0.2)",
+        fill: true,
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: "top" },
+    },
+  };
+
+  return (
+    <div style={{ width: "100%", height: "400px" }}>
+      <Line data={lineData} options={options} />
+    </div>
+  );
 }

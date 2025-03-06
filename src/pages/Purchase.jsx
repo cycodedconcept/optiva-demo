@@ -126,10 +126,10 @@ const Purchase = () => {
     }
   }
 
-  const getUpmode = (iname) => {
+  const getUpmode = (iname, id) => {
     setUpurchase(true);
-    console.log("Clicked Product Name:", iname);
 
+    localStorage.setItem("purId", id); 
     const getPur = localStorage.getItem("pur");
     if (!getPur) return;
 
@@ -139,29 +139,24 @@ const Purchase = () => {
     if (selectedPurchase) {
         console.log("Selected Purchase:", selectedPurchase);
         
-        // Store the selected purchase for later use in useEffect
         setSelectedPurchaseData(selectedPurchase);
 
-        // Find the product and update the product ID
         const matchedProduct = products.find((p) => p.product_name === selectedPurchase.product_name);
         if (matchedProduct) {
             setPro2(matchedProduct.id);
 
-            // Fetch and set available inches for the selected product
             if (matchedProduct.inches) {
                 setShowIn2(matchedProduct.inches);
             } else {
-                setShowIn2([]); // Reset if no inches are available
+                setShowIn2([]);
             }
         }
 
-        // Find and update supplier
         const matchedSupplier = supplier.find((s) => s.supplier_name === selectedPurchase.supplier);
         setSup2(matchedSupplier ? matchedSupplier.supplier_id : "");
 
         setQty2(selectedPurchase.product_quantity || "");
         
-        // We'll handle setting ins2 in the useEffect below
     } else {
         console.log("No matching purchase found");
     }
@@ -176,10 +171,11 @@ const Purchase = () => {
         }
     }, [showIn2, selectedPurchaseData]);
 
-    const handleUpPurchase = (e) => {
+    const handleUpPurchase = async (e) => {
         e.preventDefault();
+        const purId = localStorage.getItem("purId");
 
-        if (!pro || !sup || !qty) {
+        if (!pro2 || !sup2 || !qty2) {
             Swal.fire({
                 icon: "info",
                 title: "updating purchase",
@@ -201,10 +197,40 @@ const Purchase = () => {
             });
 
             const data = {
-                
+                purchase_id: purId,
+                product_id: pro2,
+                product_quantity: qty2,
+                supplier: sup2,
+                inches: ins2,
+                shop_id: getId
+            }
+
+            console.log(data)
+            const response = await dispatch(updatePurchase({token, upData: data})).unwrap();
+
+            if (response.message === "purchase recorded") {
+                Swal.fire({
+                    icon: "success",
+                    title: "purchase updated",
+                    text: `${response.message}`,
+                });
+
+                hideModal();
+                dispatch(getPurchase({token, shop_id: getId, page: currentPage, per_page: per_page}));
+            }
+            else {
+                Swal.fire({
+                    icon: "info",
+                    title: "updating purchase",
+                    text: `${response.message}`,
+                });
             }
         } catch (error) {
-            
+            Swal.fire({
+                icon: "error",
+                title: "Error Occurred",
+                text: error.message || "Something went wrong while updating purchase. Please try again.",
+            });
         }
     }
 
@@ -250,7 +276,7 @@ const Purchase = () => {
                                         <td>{item.date}</td>
                                         <td>{item.created_by}</td>
                                         <td>
-                                          <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px', backgroundColor: '#E6FEE8', padding: '5px'}} onClick={(e) => {getUpmode(item.product_name); e.stopPropagation()}} title='update purchase'/>
+                                          <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px', backgroundColor: '#E6FEE8', padding: '5px'}} onClick={(e) => {getUpmode(item.product_name, item.purchase_id); e.stopPropagation()}} title='update purchase'/>
                                         </td>
                                     </tr>
                                 ))

@@ -9,6 +9,7 @@ import Products from './Products';
 import Payment from './Payment';
 import Purchase from './Purchase';
 import Report from './Report';
+import Sales from './Sales';
 import Customer from './Customer';
 import Users from './Users';
 import Suppliers from './Suppliers'
@@ -51,6 +52,7 @@ const Dashboard = () => {
           {activeContent === 'Payment List' && <Payment /> }
           {activeContent === 'Purchase' && <Purchase /> }
           {activeContent === 'stock history' && <Report /> }
+          {activeContent === 'sales report' && <Sales /> }
           {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
           {activeContent === 'Category' && <Category /> }

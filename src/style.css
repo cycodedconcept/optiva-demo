@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund, .b-sum, .b-sum2 {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -65,6 +65,21 @@ body {
     background: #7A0091;
     color: #fff;
     width: 100%;
+}
+
+.b-sum,.b-sum2 {
+    border-radius: 10px;
+}
+
+.b-sum2 {
+    background: #fff;
+    color: #840a9c;
+    border: 1px solid #7A0091;
+}
+
+.b-sum2:hover {
+    background: #7A0091;
+    color: #fff;
 }
 
 .active {
@@ -438,7 +453,7 @@ canvas {
     width: 100% !important;
 }
 
-.chart-item, .table-content, .box2 {
+.table-content, .box2 {
     background: #fff;
     height: 300px;
     width: 100%;
