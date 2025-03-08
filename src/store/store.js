@@ -8,6 +8,8 @@ import invoiceReducer from '../features/invoiceSlice';
 import paymentReducer from '../features/paymentSlice';
 import purchaseReducer from '../features/purchaseSlice';
 import reportReducer from '../features/reportSlice';
+import sortedReducer from '../features/sortedSlice';
+import dashboardReducer from '../features/dashboardSlice'
 
 const store = configureStore({
   reducer: {
@@ -19,7 +21,9 @@ const store = configureStore({
     invoice: invoiceReducer,
     payment: paymentReducer,
     purchase: purchaseReducer,
-    report: reportReducer
+    report: reportReducer,
+    sorted: sortedReducer,
+    dashboard: dashboardReducer
   },
 });
 

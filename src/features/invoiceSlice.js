@@ -33,7 +33,6 @@ export const getInvoice = createAsyncThunk(
                 }
             })
             localStorage.setItem("invoice", JSON.stringify(response.data.data));
-            console.log(response.data)
             return {
                 data: response.data,
                 page: response.data.page,

@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Cards from './Cards';
 import Invoice from './Invoice';
 import CreateInvoice from './CreateInvoice';
+import Sorted from './Sorted';
 import Products from './Products';
 import Payment from './Payment';
 import Purchase from './Purchase';
@@ -35,7 +36,9 @@ const Dashboard = () => {
       <div className="main-content">
           <header className='d-flex justify-content-between'>
               <div className="head-left d-flex">
-                <FontAwesomeIcon icon={faBars} style={{fontSize: '25px'}} className="my-1"/>
+                <label htmlFor="nav-toggle" className="nav-toggle-label">
+                  <FontAwesomeIcon icon={faBars} style={{fontSize: '25px'}} className="my-1"/>
+                </label>
                 <h3 className="mx-3 vega">{upperLetter(activeContent)}</h3>
               </div>
               <div className="head-right d-flex">
@@ -47,6 +50,7 @@ const Dashboard = () => {
 
           {activeContent === 'Dashboard' && <Cards /> }
           {activeContent === 'Invoice List' && <Invoice /> }
+          {activeContent === 'sort orders' && <Sorted /> }
           {activeContent === 'Create Invoice' && <CreateInvoice /> }
           {activeContent === 'Product List' && <Products /> }
           {activeContent === 'Payment List' && <Payment /> }

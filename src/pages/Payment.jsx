@@ -303,7 +303,7 @@ const proDetails = (iNumber) => {
               fontSize: "20px",
               color: "#222",
               cursor: "pointer"}}>&#128269;</span>
-          </div>
+         </div>
         </div>
 
         {loading ? (
@@ -392,7 +392,7 @@ const proDetails = (iNumber) => {
                 }}
             />
 
-            </div>
+          </div>
         </div>
         )}
       </div>

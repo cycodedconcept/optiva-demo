@@ -33,6 +33,27 @@ const Purchase = () => {
   const [ins2, setIns2] = useState('');
   const [inch2, setInch2] = useState(false);
   const [selectedPurchaseData, setSelectedPurchaseData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm2, setSearchTerm2] = useState("");
+  const [searchSupplier, setSearchSupplier] = useState("");
+  const [searchSupplier2, setSearchSupplier2] = useState("");
+
+
+  const filteredProducts = products.filter((item) =>
+    item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredProducts2 = products.filter((item) =>
+    item.product_name.toLowerCase().includes(searchTerm2.toLowerCase())
+  );
+
+  const filteredSupplier = supplier.filter((item) => 
+    item.supplier_name.toLowerCase().includes(searchSupplier.toLowerCase())
+  )
+
+  const filteredSupplier2 = supplier.filter((item) => 
+    item.supplier_name.toLowerCase().includes(searchSupplier2.toLowerCase())
+  )
 
   const productItem = (e) => {
     setPro(e.target.value)
@@ -144,6 +165,7 @@ const Purchase = () => {
         const matchedProduct = products.find((p) => p.product_name === selectedPurchase.product_name);
         if (matchedProduct) {
             setPro2(matchedProduct.id);
+            setSearchTerm2(matchedProduct.product_name)
 
             if (matchedProduct.inches) {
                 setShowIn2(matchedProduct.inches);
@@ -154,6 +176,7 @@ const Purchase = () => {
 
         const matchedSupplier = supplier.find((s) => s.supplier_name === selectedPurchase.supplier);
         setSup2(matchedSupplier ? matchedSupplier.supplier_id : "");
+        setSearchSupplier2(matchedSupplier ? matchedSupplier.supplier_name : "")
 
         setQty2(selectedPurchase.product_quantity || "");
         
@@ -296,11 +319,11 @@ const Purchase = () => {
                     perPage={per_page}
                     total={total}
                     onPageChange={(newPage) => {
-                        if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
+                        if (newPage < 1 || newPage > total_pages) return;
                         dispatch(getPurchase({ token, shop_id: getId, page: newPage, per_page: per_page }));
                     }}
                     onPerPageChange={(newPerPage) => {
-                        if (newPerPage < 1) return; // Prevent invalid per_page values
+                        if (newPerPage < 1) return;
                         dispatch(getPurchase({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
                     }}
                 />
@@ -318,14 +341,22 @@ const Purchase = () => {
                   <button className="modal-close" onClick={hideModal}>&times;</button>
               </div>
               <div className="modal-body">
-                <form onSubmit={handlePurchase}>
+                <form onSubmit={handlePurchase}> 
                     <div className="row">
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
+                            <label>Search Product <span style={{color: '#7A0091'}}>*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="Search for a product..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="mb-2"
+                                />
                                 <label htmlFor="exampleInputEmail1">Product Name <span style={{color: '#7A0091'}}>*</span></label>
                                 <select value={pro} onChange={productItem}>
                                     <option>--select product--</option>
-                                    {products.map((item) => 
+                                    {filteredProducts.map((item) => 
                                         <option key={item.id} value={item.id}>{item.product_name}</option>
                                     )}
                                 </select>
@@ -333,10 +364,18 @@ const Purchase = () => {
                         </div>
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
+                            <label>Search Supplier<span style={{color: '#7A0091'}}>*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="Search for a supplier..."
+                                    value={searchSupplier}
+                                    onChange={(e) => setSearchSupplier(e.target.value)}
+                                    className="mb-2"
+                                />
                                 <label htmlFor="exampleInputEmail1">Supplier Name <span style={{color: '#7A0091'}}>*</span></label>
                                 <select value={sup} onChange={(e) => setSup(e.target.value)}>
                                     <option>--select supplier--</option>
-                                    {supplier.map((item) => 
+                                    {filteredSupplier.map((item) => 
                                         <option key={item.supplier_id} value={item.supplier_id}>{item.supplier_name}</option>
                                     )}
                                 </select>
@@ -400,10 +439,18 @@ const Purchase = () => {
                     <div className="row">
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
+                                <label>Search Product <span style={{color: '#7A0091'}}>*</span> </label>
+                                <input
+                                    type="text"
+                                    placeholder="Search for a product..."
+                                    value={searchTerm2}
+                                    onChange={(e) => setSearchTerm2(e.target.value)}
+                                    className="mb-2"
+                                />
                                 <label htmlFor="exampleInputEmail1">Product Name <span style={{color: '#7A0091'}}>*</span></label>
                                 <select value={pro2} onChange={(e) => setPro2(e.target.value)}>
                                     <option>--select product--</option>
-                                    {products.map((item) => 
+                                    {filteredProducts2.map((item) => 
                                         <option key={item.id} value={item.id}>{item.product_name}</option>
                                     )}
                                 </select>
@@ -411,10 +458,18 @@ const Purchase = () => {
                         </div>
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
+                            <label>Search Supplier<span style={{color: '#7A0091'}}>*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="Search for a supplier..."
+                                    value={searchSupplier2}
+                                    onChange={(e) => setSearchSupplier2(e.target.value)}
+                                    className="mb-2"
+                                />
                                 <label htmlFor="exampleInputEmail1">Supplier Name <span style={{color: '#7A0091'}}>*</span></label>
                                 <select value={sup2} onChange={(e) => setSup2(e.target.value)}>
                                     <option>--select supplier--</option>
-                                    {supplier.map((item) => 
+                                    {filteredSupplier2.map((item) => 
                                         <option key={item.supplier_id} value={item.supplier_id}>{item.supplier_name}</option>
                                     )}
                                 </select>

@@ -109,14 +109,14 @@ const Invoice = () => {
     )
 
     const getUpModal = (inumber) => {
-        setMode(true);
         const gInvoice = localStorage.getItem("invoice");
         const gI = JSON.parse(gInvoice);
     
         const selectedInvoice = gI.data.find((item) => item.invoice_number === inumber);
         console.log(selectedInvoice)
     
-        if (selectedInvoice) {
+        if (selectedInvoice && selectedInvoice.payment_status !== "Paid") {
+            setMode(true);
             setInvoiceNumber(selectedInvoice.invoice_number || '');
             setPaymentMethod(selectedInvoice.payment_method || '');
     
@@ -151,6 +151,12 @@ const Invoice = () => {
                 });
                 setSearchTerms(initialSearchTerms);
             }
+        }else {
+            return Swal.fire({
+                icon: "warning",
+                title: "Forbidden",
+                text: "You can't update or edit a paid invoice.",
+            });
         }
     };
 

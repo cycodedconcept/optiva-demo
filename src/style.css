@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund, .b-sum, .b-sum2 {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund, .b-sum, .b-sum2, .Sorted, .Not {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -217,6 +217,10 @@ header {
     transition: left 300ms;
 }
 
+
+.nav-toggle-label {
+    display: none;
+}
 
 @media only screen and (max-width: 1000px) {
     .sidebar {
@@ -414,12 +418,12 @@ tbody tr td:last-child {
     background-color: #FCF2FF;
 }
 
-.Paid {
+.Paid, .Sorted {
     color: #2A803E;
     background: #E4F6E8;
     padding: 5px;
 }
-.Unpaid, .Pending, .Refund {
+.Unpaid, .Pending, .Refund, .Not {
     color: #B34017;
     background: #FCEAE4;
     padding: 5px;
@@ -453,10 +457,14 @@ canvas {
     width: 100% !important;
 }
 
-.table-content, .box2 {
+.table-content {
     background: #fff;
     height: 300px;
     width: 100%;
+}
+
+.box2 {
+    background: #fff;
 }
 
 .recent-order {
@@ -701,6 +709,14 @@ input, select, textarea {
         width: 100%;
     }
 
+    .nav-toggle-label {
+        display: block;
+    }
+
+    .sticky-pagination {
+        z-index: 1;
+    }
+
 }
 
 .nav-toggle {
@@ -716,7 +732,7 @@ input, select, textarea {
         top: 0;
         z-index: 1000;
         transition: left 0.3s ease;
-        background-color: #FF962E;
+        z-index: -1;
     }
 
     .sidebar-visible {
@@ -730,5 +746,9 @@ input, select, textarea {
         width: 100%;
         height: 100%;
         background: rgba(0,0,0,0.5);
+    }
+
+    .lp {
+        height: 0;
     }
 }
