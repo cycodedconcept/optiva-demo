@@ -55,7 +55,7 @@ const Cards = () => {
               <img src={item.icon} alt="" />
           </div>
           <div className="d-flex justify-content-between">
-              <h5>{item.cvalue}</h5>
+              <h5>{item.cvalue || 0}</h5>
               <small className={item.grp === '0.02%' ? 'df' : 'ft'}>{item.grp}</small>
           </div>
       </div> 
@@ -79,8 +79,11 @@ const Cards = () => {
             <div className='mr-3'>
               <img src={Fp} alt="" />
             </div>
-            <p>Invoice: {item.invoice_number}<br/>{item.date}</p>
-        </div>
+            <div>
+              <p>Invoice: {item.invoice_number}<br/></p>
+              <p>{item.date}</p>
+            </div>
+          </div>
         <p style={{color: '#2A803E'}}>₦{Number(item.total_amount).toLocaleString()}</p>
       </div>
     )
@@ -131,11 +134,11 @@ const Cards = () => {
               
           </div>
           <div className="col-sm-12 col-md-12 col-lg-5">
-              <div className="box2 p-4">
+              <div className="p-4">
                 <h5 className='mb-3'>Top Selling Products</h5>
                   {topSell}
               </div>
-              <div className="box2 p-3 recent-order" style={{marginTop: "126px"}}>
+              <div className="p-0 p-lg-3 recent-order" style={{marginTop: "126px"}}>
                   <div className='d-flex justify-content-between'>
                     <h5>Recent Transaction</h5>
                     <h6>See All</h6>

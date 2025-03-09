@@ -642,12 +642,12 @@ const Invoice = () => {
                             perPage={per_page}
                             total={total}
                             onPageChange={(newPage) => {
-                                if (newPage < 1 || newPage > total_pages) return; // Prevent invalid pages
+                                if (newPage < 1 || newPage > total_pages) return;
                                 dispatch(getInvoice({ token, shop_id: getId, page: newPage, per_page: per_page }));
                             }}
                             onPerPageChange={(newPerPage) => {
-                                if (newPerPage < 1) return; // Prevent invalid per_page values
-                                dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage })); // Reset to first page
+                                if (newPerPage < 1) return;
+                                dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage }));
                             }}
                         />
                     </div>
@@ -1008,24 +1008,24 @@ const Invoice = () => {
                             <>
                                 <div>
 
-                                    <div className='d-flex justify-content-between'>
+                                    <div className='d-block d-lg-flex justify-content-between'>
                                         <div>
                                           <img src={Inv} alt="img" className='mb-3'/>
                                         </div>
                                         <div>
-                                            <div className='d-flex'>
+                                            <div className='d-flex justify-content-between'>
                                               <p className='mr-3'>Date: </p>
                                               <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.date}</p>
                                             </div>
-                                            <div className='d-flex'>
+                                            <div className='d-flex justify-content-between'>
                                               <p className='mr-3'>Payment Method: </p>
                                               <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.payment_method}</p>
                                             </div>
-                                            <div className='d-flex'>
+                                            <div className='d-flex justify-content-between'>
                                               <p className='mr-3'>Payment Status: </p>
-                                              <p className={initem.payment_status} style={{width: '0px', padding: '0px'}}>{initem.payment_status}</p>
+                                              <p style={{color: '#271F29', fontWeight: '900', width: '70px'}} className={initem.payment_status}>{initem.payment_status}</p>
                                             </div>
-                                            <div className='d-flex'>
+                                            <div className='d-flex justify-content-between'>
                                               <p className='mr-3'>Total Amount: </p>
                                               <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>₦{Number(initem.total_amount).toLocaleString()}</p>
                                             </div>
@@ -1064,29 +1064,32 @@ const Invoice = () => {
                                         </div>
                                     </div>
                                     <hr />
-                                    <table className="w-100 table-borderless bin">
-                                        <thead className='th-d'>
-                                        <tr className='m-0'>
-                                            <th className="p-2 text-light">Sr. No</th>
-                                            <th className="p-2 text-light">Product Name </th>
-                                            <th className="p-2 text-light">Price</th>
-                                            <th className="p-2 text-light">Quantity</th>
-                                            <th className="p-2 text-light">Amount</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {initem.products_ordered.map((product, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{product.product_name} - {product.inches} inches</td>
-                                                <td>₦{Number(product.product_price).toLocaleString()}</td>
-                                                <td>{product.quantity}</td>
-                                                <td>₦{product.product_price * product.quantity}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-
+                                    <div className="table-content">
+                                        <div className="table-container">
+                                            <table className="w-100 table-borderless bin">
+                                                <thead className='th-d'>
+                                                <tr className='m-0'>
+                                                    <th className="p-2 text-light">Sr. No</th>
+                                                    <th className="p-2 text-light">Product Name </th>
+                                                    <th className="p-2 text-light">Price</th>
+                                                    <th className="p-2 text-light">Quantity</th>
+                                                    <th className="p-2 text-light">Amount</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {initem.products_ordered.map((product, index) => (
+                                                    <tr key={index}>
+                                                        <td>{index + 1}</td>
+                                                        <td>{product.product_name} - {product.inches} inches</td>
+                                                        <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                                        <td>{product.quantity}</td>
+                                                        <td>₦{product.product_price * product.quantity}</td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </>
                             ): ('')}

@@ -432,6 +432,8 @@ const getUpmode = (id) => {
   console.log(selectedSupplier)
 
   if (selectedSupplier) {
+    const shopIds = selectedSupplier.assigned_shops.map(shop => shop.id);
+    console.log("Extracted Shop IDs:", shopIds);
     const countries = JSON.parse(localStorage.getItem("fetchedData")) || [];
     const selectedCountry = countries.find(country => country.name === selectedSupplier.country);
     const states = selectedCountry ? selectedCountry.states : [];
@@ -442,7 +444,7 @@ const getUpmode = (id) => {
       supplier_phonenumber: selectedSupplier.supplier_phonenumber || '',
       country: selectedSupplier.country || '',
       state: selectedSupplier.state || '',
-      shop_id: selectedSupplier.assigned_shops.map(shop => shop.shop_id) || [],
+      shop_id: shopIds,
       st: states,
     });
   }
@@ -714,7 +716,7 @@ const deleteMode = (id) => {
                     <div className="col-sm-12 col-md-12 col-lg-6">
                       <div className="form-group mb-4">
                        <label htmlFor="shops">Shops <span style={{color: '#7A0091'}}>*</span></label>
-                       <ShopSelector shops={shops} onShopSelectionChange={handleShopSelectionChange2} selectedShops={upData.shop_id}/>
+                       <ShopSelector shops={shops} onShopSelectionChange={handleShopSelectionChange2} initialSelectedShops={upData.shop_id}/>
                       </div>
                     </div>
                     <div className="col-sm-12 col-md-12 col-lg-6">
@@ -810,7 +812,7 @@ const deleteMode = (id) => {
                         <p>{selectUser.created_by}</p>
                       </div>
 
-                      <p><strong>Assigned Shop:</strong><span style={{marginLeft: '90px'}}>{selectUser.assigned_shops.map((item) => item.shop_name).join(", ")}</span></p>
+                      <p><strong>Assigned Shop:</strong><span style={{marginLeft: '90px'}} className='m-0'>{selectUser.assigned_shops.map((item) => item.shop_name).join(", ")}</span></p>
 
                     </div>
                   )}

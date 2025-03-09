@@ -467,9 +467,6 @@ canvas {
     background: #fff;
 }
 
-.recent-order {
-    height: 440px;
-}
 
 .table-container {
     overflow-x: auto;
@@ -716,7 +713,32 @@ input, select, textarea {
     .sticky-pagination {
         z-index: 1;
     }
+    .Paid, .Unpaid {
+        background: #fff;
+    }
 
+    .Paid {
+        color: #2A803E !important;
+    }
+
+    .Unpaid {
+        color: #B34017 !important;
+    }
+    .d-btn {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    .sub-img img {
+        width: 40%;
+    }
+    .sub-img {
+        top: 12px;
+        left: 2px;
+    }
+
+    .user-details {
+        gap: 42px;
+    }
 }
 
 .nav-toggle {

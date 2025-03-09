@@ -77,24 +77,30 @@ const Users = () => {
 
   const getUpmode = (id) => {
     setUpmode(true);
-    localStorage.setItem("dtid", id)
+    localStorage.setItem("dtid", id);
     const theUsers = localStorage.getItem("allUsers");
     const user = JSON.parse(theUsers);
 
     const selectedUser = user.find((item) => item.id === id);
+    console.log("Selected User:", selectedUser);
     
     if (selectedUser) {
+      // Extract shop IDs from the assigned_shop array
+      const shopIds = selectedUser.assigned_shop.map(shop => shop.id);
+      console.log("Extracted Shop IDs:", shopIds);
+      
       setUpUserData({
         email: selectedUser.email || '',
         phone_number: selectedUser.phone_number || '',
         user_name: selectedUser.user_name || '',
         password: '',
-        role_type_id: selectedUser.role_type_id || null,
-        role_priviledge_ids: selectedUser.role_priviledge_ids || [],
-        shop_id: selectedUser.shop_id || [],
+        role_type_id: selectedUser.role_type_id || selectedUser.role_type?.role_type_id || null,
+        role_priviledge_ids: selectedUser.role_priviledge_ids || 
+          (selectedUser.privileges ? selectedUser.privileges.map(p => p.id) : []),
+        shop_id: shopIds, 
       });
     }
-  }
+};
 
   const userDetails = (id) => {
     localStorage.setItem("dtid", id)
@@ -761,8 +767,8 @@ const Users = () => {
                         <p>{selectUser.role_type.role}</p>
                       </div>
 
-                      <p><strong>Privileges:</strong> <span style={{marginLeft: '126px'}}>{selectUser.privileges.map((item) => item.privileges).join(", ")}</span></p>
-                      <p><strong>Assigned Shop:</strong><span style={{marginLeft: '90px'}}>{selectUser.assigned_shop.map((item) => item.shop_name).join(", ")}</span></p>
+                      <p><strong>Privileges:</strong> <span style={{marginLeft: '126px'}} className='m-0 m-lg-1' >{selectUser.privileges.map((item) => item.privileges).join(", ")}</span></p>
+                      <p><strong>Assigned Shop:</strong><span style={{marginLeft: '90px'}} className='m-0 m-lg-1'>{selectUser.assigned_shop.map((item) => item.shop_name).join(", ")}</span></p>
 
                     </div>
                   )}

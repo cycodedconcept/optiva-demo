@@ -168,8 +168,8 @@ const Priviledge = ({ data, onChange, initialRoleId, initialPrivileges }) => {
           ))}
 
 <div>
-<h3>Selected Roles and Privileges:</h3>
-<pre>
+{/* <h3>Selected Roles and Privileges:</h3> */}
+{/* <pre>
           {JSON.stringify(
             {
               role_type_id: selectedRoles,
@@ -178,7 +178,7 @@ const Priviledge = ({ data, onChange, initialRoleId, initialPrivileges }) => {
             null,
             2
           )}
-        </pre>
+        </pre> */}
       </div>
         </div>
       )}
