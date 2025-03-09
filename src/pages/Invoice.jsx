@@ -899,33 +899,33 @@ const Invoice = () => {
             {dataItem ? (
                 <>
                     <div ref={invoiceRef} style={{background: '#fff'}} className='p-4'>
-                        <div className="top-section d-flex justify-content-between">
-                        <div>
-                            <img src={Inv} alt="img" className='mb-3'/>
-                            <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
-                            <p style={{color: '#95799B'}}>Professional in hair making business</p>
-                        </div>
-                        <div className='text-right'>
-                            <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
-                            <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
-                            <div className='text-right mb-5'>
-                                <button style={{fontSize: '12px', width: '70px'}} className={dataItem.payment_status}>{dataItem.payment_status}</button>
+                        <div className="top-section d-lg-flex d-block justify-content-between">
+                            <div>
+                                <img src={Inv} alt="img" className='mb-3'/>
+                                <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                                <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
+                                <p style={{color: '#95799B'}}>Professional in hair making business</p>
                             </div>
+                            <div className='text-right'>
+                                <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                                <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                                <div className='text-right mb-5'>
+                                    <button style={{fontSize: '12px', width: '70px'}} className={dataItem.payment_status}>{dataItem.payment_status}</button>
+                                </div>
 
-                            <div className="d-flex">
-                                <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
-                                <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
+                                </div>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                                </div>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                                </div>
                             </div>
-                            <div className="d-flex">
-                                <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
-                                <small style={{color: '#271F29'}}>{dataItem.date}</small>
-                            </div>
-                            <div className="d-flex">
-                                <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
-                                <small style={{color: '#271F29'}}>{dataItem.date}</small>
-                            </div>
-                        </div>
                         </div>
                         <hr />
                         <div className="d-flex justify-content-between">
@@ -952,38 +952,42 @@ const Invoice = () => {
                             </div>
                         </div>
                         <hr />
-                        <table className="w-100 table-borderless bin">
-                            <thead className='th-d'>
-                            <tr className='m-0'>
-                                <th className="p-2 text-light">Sr. No</th>
-                                <th className="p-2 text-light">Product Name </th>
-                                <th className="p-2 text-light">Price</th>
-                                <th className="p-2 text-light">Quantity</th>
-                                <th className="p-2 text-light">Amount</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {dataItem.products_ordered.map((product, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{product.product_name} - {product.inches} inches</td>
-                                    <td>₦{Number(product.product_price).toLocaleString()}</td>
-                                    <td>{product.quantity}</td>
-                                    <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                            <tfoot>
-                            <tr className="text-right">
-                                <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
-                                <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
-                            </tr>
-                            <tr className="text-right">
-                                <td colSpan="4" className="p-2 font-semibold w-50">Total:</td>
-                                <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
-                            </tr>
-                            </tfoot>
-                        </table>
+                        <div className="table content">
+                            <div className="table-container">
+                                <table className="w-100 table-borderless bin">
+                                    <thead className='th-d'>
+                                    <tr className='m-0'>
+                                        <th className="p-2 text-light">Sr. No</th>
+                                        <th className="p-2 text-light">Product Name </th>
+                                        <th className="p-2 text-light">Price</th>
+                                        <th className="p-2 text-light">Quantity</th>
+                                        <th className="p-2 text-light">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {dataItem.products_ordered.map((product, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{product.product_name} - {product.inches} inches</td>
+                                            <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                            <td>{product.quantity}</td>
+                                            <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                    <tfoot>
+                                    <tr className="text-right">
+                                        <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
+                                        <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                                    </tr>
+                                    <tr className="text-right">
+                                        <td colSpan="4" className="p-2 font-semibold w-50">Total:</td>
+                                        <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </>
             ) : (
