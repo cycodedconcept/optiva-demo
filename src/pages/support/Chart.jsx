@@ -12,12 +12,25 @@ import {
     Title,
     Tooltip,
     Legend,
-    PointElement
+    PointElement,
+    BarController,
+    LineController
 } from 'chart.js';
 import { Chart, Line } from 'react-chartjs-2';
 
 // Register necessary components for both bar and line charts
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    LineElement, 
+    PointElement, 
+    Title, 
+    Tooltip, 
+    Legend,
+    BarController,  // Add this
+    LineController  // Add this
+);
 
 export const MixedChart = () => {
     const dispatch = useDispatch();
