@@ -49,7 +49,7 @@ const Progress = () => {
                             key={product.product_id}
                             style={{
                                 width: `${percentageValue}%`,
-                                backgroundColor: "#FFCC00",
+                                backgroundColor: "#7A0091",
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -91,7 +91,7 @@ const Progress = () => {
                                     display: 'block',
                                     width: '15px',
                                     height: '10px',
-                                    backgroundColor: "#FFCC00",
+                                    backgroundColor: "#7A0091",
                                     marginBottom: '5px',
                                 }}
                             ></span>

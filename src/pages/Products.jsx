@@ -839,6 +839,7 @@ const Products = () => {
                             <thead>
                                 <tr>
                                     <th><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
+                                    <th><div className='d-flex justify-content-between'><p>Image</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th><div className='d-flex justify-content-between'><p>Product Name</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th><div className='d-flex justify-content-between'><p>Category</p><div><img src={Fil} alt="" /></div></div></th>
                                     <th><div className='d-flex justify-content-between'><p>Supplier Name</p><div><img src={Fil} alt="" /></div></div></th>
@@ -863,8 +864,8 @@ const Products = () => {
                                                         width={60} className="img-thumbnail" alt="Thumbnail"
                                                         style={{ boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px' }}
                                                     />
-                                                    <span className='ml-5'>{item.product_name}</span>
                                                 </td>
+                                                <td>{item.product_name}</td>
                                                 <td>{item.product_category || '----'}</td>
                                                 <td>{item.supplier_name.supplier_name}</td>
                                                 <td>{item.total_buying_price}</td>
@@ -1039,9 +1040,9 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-12">
                                     <div className="form-group mb-4">
                                         <div className="d-flex justify-content-between mb-3">
-                                            <div className='d-flex'>
+                                            <div className='d-lg-flex d-block'>
                                                 <div>
-                                                <label htmlFor="exampleInputPassword1">click on checkbox to add Inches</label>
+                                                <label htmlFor="exampleInputPassword1">add Inches</label>
 
                                                 </div>
                                                 <div>
@@ -1049,7 +1050,7 @@ const Products = () => {
                                                     type="checkbox"
                                                     checked={hasInches}
                                                     onChange={toggleInches}
-                                                    className="ml-5"
+                                                    className="ml-lg-5 ml-0"
                                                 />
                                                 </div>
                                                 
@@ -1073,41 +1074,41 @@ const Products = () => {
                                         </div>
 
                                         {hasInches && inputGroups.map((group, index) => (
-                                            <div key={index} style={{ marginBottom: '20px' }} className="d-flex">
+                                            <div key={index} style={{ marginBottom: '20px' }} className="d-lg-flex d-block">
                                                 <input
                                                     type="text"
                                                     value={group.inche || ''}
                                                     onChange={(e) => handleInchesChange(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.buying_price || ''}
                                                     onChange={(e) => handleInchesChange(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.selling_price || ''}
                                                     onChange={(e) => handleInchesChange(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.total || ''}
                                                     readOnly
                                                     placeholder="Total"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                     style={{ backgroundColor: '#f5f5f5' }}
                                                 />
                                                 <FontAwesomeIcon
@@ -1245,9 +1246,9 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-12">
                                     <div className="form-group mb-4">
                                         <div className="d-flex justify-content-between mb-3">
-                                            <div className='d-flex'>
+                                            <div className='d-lg-flex d-block'>
                                                 <div>
-                                                <label htmlFor="exampleInputPassword1">click on checkbox to add Inches</label>
+                                                <label htmlFor="exampleInputPassword1">add Inches</label>
 
                                                 </div>
                                                 <div>
@@ -1255,7 +1256,7 @@ const Products = () => {
                                                     type="checkbox"
                                                     checked={hasInches2}
                                                     onChange={toggleInches2}
-                                                    className="ml-5"
+                                                    className="ml-lg-5 ml-0"
                                                 />
                                                 </div>
                                                 
@@ -1279,41 +1280,41 @@ const Products = () => {
                                         </div>
 
                                         {hasInches2 && inputGroups2.map((group, index) => (
-                                            <div key={index} style={{ marginBottom: '20px' }} className="d-flex">
+                                            <div key={index} style={{ marginBottom: '20px' }} className="d-lg-flex d-block">
                                                 <input
                                                     type="text"
                                                     value={group.inche || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.buying_price || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.selling_price || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
-                                                    className="mx-2" 
+                                                    className="mx-2 my-g-0 my-3" 
                                                 />
                                                 <input
                                                     type="text"
                                                     value={group.total || ''}
                                                     readOnly
                                                     placeholder="Total"
-                                                    className="mx-2"
+                                                    className="mx-2 my-g-0 my-3"
                                                     style={{ backgroundColor: '#f5f5f5' }}
                                                 />
                                                 <FontAwesomeIcon
@@ -1417,7 +1418,7 @@ const Products = () => {
                             </Carousel>
                         </div>
                         <div className="col-sm-12 col-md-12 col-lg-7">
-                            <h4>Basic Information</h4>
+                            <h4 className='my-lg-0 my-4'>Basic Information</h4>
                             <div className="d-flex justify-content-between">
                                 <p>Product Name:</p>
                                 <p>{productDetails.product_name}</p>
@@ -1458,7 +1459,7 @@ const Products = () => {
                                 <p>Supplier Name:</p>
                                 <p>{productDetails.supplier_name.supplier_name}</p>
                             </div>
-                            <div className="d-flex justify-content-between">
+                            <div className="d-lg-flex d-block justify-content-between">
                                 <p>Assigned Shop:</p>
                                 <p>{productDetails.assigned_shops.map((item) => item.shop_name).join(',')}</p>
                             </div>

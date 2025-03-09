@@ -201,7 +201,7 @@ const Sales = () => {
             { reportItem }
         </div>
         <form onSubmit={sortItem}>
-            <div className="d-flex ">
+            <div className="d-lg-flex d-block">
                 <div className="form-group mr-3">
                 <label>Select Month:</label>
                 <select 
@@ -256,56 +256,57 @@ const Sales = () => {
           <div>Error: {error?.message || 'Something went wrong'}</div>
         ) : (
             <>
+
+            <form onSubmit={handleSearchItem} className='mt-5'>
+            <div className="d-lg-flex d-block">
+                <div className="form-group mr-3">
+                    <label>Select Month:</label>
+                    <select 
+                    value={selectedMonth2} 
+                    onChange={(e) => setSelectedMonth2(e.target.value)}
+                    className=""
+                    >
+                    <option>--Selected Month---</option>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                    </select>
+                </div>
+                <div className="form-group mr-3">
+                <label>Select Year:</label>
+                <select 
+                    value={selectedYear2} 
+                    onChange={(e) => setSelectedYear2(e.target.value)}
+                    className=" "
+                >
+                    {years.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>
+                </div>
+                <div className="form-group mr-3">
+                    <label>Invoice Number:</label>
+                    <input type="text" placeholder="Search invoice..." className="mb-3" style={{borderRadius: '5px', width: '100%'}} value={searchItem} onChange={(e) => setSearchItem(e.target.value)}/>
+                </div>
+                <div style={{marginTop: '33px'}}>
+                <button className='b-sum'>Get Sales</button>
+                </div>
+                <div style={{marginTop: '33px'}} className='ml-lg-3 ml-0'>
+                    <button className='b-sum2' onClick={switchTable}>Reset</button>
+                </div>
+            </div>
+            </form>
               <div className="table-content mt-5">
                 <div className="table-container">
-                    <form onSubmit={handleSearchItem}>
-                        <div className="d-flex ">
-                            <div className="form-group mr-3">
-                                <label>Select Month:</label>
-                                <select 
-                                value={selectedMonth2} 
-                                onChange={(e) => setSelectedMonth2(e.target.value)}
-                                className=""
-                                >
-                                <option>--Selected Month---</option>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                                </select>
-                            </div>
-                            <div className="form-group mr-3">
-                            <label>Select Year:</label>
-                            <select 
-                                value={selectedYear2} 
-                                onChange={(e) => setSelectedYear2(e.target.value)}
-                                className=" "
-                            >
-                                {years.map((year) => (
-                                <option key={year} value={year}>{year}</option>
-                                ))}
-                            </select>
-                            </div>
-                            <div className="form-group mr-3">
-                              <label>Invoice Number:</label>
-                              <input type="text" placeholder="Search invoice..." className="mb-3" style={{borderRadius: '5px', width: '100%'}} value={searchItem} onChange={(e) => setSearchItem(e.target.value)}/>
-                            </div>
-                            <div style={{marginTop: '33px', marginRight: "20px"}} >
-                            <button className='b-sum'>Get Sales</button>
-                            </div>
-                            <div style={{marginTop: '33px'}}>
-                              <button className='b-sum2' onClick={switchTable}>Reset</button>
-                            </div>
-                        </div>
-                    </form>
                     <table className="my-table">
                         <thead>
                             <tr>
@@ -403,24 +404,24 @@ const Sales = () => {
                         <>
                             <div>
 
-                                <div className='d-flex justify-content-between'>
+                                <div className='d-lg-flex d-block justify-content-between'>
                                     <div>
                                         <img src={Inv} alt="img" className='mb-3'/>
                                     </div>
                                     <div>
-                                        <div className='d-flex'>
+                                        <div className='d-flex justify-content-between'>
                                             <p className='mr-3'>Date: </p>
                                             <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{details.date}</p>
                                         </div>
-                                        <div className='d-flex'>
+                                        <div className='d-flex justify-content-between'>
                                             <p className='mr-3'>Payment Method: </p>
                                             <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{details.payment_method}</p>
                                         </div>
-                                        <div className='d-flex'>
+                                        <div className='d-flex justify-content-between'>
                                             <p className='mr-3'>Payment Status: </p>
-                                            <p className={details.payment_status} style={{width: '0px', padding: '0px'}}>{details.payment_status}</p>
+                                            <p className={details.payment_status} style={{width: '50px', padding: '0px'}}>{details.payment_status}</p>
                                         </div>
-                                        <div className='d-flex'>
+                                        <div className='d-flex justify-content-between'>
                                             <p className='mr-3'>Total Amount: </p>
                                             <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>₦{Number(details.total_amount).toLocaleString()}</p>
                                         </div>
@@ -459,28 +460,32 @@ const Sales = () => {
                                     </div>
                                 </div>
                                 <hr />
-                                <table className="w-100 table-borderless bin">
-                                    <thead className='th-d'>
-                                    <tr className='m-0'>
-                                        <th className="p-2 text-light">Sr. No</th>
-                                        <th className="p-2 text-light">Product Name </th>
-                                        <th className="p-2 text-light">Price</th>
-                                        <th className="p-2 text-light">Quantity</th>
-                                        <th className="p-2 text-light">Amount</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {details.products_ordered.map((product, index) => (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td>{product.product_name} - {product.inches} inches</td>
-                                            <td>₦{Number(product.product_price).toLocaleString()}</td>
-                                            <td>{product.quantity}</td>
-                                            <td>₦{product.product_price * product.quantity}</td>
+                                <div className="table-content">
+                                    <div className="table-container">
+                                        <table className="w-100 table-borderless bin">
+                                        <thead className='th-d'>
+                                        <tr className='m-0'>
+                                            <th className="p-2 text-light">Sr. No</th>
+                                            <th className="p-2 text-light">Product Name </th>
+                                            <th className="p-2 text-light">Price</th>
+                                            <th className="p-2 text-light">Quantity</th>
+                                            <th className="p-2 text-light">Amount</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {details.products_ordered.map((product, index) => (
+                                            <tr key={index}>
+                                                <td>{index + 1}</td>
+                                                <td>{product.product_name} - {product.inches} inches</td>
+                                                <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                                <td>{product.quantity}</td>
+                                                <td>₦{product.product_price * product.quantity}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
 
                             </div>
                         </>

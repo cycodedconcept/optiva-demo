@@ -226,7 +226,7 @@ const Discount = () => {
                 <tbody>
                     {discountItem && discountItem.length > 0 ? (
                         discountItem.map((discount, index) => (
-                        <tr key={discount.id} onClick={() => userDetails(user.id)} style={{cursor: 'pointer'}}>
+                        <tr key={discount.id}>
                             <td>{index + 1}</td>
                             <td>{discount.discount_name}</td>
                             <td>{discount.discount_value}</td>
@@ -234,7 +234,7 @@ const Discount = () => {
                             <td><button className={discount.status} style={{padding: '10px'}}>{discount.status}</button></td>
                             <td>
                             <div className="d-flex gap-5">
-                                <FontAwesomeIcon icon={faEdit} style={{color: '#7A0091', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(discount.id); e.stopPropagation();}} title='update discount'/>
+                                <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(discount.id); e.stopPropagation();}} title='update discount'/>
                             </div>
                             </td>
                         </tr>

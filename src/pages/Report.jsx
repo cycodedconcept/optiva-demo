@@ -119,49 +119,49 @@ const Report = () => {
             { reportItem }
           </div>
 
-          <div className="table-content">
-            <div className="table-container mt-5">
-              <form onSubmit={handleSummaryFilter}>
-                <div className="d-flex ">
-                  <div className="form-group mr-3">
-                    <label>Select Month:</label>
-                    <select 
-                      value={selectedMonth} 
-                      onChange={(e) => setSelectedMonth(e.target.value)}
-                      className=""
-                    >
-                      <option>--Selected Month---</option>
-                      <option value="01">January</option>
-                      <option value="02">February</option>
-                      <option value="03">March</option>
-                      <option value="04">April</option>
-                      <option value="05">May</option>
-                      <option value="06">June</option>
-                      <option value="07">July</option>
-                      <option value="08">August</option>
-                      <option value="09">September</option>
-                      <option value="10">October</option>
-                      <option value="11">November</option>
-                      <option value="12">December</option>
-                    </select>
-                  </div>
-                    <div className="form-group mr-3">
-                      <label>Select Year:</label>
-                      <select 
-                        value={selectedYear} 
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        className=" "
-                      >
-                        {years.map((year) => (
-                          <option key={year} value={year}>{year}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div style={{marginTop: '33px'}}>
-                      <button className='b-sum'>Get Summary</button>
-                    </div>
+          <form onSubmit={handleSummaryFilter} className='mt-5'>
+            <div className="d-lg-flex d-block">
+              <div className="form-group mr-3">
+                <label>Select Month:</label>
+                <select 
+                  value={selectedMonth} 
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className=""
+                >
+                  <option>--Selected Month---</option>
+                  <option value="01">January</option>
+                  <option value="02">February</option>
+                  <option value="03">March</option>
+                  <option value="04">April</option>
+                  <option value="05">May</option>
+                  <option value="06">June</option>
+                  <option value="07">July</option>
+                  <option value="08">August</option>
+                  <option value="09">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
+                <div className="form-group mr-3">
+                  <label>Select Year:</label>
+                  <select 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className=" "
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
                 </div>
-              </form>
+                <div style={{marginTop: '33px'}}>
+                  <button className='b-sum'>Get Summary</button>
+                </div>
+            </div>
+          </form>
+          <div className="table-content">
+            <div className="table-container mt-3">
                 <table className="my-table">
                     <thead>
                       <tr>

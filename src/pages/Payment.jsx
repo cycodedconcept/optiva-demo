@@ -409,7 +409,7 @@ const proDetails = (iNumber) => {
             <div className="modal-body">
               {payData ? (
                 <>
-                <div className="d-flex justify-content-between">
+                <div className="d-lg-flex d-block justify-content-between">
                   <div>
                     <img src={Inv} alt="img" className='mb-3'/>
                   </div>
@@ -434,7 +434,7 @@ const proDetails = (iNumber) => {
                 </div>
                 <hr />
 
-                <div className="d-flex justify-content-between">
+                <div className="d-lg-flex d-block justify-content-between">
                   <div>
                     <div className="d-flex">
                       <p className='mr-3'>Customer name:</p>
@@ -457,28 +457,32 @@ const proDetails = (iNumber) => {
                   </div>
                 </div>
                 <hr />
-                <table className="w-100 table-borderless bin">
-                  <thead className='th-d'>
-                  <tr className='m-0'>
-                      <th className="p-2 text-light">Sr. No</th>
-                      <th className="p-2 text-light">Product Name </th>
-                      <th className="p-2 text-light">Price</th>
-                      <th className="p-2 text-light">Quantity</th>
-                      <th className="p-2 text-light">Amount</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {payData.invoicedata.products_ordered.map((product, index) => (
-                      <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>{product.product_name} - {product.inches} inches</td>
-                          <td>₦{Number(product.product_price).toLocaleString()}</td>
-                          <td>{product.quantity}</td>
-                          <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
-                      </tr>
-                  ))}
-                  </tbody>
-              </table>
+                <div className="table-content">
+                  <div className="table-container">
+                    <table className="w-100 table-borderless bin">
+                    <thead className='th-d'>
+                    <tr className='m-0'>
+                        <th className="p-2 text-light">Sr. No</th>
+                        <th className="p-2 text-light">Product Name </th>
+                        <th className="p-2 text-light">Price</th>
+                        <th className="p-2 text-light">Quantity</th>
+                        <th className="p-2 text-light">Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {payData.invoicedata.products_ordered.map((product, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{product.product_name} - {product.inches} inches</td>
+                            <td>₦{Number(product.product_price).toLocaleString()}</td>
+                            <td>{product.quantity}</td>
+                            <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
 
               </>) : ('')}
             </div>
