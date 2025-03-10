@@ -432,25 +432,25 @@ const Invoice = () => {
         }
     }
 
-    useEffect(() => {
-        // Find the existing meta viewport tag
-        const metaViewport = document.querySelector('meta[name="viewport"]');
+    // useEffect(() => {
+    //     // Find the existing meta viewport tag
+    //     const metaViewport = document.querySelector('meta[name="viewport"]');
     
-        // Backup the original content
-        const originalContent = metaViewport?.getAttribute('content');
+    //     // Backup the original content
+    //     const originalContent = metaViewport?.getAttribute('content');
     
-        // Update the content to disable responsiveness
-        if (metaViewport) {
-          metaViewport.setAttribute('content', 'width=1000');
-        }
+    //     // Update the content to disable responsiveness
+    //     if (metaViewport) {
+    //       metaViewport.setAttribute('content', 'width=1000');
+    //     }
     
-        return () => {
-          // Restore the original content when the component unmounts
-          if (metaViewport) {
-            metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-          }
-        };
-      }, []);
+    //     return () => {
+    //       // Restore the original content when the component unmounts
+    //       if (metaViewport) {
+    //         metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+    //       }
+    //     };
+    // }, []);
 
     // const handlePrint = useReactToPrint({
         // contentRef: invoiceRef,
@@ -487,6 +487,22 @@ const Invoice = () => {
     });
 
     const handleDownload = async () => {
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+    
+        // Backup the original content
+        const originalContent = metaViewport?.getAttribute('content');
+    
+        // Update the content to disable responsiveness
+        if (metaViewport) {
+          metaViewport.setAttribute('content', 'width=1000');
+        }
+    
+        // return () => {
+        //   // Restore the original content when the component unmounts
+        //   if (metaViewport) {
+        //     metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+        //   }
+        // };
         if (!invoiceRef.current) return;
         
         // Show loading alert
