@@ -429,9 +429,38 @@ const Invoice = () => {
         }
     }
 
+    // const handlePrint = useReactToPrint({
+        // contentRef: invoiceRef,
+        // onAfterPrint: () => console.log("Invoice printed successfully!"),
+    // });
+
     const handlePrint = useReactToPrint({
         contentRef: invoiceRef,
         onAfterPrint: () => console.log("Invoice printed successfully!"),
+        pageStyle: `
+            @page {
+                size: auto;
+                margin: 20mm 10mm;
+            }
+            @media print {
+                body {
+                    margin: 0;
+                    padding: 0;
+                }
+                .invoice-container {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    padding: 10px !important;
+                }
+                .table-responsive {
+                    overflow-x: visible !important;
+                }
+                table {
+                    width: 100% !important;
+                }
+            }
+        `,
     });
 
     const changeStatus = (payment, inum) => {
@@ -993,6 +1022,113 @@ const Invoice = () => {
             ) : (
                <p>Loading invoice...</p>
             )}
+
+            {/* {dataItem ? (
+                <>
+                    <div 
+                        ref={invoiceRef} 
+                        style={{
+                            background: '#fff',
+                            width: '100%',
+                            maxWidth: '100%',
+                            margin: '0 auto',
+                            padding: '20px',
+                            boxSizing: 'border-box'
+                        }} 
+                        className='p-4'
+                    >
+                        <div className="top-section d-flex flex-column flex-lg-row justify-content-between">
+                            <div className="mb-4 mb-lg-0">
+                                <img src={Inv} alt="img" className='mb-3' style={{ maxWidth: '150px' }}/>
+                                <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                                <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
+                                <p style={{color: '#95799B'}}>Professional in hair making business</p>
+                            </div>
+                            <div className='text-lg-right text-left'>
+                                <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                                <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                                <div className='text-lg-right mb-3'>
+                                    <button style={{fontSize: '12px', width: '70px'}} className={dataItem.payment_status}>{dataItem.payment_status}</button>
+                                </div>
+
+                                <div className="d-flex justify-content-lg-end">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
+                                </div>
+                                <div className="d-flex justify-content-lg-end">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                                </div>
+                                <div className="d-flex justify-content-lg-end">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div className="d-flex flex-column flex-lg-row justify-content-between">
+                            <div className="mb-4 mb-lg-0">
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.phone_number}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.email}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
+                                    <small style={{color: '#271F29'}}>{dataItem.payment_method}</small>
+                                </div>
+                            </div>
+                            <div className="text-lg-right text-left">
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
+                                <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(dataItem.total_amount).toLocaleString()}</h5>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
+                                <small style={{color: '#7A0091', fontWeight: '900'}}>{dataItem.discount_name}</small>
+                            </div>
+                        </div>
+                        <hr />
+                        <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                            <table className="w-100 table-borderless bin" style={{ minWidth: '650px' }}>
+                                <thead className='th-d'>
+                                <tr className='m-0'>
+                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Sr. No</th>
+                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Product Name</th>
+                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Price</th>
+                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Quantity</th>
+                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {dataItem.products_ordered.map((product, index) => (
+                                    <tr key={index}>
+                                        <td style={{ whiteSpace: 'nowrap' }}>{index + 1}</td>
+                                        <td>{product.product_name} - {product.inches} inches</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>₦{Number(product.product_price).toLocaleString()}</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>{product.quantity}</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colSpan="4" className="p-2 font-semibold text-right">Subtotal:</td>
+                                    <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan="4" className="p-2 font-semibold text-right">Total:</td>
+                                    <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            ) : (
+            <p>Loading invoice...</p>
+            )} */}
           </div>
         </>
         )
