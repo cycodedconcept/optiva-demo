@@ -432,6 +432,26 @@ const Invoice = () => {
         }
     }
 
+    useEffect(() => {
+        // Find the existing meta viewport tag
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+    
+        // Backup the original content
+        const originalContent = metaViewport?.getAttribute('content');
+    
+        // Update the content to disable responsiveness
+        if (metaViewport) {
+          metaViewport.setAttribute('content', 'width=1000');
+        }
+    
+        return () => {
+          // Restore the original content when the component unmounts
+          if (metaViewport) {
+            metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+          }
+        };
+      }, []);
+
     // const handlePrint = useReactToPrint({
         // contentRef: invoiceRef,
         // onAfterPrint: () => console.log("Invoice printed successfully!"),
