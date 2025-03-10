@@ -8,6 +8,9 @@ import Pagination from './support/Pagination';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useReactToPrint } from "react-to-print";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable'
 
 
 const Invoice = () => {
@@ -462,6 +465,73 @@ const Invoice = () => {
             }
         `,
     });
+
+    const handleDownload = async () => {
+        if (!invoiceRef.current) return;
+        
+        // Show loading alert
+        Swal.fire({
+          title: 'Generating PDF',
+          html: 'Please wait while we prepare your invoice...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+        
+        try {
+          // Calculate optimal dimensions (A4 proportions)
+          const printWidth = 210; // A4 width in mm
+          const invoiceElement = invoiceRef.current;
+          const originalWidth = invoiceElement.offsetWidth;
+          const originalHeight = invoiceElement.offsetHeight;
+          const aspectRatio = originalHeight / originalWidth;
+          const printHeight = printWidth * aspectRatio;
+          
+          // Create canvas with higher scale for better quality
+          const canvas = await html2canvas(invoiceElement, {
+            scale: 3, // Higher scale for better quality
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+          });
+          
+          // Create PDF with proper dimensions
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const pdf = new jsPDF({
+            orientation: printHeight > printWidth ? 'portrait' : 'landscape',
+            unit: 'mm',
+            format: 'a4',
+          });
+          
+          // Add image to PDF with proper scaling
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          
+          // Save the PDF
+          pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
+          
+          // Success message
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Your invoice has been downloaded successfully.',
+            confirmButtonColor: '#7A0091'
+          });
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          
+          // Error message
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Failed to download the invoice. Please try again.',
+            confirmButtonColor: '#7A0091'
+          });
+        }
+    };
 
     const changeStatus = (payment, inum) => {
         if (payment === "Paid" || payment === "paid") {
@@ -922,7 +992,8 @@ const Invoice = () => {
                     >
                         <FontAwesomeIcon icon={faPrint} className='mr-4'/>
                         Print
-                    </button>
+                </button>
+                <button className='btn mr-3' style={{background: '#fff', color: '#7A0091'}} onClick={handleDownload}>Download</button>
             </div>
 
             {dataItem ? (
@@ -988,6 +1059,7 @@ const Invoice = () => {
                                     <tr className='m-0'>
                                         <th className="p-2 text-light">Sr. No</th>
                                         <th className="p-2 text-light">Product Name </th>
+                                        <th className="p-2 text-light">Inches </th>
                                         <th className="p-2 text-light">Price</th>
                                         <th className="p-2 text-light">Quantity</th>
                                         <th className="p-2 text-light">Amount</th>
@@ -997,7 +1069,8 @@ const Invoice = () => {
                                     {dataItem.products_ordered.map((product, index) => (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
-                                            <td>{product.product_name} - {product.inches} inches</td>
+                                            <td>{product.product_name}</td>
+                                            <td>{product.inches}</td>
                                             <td>₦{Number(product.product_price).toLocaleString()}</td>
                                             <td>{product.quantity}</td>
                                             <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
@@ -1022,113 +1095,6 @@ const Invoice = () => {
             ) : (
                <p>Loading invoice...</p>
             )}
-
-            {/* {dataItem ? (
-                <>
-                    <div 
-                        ref={invoiceRef} 
-                        style={{
-                            background: '#fff',
-                            width: '100%',
-                            maxWidth: '100%',
-                            margin: '0 auto',
-                            padding: '20px',
-                            boxSizing: 'border-box'
-                        }} 
-                        className='p-4'
-                    >
-                        <div className="top-section d-flex flex-column flex-lg-row justify-content-between">
-                            <div className="mb-4 mb-lg-0">
-                                <img src={Inv} alt="img" className='mb-3' style={{ maxWidth: '150px' }}/>
-                                <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                                <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
-                                <p style={{color: '#95799B'}}>Professional in hair making business</p>
-                            </div>
-                            <div className='text-lg-right text-left'>
-                                <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
-                                <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
-                                <div className='text-lg-right mb-3'>
-                                    <button style={{fontSize: '12px', width: '70px'}} className={dataItem.payment_status}>{dataItem.payment_status}</button>
-                                </div>
-
-                                <div className="d-flex justify-content-lg-end">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
-                                </div>
-                                <div className="d-flex justify-content-lg-end">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
-                                </div>
-                                <div className="d-flex justify-content-lg-end">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.date}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <hr />
-                        <div className="d-flex flex-column flex-lg-row justify-content-between">
-                            <div className="mb-4 mb-lg-0">
-                                <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
-                                <div className="d-flex">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.phone_number}</small>
-                                    </div>
-                                    <div className="d-flex">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.email}</small>
-                                    </div>
-                                    <div className="d-flex">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.payment_method}</small>
-                                </div>
-                            </div>
-                            <div className="text-lg-right text-left">
-                                <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
-                                <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(dataItem.total_amount).toLocaleString()}</h5>
-                                <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
-                                <small style={{color: '#7A0091', fontWeight: '900'}}>{dataItem.discount_name}</small>
-                            </div>
-                        </div>
-                        <hr />
-                        <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                            <table className="w-100 table-borderless bin" style={{ minWidth: '650px' }}>
-                                <thead className='th-d'>
-                                <tr className='m-0'>
-                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Sr. No</th>
-                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Product Name</th>
-                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Price</th>
-                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Quantity</th>
-                                    <th className="p-2 text-light" style={{ whiteSpace: 'nowrap' }}>Amount</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {dataItem.products_ordered.map((product, index) => (
-                                    <tr key={index}>
-                                        <td style={{ whiteSpace: 'nowrap' }}>{index + 1}</td>
-                                        <td>{product.product_name} - {product.inches} inches</td>
-                                        <td style={{ whiteSpace: 'nowrap' }}>₦{Number(product.product_price).toLocaleString()}</td>
-                                        <td style={{ whiteSpace: 'nowrap' }}>{product.quantity}</td>
-                                        <td style={{ whiteSpace: 'nowrap' }}>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                                <tfoot>
-                                <tr>
-                                    <td colSpan="4" className="p-2 font-semibold text-right">Subtotal:</td>
-                                    <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan="4" className="p-2 font-semibold text-right">Total:</td>
-                                    <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </>
-            ) : (
-            <p>Loading invoice...</p>
-            )} */}
           </div>
         </>
         )
