@@ -74,7 +74,7 @@ const Login = () => {
                   <div className="tron">
                     <div className="lo-body text-center mt-3">
                         <h5>Welcome Back !</h5>
-                        <p>Sign in to continue to Hair Planeth.</p>
+                        <p>Sign in to continue to Hair Planet.</p>
                     </div>
                     <form className='mt-5' onSubmit={handleSubmit}>
                         <div className="form-group mb-3">
@@ -112,3 +112,6 @@ const Login = () => {
 }
 
 export default Login
+
+
+

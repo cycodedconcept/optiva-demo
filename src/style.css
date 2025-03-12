@@ -686,6 +686,11 @@ input, select, textarea {
         grid-column-gap: 1rem;
     }
 
+    .osicard {
+        grid-template-columns: repeat(1, 1fr) !important;
+        grid-column-gap: 1rem !important;
+    }
+
     .card-single {
         margin-bottom: 1rem;
     }

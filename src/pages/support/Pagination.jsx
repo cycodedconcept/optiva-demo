@@ -1,36 +1,38 @@
 import React from 'react'
 
 const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onPerPageChange}) => {
+    // Convert currentPage to number to ensure it's always a number
+    const currentPageNum = Number(currentPage) || 1; // Default to 1 if conversion fails
+    
     const getPageNumbers = () => {
         const pageNumbers = [];
-        const maxPagesToShow = 5; // Show max 5 page numbers at a time
-
+        const maxPagesToShow = 5;
     
         if (totalPages <= maxPagesToShow) {
-          // If total pages is less than max, show all pages
           for (let i = 1; i <= totalPages; i++) {
             pageNumbers.push(i);
           }
         } else {
-          // Complex logic for when we have many pages
-          if (currentPage <= 3) {
-            // At the start
+          if (currentPageNum <= 3) {
             for (let i = 1; i <= 5; i++) {
               pageNumbers.push(i);
             }
-          } else if (currentPage >= totalPages - 2) {
-            // At the end
+          } else if (currentPageNum >= totalPages - 2) {
             for (let i = totalPages - 4; i <= totalPages; i++) {
               pageNumbers.push(i);
             }
           } else {
-            // In the middle
-            for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+            for (let i = currentPageNum - 2; i <= currentPageNum + 2; i++) {
               pageNumbers.push(i);
             }
           }
         }
         return pageNumbers;
+    };
+    
+    // Ensure page changes always pass numbers
+    const handlePageChange = (page) => {
+        onPageChange(Number(page));
     };
     
     const perPageOptions = [10, 20, 50, 100];
@@ -57,18 +59,18 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
     
           
           <div className="text-secondary">
-            Showing {total > 0 ? Math.min((currentPage - 1) * perPage + 1, total) : 0} to{' '}
-            {total > 0 ? Math.min(currentPage * perPage, total) : 0} of {total} entries
+            Showing {total > 0 ? Math.min((currentPageNum - 1) * perPage + 1, total) : 0} to{' '}
+            {total > 0 ? Math.min(currentPageNum * perPage, total) : 0} of {total} entries
           </div>
     
           {/* Page navigation */}
           <nav aria-label="Page navigation">
             <ul className="pagination mb-0">
-              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <li className={`page-item ${currentPageNum === 1 ? 'disabled' : ''}`}>
                 <button
                   className="page-link btn"
-                  onClick={() => onPageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPageNum - 1)}
+                  disabled={currentPageNum === 1}
                 >
                   <span aria-hidden="true">&laquo;</span>
                 </button>
@@ -77,22 +79,22 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
               {getPageNumbers().map(pageNum => (
                 <li
                   key={pageNum}
-                  className={`page-item ${currentPage === pageNum ? 'active' : ''}`}
+                  className={`page-item ${currentPageNum === pageNum ? 'active' : ''}`}
                 >
                   <button
                     className="page-link btn"
-                    onClick={() => onPageChange(pageNum)}
+                    onClick={() => handlePageChange(pageNum)}
                   >
                     {pageNum}
                   </button>
                 </li>
               ))}
     
-              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <li className={`page-item ${currentPageNum === totalPages ? 'disabled' : ''}`}>
                 <button
                   className="page-link btn"
-                  onClick={() => onPageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPageNum + 1)}
+                  disabled={currentPageNum === totalPages}
                 >
                   <span aria-hidden="true">&raquo;</span>
                 </button>

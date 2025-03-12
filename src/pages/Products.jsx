@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { getProduct, createProduct, updateProduct, deleteProduct, searchProduct, clearSearch } from '../features/productSlice';
@@ -84,11 +83,11 @@ const Products = () => {
     }
 
     const [inputGroups, setInputGroups] = useState([
-        { inche: '', buying_price: '', selling_price: '', stock: '', total: '' },
+        { inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' },
     ]);
 
     const [inputGroups2, setInputGroups2] = useState([
-        { inche: '', buying_price: '', selling_price: '', stock: '', total: '' },
+        { inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' },
     ]);
 
     const images = productDetails?.images || [];
@@ -116,12 +115,12 @@ const Products = () => {
     
     const handleAddInputGroup = (e) => {
         e.preventDefault();
-        setInputGroups([...inputGroups, { inche: '', buying_price: '', selling_price: '', stock: '' }]);
+        setInputGroups([...inputGroups, { inche: '', buying_price: '', selling_price: '', color: '', stock: '' }]);
     };
 
     const handleAddInputGroup2 = (e) => {
         e.preventDefault();
-        setInputGroups2([...inputGroups2, { inche: '', buying_price: '', selling_price: '', stock: '' }]);
+        setInputGroups2([...inputGroups2, { inche: '', buying_price: '', selling_price: '', color: '', stock: '' }]);
     };
       
 
@@ -248,10 +247,11 @@ const Products = () => {
             total_buying_price: '' || 0,
             total_selling_price: '' || 0,
             total_stock_value: '',
-            total_product_stock: ''
+            total_product_stock: '',
+            color: ''
         }));
         // Reset inches input groups
-        setInputGroups([{ inche: '', buying_price: '', selling_price: '', stock: '', total: '' }]);
+        setInputGroups([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
     };
 
     // for update product
@@ -323,10 +323,11 @@ const Products = () => {
             total_buying_price: '' || 0,
             total_selling_price: '' || 0,
             total_stock_value: '',
-            total_product_stock: ''
+            total_product_stock: '',
+            color: ''
         }));
         // Reset inches input groups
-        setInputGroups2([{ inche: '', buying_price: '', selling_price: '', stock: '', total: '' }]);
+        setInputGroups2([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
     };
     
     // for create product
@@ -359,7 +360,7 @@ const Products = () => {
     const handleAddProduct = async (e) => {
         e.preventDefault();
 
-        if (!productData.product_name || !productData.color || !productData.unit || !productData.product_category || !productData.total_product_stock || !productData.supplier_id || productData.shop_id.length === 0) {
+        if (!productData.product_name || !productData.unit || !productData.product_category || !productData.total_product_stock || !productData.supplier_id || productData.shop_id.length === 0) {
             Swal.fire({
                 icon: "info",
                 title: "creating product",
@@ -375,6 +376,7 @@ const Products = () => {
                     !(group.inche || '').trim() ||
                     !(group.buying_price || '').trim() ||
                     !(group.selling_price || '').trim() ||
+                    !(group.color || '').trim() ||
                     !(group.stock || '').trim()
             );
         
@@ -480,7 +482,7 @@ const Products = () => {
                     shop_id: [],
                     images: []
                 });
-                setInputGroups([{ inche: "", buying_price: "", selling_price: "", stock: "" }]);
+                setInputGroups([{ inche: "", buying_price: "", selling_price: "", color: "", stock: "" }]);
                 setHasInches(false);
         
                 // Close modal
@@ -511,7 +513,7 @@ const Products = () => {
         e.preventDefault();
         const getUpId = localStorage.getItem("prid");
 
-        if (!upProductData.product_name || !upProductData.color || !upProductData.unit || !upProductData.product_category || !upProductData.total_product_stock || !upProductData.supplier_id || upProductData.shop_id.length === 0) {
+        if (!upProductData.product_name || !upProductData.unit || !upProductData.product_category || !upProductData.total_product_stock || !upProductData.supplier_id || upProductData.shop_id.length === 0) {
             Swal.fire({
                 icon: "info",
                 title: "updating product",
@@ -526,6 +528,7 @@ const Products = () => {
                     !(group.inche || '') ||
                     !(group.buying_price || '') ||
                     !(group.selling_price || '') ||
+                    !(group.color || '') ||
                     !(group.stock || '')
             );
         
@@ -624,7 +627,7 @@ const Products = () => {
                     shop_id: [],
                     images: []
                 });
-                setInputGroups2([{ inche: "", buying_price: "", selling_price: "", stock: "" }]);
+                setInputGroups2([{ inche: "", buying_price: "", selling_price: "", color: "", stock: "" }]);
                 setHasInches2(false);
 
                 hideModal();
@@ -650,6 +653,75 @@ const Products = () => {
 
     }
 
+    // const getUpmode = (id) => {
+    //     setUpModal(true);
+    //     const getProduct = localStorage.getItem("product");
+    //     localStorage.setItem("prid", id)
+    //     const vProduct = JSON.parse(getProduct);
+    //     const selectedProduct = vProduct.find((item) => item.id === id);
+    //     console.log(selectedProduct);
+    
+    //     let totalStockValue = selectedProduct.total_stock_value || 0;
+    
+    //     if (selectedProduct.inches && selectedProduct.inches.length > 0) {
+    //         setHasInches2(true);
+    //         setUpProductData({
+    //             color: ''
+    //         })
+    
+    //         // Calculate total_stock_value based on inches
+    //         totalStockValue = selectedProduct.inches.reduce((total, inch) => {
+    //             const buyingPrice = parseFloat(inch.buying_price) || 0;
+    //             const stock = parseInt(inch.stock) || 0;
+    //             return total + (buyingPrice * stock);
+    //         }, 0);
+    
+    //         setInputGroups2(
+    //             selectedProduct.inches.map((inch) => {
+    //                 // Calculate total for each inch row
+    //                 const buyingPrice = parseFloat(inch.buying_price) || 0;
+    //                 const stock = parseInt(inch.stock) || 0;
+    //                 const rowTotal = (buyingPrice * stock).toLocaleString('en-US', {
+    //                     minimumFractionDigits: 2,
+    //                     maximumFractionDigits: 2
+    //                 });
+    
+    //                 return {
+    //                     inche: inch.inche || '', 
+    //                     buying_price: inch.buying_price || '',
+    //                     selling_price: inch.selling_price || '',
+    //                     color: inch.color || '',
+    //                     stock: inch.stock || '',
+    //                     total: rowTotal 
+    //                 };
+    //             })
+    //         );
+    //     }
+    
+    //     if (selectedProduct) {
+    //         setUpProductData({
+    //             product_name: selectedProduct.product_name || '',
+    //             color: selectedProduct.color || '',
+    //             unit: selectedProduct.unit || '',
+    //             product_category: selectedProduct.product_category || '',
+    //             product_description: selectedProduct.product_description || '',
+    //             total_product_stock: selectedProduct.total_product_stock || '',
+    //             supplier_id: selectedProduct.supplier_name?.id || '',
+    //             shop_id: selectedProduct.assigned_shops.map(shop => shop.shop_id) || [],
+    
+    //             total_buying_price: (selectedProduct.inches && selectedProduct.inches.length > 0) 
+    //                                 ? '' 
+    //                                 : selectedProduct.total_buying_price || '',
+    
+    //             total_selling_price: (selectedProduct.inches && selectedProduct.inches.length > 0) 
+    //                                 ? '' 
+    //                                 : selectedProduct.total_selling_price || '',
+    
+    //             total_stock_value: totalStockValue,
+    //         });
+    //     }
+    // };
+    
     const getUpmode = (id) => {
         setUpModal(true);
         const getProduct = localStorage.getItem("product");
@@ -657,18 +729,37 @@ const Products = () => {
         const vProduct = JSON.parse(getProduct);
         const selectedProduct = vProduct.find((item) => item.id === id);
         console.log(selectedProduct);
+
+        const shopIds = selectedProduct.assigned_shops.map(shop => shop.id);
+        console.log("Extracted Shop IDs:", shopIds);
     
-        let totalStockValue = selectedProduct.total_stock_value || 0; // Default value
+        let totalStockValue = selectedProduct.total_stock_value || 0;
+        let productDataToSet = {
+            product_name: selectedProduct.product_name || '',
+            unit: selectedProduct.unit || '',
+            product_category: selectedProduct.product_category || '',
+            product_description: selectedProduct.product_description || '',
+            total_product_stock: selectedProduct.total_product_stock || '',
+            supplier_id: selectedProduct.supplier_name?.id || '',
+            shop_id: shopIds
+        };
     
         if (selectedProduct.inches && selectedProduct.inches.length > 0) {
             setHasInches2(true);
-    
+            
+            // For products with inches, set color to empty string
+            productDataToSet.color = '';
+            
             // Calculate total_stock_value based on inches
             totalStockValue = selectedProduct.inches.reduce((total, inch) => {
                 const buyingPrice = parseFloat(inch.buying_price) || 0;
                 const stock = parseInt(inch.stock) || 0;
                 return total + (buyingPrice * stock);
             }, 0);
+    
+            // Set buying and selling price to empty for products with inches
+            productDataToSet.total_buying_price = '';
+            productDataToSet.total_selling_price = '';
     
             setInputGroups2(
                 selectedProduct.inches.map((inch) => {
@@ -684,38 +775,26 @@ const Products = () => {
                         inche: inch.inche || '', 
                         buying_price: inch.buying_price || '',
                         selling_price: inch.selling_price || '',
+                        color: inch.color || '',
                         stock: inch.stock || '',
-                        total: rowTotal // Add the calculated total
+                        total: rowTotal 
                     };
                 })
             );
+        } else {
+            // For products without inches, use the product's color
+            productDataToSet.color = selectedProduct.color || '';
+            productDataToSet.total_buying_price = selectedProduct.total_buying_price || '';
+            productDataToSet.total_selling_price = selectedProduct.total_selling_price || '';
+            setHasInches2(false);
         }
     
-        if (selectedProduct) {
-            setUpProductData({
-                product_name: selectedProduct.product_name || '',
-                color: selectedProduct.color || '',
-                unit: selectedProduct.unit || '',
-                product_category: selectedProduct.product_category || '',
-                product_description: selectedProduct.product_description || '',
-                total_product_stock: selectedProduct.total_product_stock || '',
-                supplier_id: selectedProduct.supplier_name?.id || '',
-                shop_id: selectedProduct.assigned_shops.map(shop => shop.shop_id) || [],
-    
-                total_buying_price: (selectedProduct.inches && selectedProduct.inches.length > 0) 
-                                    ? '' 
-                                    : selectedProduct.total_buying_price || '',
-    
-                total_selling_price: (selectedProduct.inches && selectedProduct.inches.length > 0) 
-                                    ? '' 
-                                    : selectedProduct.total_selling_price || '',
-    
-                total_stock_value: totalStockValue,
-            });
-        }
+        // Set the total stock value after it's calculated
+        productDataToSet.total_stock_value = totalStockValue;
+        
+        // Finally set the product data
+        setUpProductData(productDataToSet);
     };
-    
-    
 
     const deleteMode = (id) => {
         Swal.fire({
@@ -1098,6 +1177,13 @@ const Products = () => {
                                                 />
                                                 <input
                                                     type="text"
+                                                    value={group.color || ''}
+                                                    onChange={(e) => handleInchesChange(index, 'color', e.target.value)}
+                                                    placeholder="Color"
+                                                    className="mx-2 my-g-0 my-3"
+                                                />
+                                                <input
+                                                    type="text"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
@@ -1173,7 +1259,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Shops <span style={{color: '#7A0091'}}>*</span></label>
-                                        <ShopSelector shops={shops} onShopSelectionChange={handleShopSelectionChange2}/>
+                                        <ShopSelector shops={shops} onShopSelectionChange={handleShopSelectionChange2} initialSelectedShops={upProductData.shop_id}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -1304,6 +1390,13 @@ const Products = () => {
                                                 />
                                                 <input
                                                     type="text"
+                                                    value={group.color || ''}
+                                                    onChange={(e) => handleInchesChange2(index, 'color', e.target.value)}
+                                                    placeholder="Color"
+                                                    className="mx-2 my-g-0 my-3"
+                                                />
+                                                <input
+                                                    type="text"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
@@ -1368,7 +1461,7 @@ const Products = () => {
                 </div>
                 <div className="modal-body">
                     <div className="row">
-                        <div className="col-sm-12 col-md-12 col-lg-5">
+                        <div className="col-sm-12 col-md-12 col-lg-6">
                             <div
                                 className="box mb-3"
                                 style={{
@@ -1417,7 +1510,7 @@ const Products = () => {
                                 )}
                             </Carousel>
                         </div>
-                        <div className="col-sm-12 col-md-12 col-lg-7">
+                        <div className="col-sm-12 col-md-12 col-lg-6">
                             <h4 className='my-lg-0 my-4'>Basic Information</h4>
                             <div className="d-flex justify-content-between">
                                 <p>Product Name:</p>
@@ -1425,7 +1518,7 @@ const Products = () => {
                             </div>
                             <div className="d-flex justify-content-between">
                                 <p>Product Color:</p>
-                                <p>{productDetails.color}</p>
+                                <p>{productDetails.color || 'none'}</p>
                             </div>
                             <div className="d-flex justify-content-between">
                                 <p>Unit:</p>
@@ -1464,61 +1557,62 @@ const Products = () => {
                                 <p>{productDetails.assigned_shops.map((item) => item.shop_name).join(',')}</p>
                             </div>
 
-                            {productDetails.inches && productDetails.inches.length > 0 && (
-                                <div className="table-content">
-                                    <p className='my-3'>Inches Section</p>
-                                    <div className="table-container">
-                                        <table className="my-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Inches</th>
-                                                    <th>Buying Price</th>
-                                                    <th>Selling Price</th>
-                                                    <th>Stock</th>
-                                                    <th>Total</th>  {/* Added new column header */}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {productDetails.inches.map((item, index) => {
-                                                    // Calculate total for each row
-                                                    const buyingPrice = parseFloat(item.buying_price) || 0;
-                                                    const stock = parseInt(item.stock) || 0;
-                                                    const rowTotal = (buyingPrice * stock).toLocaleString('en-US', {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    });
-
-                                                    return (
-                                                        <tr key={index}>
-                                                            <td>{item.inche}</td>
-                                                            <td>{item.buying_price}</td>
-                                                            <td>{item.selling_price}</td>
-                                                            <td>{item.stock}</td>
-                                                            <td>{rowTotal}</td>  {/* Added new column with calculated total */}
-                                                        </tr>
-                                                    );
-                                                })}
-                                                {/* Optional: Add a footer row with grand total */}
-                                                <tr>
-                                                    <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold' }}>Grand Total:</td>
-                                                    <td style={{ fontWeight: 'bold' }}>
-                                                        {productDetails.inches.reduce((total, item) => {
-                                                            const buyingPrice = parseFloat(item.buying_price) || 0;
-                                                            const stock = parseInt(item.stock) || 0;
-                                                            return total + (buyingPrice * stock);
-                                                        }, 0).toLocaleString('en-US', {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        })}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
+                            
                         </div>
                     </div>
+                    {productDetails.inches && productDetails.inches.length > 0 && (
+                        <div className="table-content">
+                            <p className='my-3'>Inches Section</p>
+                            <div className="table-container">
+                                <table className="my-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Inches</th>
+                                            <th>Buying Price</th>
+                                            <th>Selling Price</th>
+                                            <th>Color</th>
+                                            <th>Stock</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {productDetails.inches.map((item, index) => {
+                                            const buyingPrice = parseFloat(item.buying_price) || 0;
+                                            const stock = parseInt(item.stock) || 0;
+                                            const rowTotal = (buyingPrice * stock).toLocaleString('en-US', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            });
+
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{item.inche}</td>
+                                                    <td>{item.buying_price}</td>
+                                                    <td>{item.selling_price}</td>
+                                                    <td>{item.color || '--------'}</td>
+                                                    <td>{item.stock}</td>
+                                                    <td>{rowTotal}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                        <tr>
+                                            <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>Grand Total:</td>
+                                            <td style={{ fontWeight: 'bold' }}>
+                                                {productDetails.inches.reduce((total, item) => {
+                                                    const buyingPrice = parseFloat(item.buying_price) || 0;
+                                                    const stock = parseInt(item.stock) || 0;
+                                                    return total + (buyingPrice * stock);
+                                                }, 0).toLocaleString('en-US', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
           </div>

@@ -153,9 +153,11 @@ const CreateInvoice = () => {
     setItems([...items, {
       productId: '',
       sellingPrice: '',
+      color: '',
       quantity: 1,
       inches: '',
-      amount: ''
+      amount: '',
+      stock: ''
     }]);
   };
 
@@ -193,18 +195,21 @@ const CreateInvoice = () => {
 
     if (field === 'productId') {
       const product = products.find(p => p.id === parseInt(value));
+      console.log(product)
       if (product) {
         const defaultPrice = getInitialPrice(product);
         newItems[index].sellingPrice = defaultPrice;
+        newItems[index].color = product.color;
         newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
         newItems[index].inches = '';
+        newItems[index].stock = product.total_product_stock;
 
         if (product.inches && product.inches.length > 0) {
             const defaultInch = product.inches[0].inche;
             newItems[index].inches = defaultInch;
-            // Update price based on the default inch
+            newItems[index].color = product.inches[0].color || product.color;
             handleInchChange(index, defaultInch, product);
-            return; // Return here since handleInchChange will call setItems
+            return;
         }
       }
     }
@@ -238,7 +243,6 @@ const CreateInvoice = () => {
     }
 };
 
-// Calculate subtotal from all items
 const calculateSubTotal = () => {
     return items.reduce((sum, item) => sum + (parseInt(item.amount) || 0), 0);
 };
@@ -278,7 +282,8 @@ const handleInvoice = async (e) => {
             product_name: product?.product_name || '',
             product_price: item.sellingPrice,
             quantity: item.quantity.toString(),
-            inches: item.inches || ''
+            inches: item.inches || '',
+            color: item.color || ''
         };
     });
 
@@ -308,7 +313,7 @@ const handleInvoice = async (e) => {
             customer_id: customerId,
             discount_name: discount.name,
             shop_id: getId,
-            products_ordered_array
+            products_ordered_array,
         };
 
         const response = await dispatch(createInvoice({token, invoiceData: data})).unwrap();
@@ -395,8 +400,9 @@ const previewInvoince = (e) => {
                 </div>
                 <div className="py-4">
                     <div className="row p-3" style={{background: '#FCF2FF'}}>
-                        <div className="col-sm-12 col-md-12 col-lg-4"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
+                        <div className="col-sm-12 col-md-12 col-lg-2"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
                         <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
+                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Color</b></p></div>
                         <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
                         <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
                         <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
@@ -414,11 +420,13 @@ const previewInvoince = (e) => {
                         <>
                           {items.map((item, index) => {
                             const filteredProducts = getFilteredProducts(searchTerms[index]);
+                            const selectedProduct = item.productId ? products.find(p => p.id === parseInt(item.productId)) : null;
+                            const hasInches = selectedProduct?.inches.length > 0;
                             
                             return (
                             <div key={index} className="card-in mb-4 py-3">
                                 <div className="row">
-                                    <div className="col-sm-12 col-md-12 col-lg-4">
+                                    <div className="col-sm-12 col-md-12 col-lg-2">
                                         <div className="input-group mb-2">
                                             <span className="input-group-text">
                                                 <Search size={20} />
@@ -453,9 +461,35 @@ const previewInvoince = (e) => {
                                             readOnly
                                         />
                                     </div>
+                                    
+
+                                    {item.productId && !hasInches && (
+                                        <div className="col-md-2">
+                                            <label>Color</label>
+                                            <input
+                                                type="text"
+                                                className=""
+                                                value={item.color || ''}
+                                                readOnly
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Display color from inches data if available */}
+                                    {hasInches && item.inches && (
+                                        <div className="col-md-2">
+                                            <label>Color</label>
+                                            <input
+                                                type="text"
+                                                className=""
+                                                value={selectedProduct.inches.find(i => i.inche === item.inches)?.color || ''}
+                                                readOnly
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="col-md-2">
-                                        <label className="form-label">Quantity</label>
+                                        <label className="form-label">Quantity:<span className='ml-3'>{item.stock}</span></label>
                                         <div className="input-group">
                                             <button
                                                 onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
@@ -482,7 +516,7 @@ const previewInvoince = (e) => {
                                         </div>
                                     </div>
 
-                                    {item.productId && products.find(p => p.id === parseInt(item.productId))?.inches.length > 0 && (
+                                    {hasInches && (
                                         <div className="col-md-2">
                                             <label className="form-label">Inches</label>
                                             <select
@@ -494,13 +528,11 @@ const previewInvoince = (e) => {
                                                 className="form-select"
                                             >
                                                 <option value="">Select inches</option>
-                                                {products
-                                                    .find(p => p.id === parseInt(item.productId))
-                                                    ?.inches.map(inch => (
-                                                        <option key={inch.inche} value={inch.inche}>
-                                                            {inch.inche}"
-                                                        </option>
-                                                    ))}
+                                                {selectedProduct.inches.map(inch => (
+                                                    <option key={inch.inche} value={inch.inche}>
+                                                        {inch.inche}"
+                                                    </option>
+                                                ))}
                                             </select>
                                         </div>
                                     )}
@@ -530,7 +562,7 @@ const previewInvoince = (e) => {
                                 </div>
                             </div>
                             );
-                          })}
+                        })};
                         </>
                         )}
                     </div>
@@ -712,9 +744,11 @@ const previewInvoince = (e) => {
                                         <thead className='th-d'>
                                         <tr className='m-0'>
                                             <th className="p-2 text-light">Sr. No</th>
-                                            <th className="p-2 text-light">Product Name </th>
+                                            <th className="p-2 text-light w-75">Product Name </th>
                                             <th className="p-2 text-light">Price</th>
                                             <th className="p-2 text-light">Quantity</th>
+                                            <th className="p-2 text-light">Inches</th>
+                                            <th className="p-2 text-light">Color</th>
                                             <th className="p-2 text-light">Amount</th>
                                         </tr>
                                         </thead>
@@ -722,20 +756,24 @@ const previewInvoince = (e) => {
                                         {ivDetails.products_ordered.map((product, index) => (
                                             <tr key={index}>
                                                 <td>{index + 1}</td>
-                                                <td>{product.product_name} - {product.inches} inches</td>
+                                                <td>{product.product_name}</td>
                                                 <td>₦{Number(product.product_price).toLocaleString()}</td>
                                                 <td>{product.quantity}</td>
+                                                <td>{product.inches}</td>
+                                                <td>{product.color}</td>
                                                 <td>₦{product.product_price * product.quantity}</td>
                                             </tr>
                                         ))}
                                         </tbody>
                                         <tfoot>
                                         <tr className="text-right">
-                                            <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
+                                            <td colSpan="5"></td>
+                                            <td className="p-2 font-semibold">Subtotal:</td>
                                             <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
                                         </tr>
                                         <tr className="text-right">
-                                            <td colSpan="4" className="p-2 font-semibold w-50">Total:</td>
+                                            <td colSpan="5"></td>
+                                            <td className="p-2 font-semibold w-50">Total:</td>
                                             <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
                                         </tr>
                                         </tfoot>

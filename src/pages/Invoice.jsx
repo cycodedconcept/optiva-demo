@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Pi, Up, Ca, Torder, Fil, Inv } from '../assets/images';
 import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice, validatePin, invoicePaymentStatus, cancelValidatePin } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPrint, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPrint, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -452,122 +452,104 @@ const Invoice = () => {
     //     };
     // }, []);
 
-    // const handlePrint = useReactToPrint({
-        // contentRef: invoiceRef,
-        // onAfterPrint: () => console.log("Invoice printed successfully!"),
-    // });
-
     const handlePrint = useReactToPrint({
         contentRef: invoiceRef,
         onAfterPrint: () => console.log("Invoice printed successfully!"),
-        pageStyle: `
-            @page {
-                size: auto;
-                margin: 20mm 10mm;
-            }
-            @media print {
-                body {
-                    margin: 0;
-                    padding: 0;
-                }
-                .invoice-container {
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    margin: 0 !important;
-                    padding: 10px !important;
-                }
-                .table-responsive {
-                    overflow-x: visible !important;
-                }
-                table {
-                    width: 100% !important;
-                }
-            }
-        `,
     });
+
+    
 
     const handleDownload = async () => {
         const metaViewport = document.querySelector('meta[name="viewport"]');
-    
+        
         // Backup the original content
         const originalContent = metaViewport?.getAttribute('content');
-    
+        
         // Update the content to disable responsiveness
         if (metaViewport) {
-          metaViewport.setAttribute('content', 'width=1000');
+            metaViewport.setAttribute('content', 'width=1000');
         }
-    
-        // return () => {
-        //   // Restore the original content when the component unmounts
-        //   if (metaViewport) {
-        //     metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-        //   }
-        // };
+        
         if (!invoiceRef.current) return;
         
         // Show loading alert
         Swal.fire({
-          title: 'Generating PDF',
-          html: 'Please wait while we prepare your invoice...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+            title: 'Generating PDF',
+            html: 'Please wait while we prepare your invoice...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
         
         try {
-          // Calculate optimal dimensions (A4 proportions)
-          const printWidth = 210; // A4 width in mm
-          const invoiceElement = invoiceRef.current;
-          const originalWidth = invoiceElement.offsetWidth;
-          const originalHeight = invoiceElement.offsetHeight;
-          const aspectRatio = originalHeight / originalWidth;
-          const printHeight = printWidth * aspectRatio;
-          
-          // Create canvas with higher scale for better quality
-          const canvas = await html2canvas(invoiceElement, {
-            scale: 3, // Higher scale for better quality
-            useCORS: true,
-            logging: false,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-          });
-          
-          // Create PDF with proper dimensions
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          const pdf = new jsPDF({
-            orientation: printHeight > printWidth ? 'portrait' : 'landscape',
-            unit: 'mm',
-            format: 'a4',
-          });
-          
-          // Add image to PDF with proper scaling
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-          
-          // Save the PDF
-          pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
-          
-          // Success message
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Your invoice has been downloaded successfully.',
-            confirmButtonColor: '#7A0091'
-          });
+            // Calculate optimal dimensions (A4 proportions)
+            const printWidth = 210; // A4 width in mm
+            const invoiceElement = invoiceRef.current;
+            const originalWidth = invoiceElement.offsetWidth;
+            const originalHeight = invoiceElement.offsetHeight;
+            const aspectRatio = originalHeight / originalWidth;
+            const printHeight = printWidth * aspectRatio;
+            
+            // Create canvas with higher scale for better quality
+            const canvas = await html2canvas(invoiceElement, {
+                scale: 3, // Higher scale for better quality
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+            });
+            
+            // Create PDF with proper dimensions
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const pdf = new jsPDF({
+                orientation: printHeight > printWidth ? 'portrait' : 'landscape',
+                unit: 'mm',
+                format: 'a4',
+            });
+            
+            // Add image to PDF with proper scaling
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            
+            // Save the PDF
+            pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
+            
+            // Success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Your invoice has been downloaded successfully.',
+                confirmButtonColor: '#7A0091'
+            });
+
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 3000)
+            
+            
         } catch (error) {
-          console.error("Error generating PDF:", error);
-          
-          // Error message
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Failed to download the invoice. Please try again.',
-            confirmButtonColor: '#7A0091'
-          });
+            console.error("Error generating PDF:", error);
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to download the invoice. Please try again.',
+                confirmButtonColor: '#7A0091'
+            });
+            
+            if (metaViewport) {
+                metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+            }
         }
     };
+    
+    const getup = () => {
+        setInDetails(true);
+    }
 
     const changeStatus = (payment, inum) => {
         if (payment === "Paid" || payment === "paid") {
@@ -1019,17 +1001,20 @@ const Invoice = () => {
         ) : (
         <>
           <div className='mt-5'>
-            <div className="text-right mb-4">
-                <button className='btn mr-3' style={{background: '#fff', color: '#7A0091'}} onClick={() => setInDetails(true)}>Back</button>
+            
+            <div className='mb-3 mb-lg-0'>
+              <button className='btn ml-lg-3 ml-0 no-print w-100 w-lg-0' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
+            </div>
+            <div className="text-lg-right text-center mb-4">
+                <button className='btn mr-lg-3 mr-0 w-100 w-lg-0' style={{background: '#fff', color: '#7A0091'}} onClick={getup}>Back</button>
                 <button 
-                        className='btn px-3 no-print' 
+                        className='btn px-3 no-print w-lg-0 w-100' 
                         style={{background: '#7A0091', color: '#F8F6F8'}}
                         onClick={handlePrint}
                     >
                         <FontAwesomeIcon icon={faPrint} className='mr-4'/>
                         Print
                 </button>
-                <button className='btn mr-3' style={{background: '#fff', color: '#7A0091'}} onClick={handleDownload}>Download</button>
             </div>
 
             {dataItem ? (
@@ -1088,16 +1073,17 @@ const Invoice = () => {
                             </div>
                         </div>
                         <hr />
-                        <div className="table content">
+                        <div className="table-content">
                             <div className="table-container">
-                                <table className="w-100 table-borderless bin">
+                                <table className="w-100 bin">
                                     <thead className='th-d'>
                                     <tr className='m-0'>
-                                        <th className="p-2 text-light">Sr. No</th>
-                                        <th className="p-2 text-light">Product Name </th>
+                                        <th className="p-2 text-light w-25">Sr. No</th>
+                                        <th className="p-2 text-light w-25">Product Name </th>
                                         <th className="p-2 text-light">Inches </th>
                                         <th className="p-2 text-light">Price</th>
                                         <th className="p-2 text-light">Quantity</th>
+                                        <th className="p-2 text-light" style={{width:'25%'}}>Color</th>
                                         <th className="p-2 text-light">Amount</th>
                                     </tr>
                                     </thead>
@@ -1106,20 +1092,23 @@ const Invoice = () => {
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td>{product.product_name}</td>
-                                            <td>{product.inches}</td>
+                                            <td>{product.inches || 'none'}</td>
                                             <td>₦{Number(product.product_price).toLocaleString()}</td>
                                             <td>{product.quantity}</td>
+                                            <td>{product.color}</td>
                                             <td>₦{Number(product.product_price * product.quantity).toLocaleString()}</td>
                                         </tr>
                                     ))}
                                     </tbody>
                                     <tfoot>
-                                    <tr className="text-right">
-                                        <td colSpan="4" className="p-2 font-semibold">Subtotal:</td>
+                                    <tr>
+                                        <td colSpan="5"></td>
+                                        <td className="p-2 font-semibold">Subtotal:</td>
                                         <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
                                     </tr>
-                                    <tr className="text-right">
-                                        <td colSpan="4" className="p-2 font-semibold w-50">Total:</td>
+                                    <tr>
+                                        <td colSpan="5"></td>
+                                        <td className="p-2 font-semibold">Total:</td>
                                         <td className="p-2 font-semibold">₦{Number(dataItem.total_amount).toLocaleString()}</td>
                                     </tr>
                                     </tfoot>
@@ -1215,6 +1204,8 @@ const Invoice = () => {
                                                     <th className="p-2 text-light">Product Name </th>
                                                     <th className="p-2 text-light">Price</th>
                                                     <th className="p-2 text-light">Quantity</th>
+                                                    <th className="p-2 text-light">Inches</th>
+                                                    <th className="p-2 text-light">Color</th>
                                                     <th className="p-2 text-light">Amount</th>
                                                 </tr>
                                                 </thead>
@@ -1222,9 +1213,11 @@ const Invoice = () => {
                                                 {initem.products_ordered.map((product, index) => (
                                                     <tr key={index}>
                                                         <td>{index + 1}</td>
-                                                        <td>{product.product_name} - {product.inches} inches</td>
+                                                        <td>{product.product_name}</td>
                                                         <td>₦{Number(product.product_price).toLocaleString()}</td>
                                                         <td>{product.quantity}</td>
+                                                        <td>{product.inches || "none"}</td>
+                                                        <td>{product.color}</td>
                                                         <td>₦{product.product_price * product.quantity}</td>
                                                     </tr>
                                                 ))}
