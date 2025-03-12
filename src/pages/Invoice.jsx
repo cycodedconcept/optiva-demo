@@ -459,6 +459,95 @@ const Invoice = () => {
 
     
 
+    // const handleDownload = async () => {
+    //     const metaViewport = document.querySelector('meta[name="viewport"]');
+        
+    //     // Backup the original content
+    //     const originalContent = metaViewport?.getAttribute('content');
+        
+    //     // Update the content to disable responsiveness
+    //     if (metaViewport) {
+    //         metaViewport.setAttribute('content', 'width=1000');
+    //     }
+        
+    //     if (!invoiceRef.current) return;
+        
+    //     // Show loading alert
+    //     Swal.fire({
+    //         title: 'Generating PDF',
+    //         html: 'Please wait while we prepare your invoice...',
+    //         allowOutsideClick: false,
+    //         didOpen: () => {
+    //             Swal.showLoading();
+    //         }
+    //     });
+        
+    //     try {
+    //         // Calculate optimal dimensions (A4 proportions)
+    //         const printWidth = 210; // A4 width in mm
+    //         const invoiceElement = invoiceRef.current;
+    //         const originalWidth = invoiceElement.offsetWidth;
+    //         const originalHeight = invoiceElement.offsetHeight;
+    //         const aspectRatio = originalHeight / originalWidth;
+    //         const printHeight = printWidth * aspectRatio;
+            
+    //         // Create canvas with higher scale for better quality
+    //         const canvas = await html2canvas(invoiceElement, {
+    //             scale: 3, // Higher scale for better quality
+    //             useCORS: true,
+    //             logging: false,
+    //             allowTaint: true,
+    //             backgroundColor: '#ffffff',
+    //         });
+            
+    //         // Create PDF with proper dimensions
+    //         const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    //         const pdf = new jsPDF({
+    //             orientation: printHeight > printWidth ? 'portrait' : 'landscape',
+    //             unit: 'mm',
+    //             format: 'a4',
+    //         });
+            
+    //         // Add image to PDF with proper scaling
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            
+    //         // Save the PDF
+    //         pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
+            
+    //         // Success message
+    //         Swal.fire({
+    //             icon: 'success',
+    //             title: 'Success!',
+    //             text: 'Your invoice has been downloaded successfully.',
+    //             confirmButtonColor: '#7A0091'
+    //         });
+
+    //         setTimeout(() => {
+    //             if (metaViewport) {
+    //                 metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+    //             }
+    //         }, 3000)
+            
+            
+    //     } catch (error) {
+    //         console.error("Error generating PDF:", error);
+            
+    //         Swal.fire({
+    //             icon: 'error',
+    //             title: 'Oops...',
+    //             text: 'Failed to download the invoice. Please try again.',
+    //             confirmButtonColor: '#7A0091'
+    //         });
+            
+    //         if (metaViewport) {
+    //             metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+    //         }
+    //     }
+    // };
+    
+
     const handleDownload = async () => {
         const metaViewport = document.querySelector('meta[name="viewport"]');
         
@@ -483,6 +572,12 @@ const Invoice = () => {
         });
         
         try {
+            // Detect iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            // Get device pixel ratio (important for iOS)
+            const dpr = window.devicePixelRatio || 1;
+            
             // Calculate optimal dimensions (A4 proportions)
             const printWidth = 210; // A4 width in mm
             const invoiceElement = invoiceRef.current;
@@ -491,17 +586,46 @@ const Invoice = () => {
             const aspectRatio = originalHeight / originalWidth;
             const printHeight = printWidth * aspectRatio;
             
-            // Create canvas with higher scale for better quality
+            // Prepare the element for iOS
+            if (isIOS) {
+                // Force any custom fonts to load completely
+                document.fonts && document.fonts.ready && await document.fonts.ready;
+                
+                // Add a small delay for iOS to ensure rendering is complete
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Create canvas with settings optimized for both Android and iOS
             const canvas = await html2canvas(invoiceElement, {
-                scale: 3, // Higher scale for better quality
+                scale: isIOS ? 2 : 3, // Lower scale for iOS to prevent memory issues
                 useCORS: true,
                 logging: false,
                 allowTaint: true,
                 backgroundColor: '#ffffff',
+                // Fix for iOS text rendering
+                letterRendering: isIOS,
+                // Force canvas size for iOS
+                width: originalWidth,
+                height: originalHeight,
+                // Improve text rendering
+                onclone: (clonedDoc) => {
+                    // Check if invoiceElement has an ID first
+                    if (isIOS && invoiceElement) {
+                        // Instead of trying to query by ID, we can use a different approach
+                        // to enhance text rendering in the cloned document
+                        const textElements = clonedDoc.querySelectorAll('p, span, h1, h2, h3, h4, h5, td, th');
+                        textElements.forEach(el => {
+                            el.style.webkitFontSmoothing = 'antialiased';
+                            el.style.textRendering = 'optimizeLegibility';
+                        });
+                    }
+                },
             });
             
             // Create PDF with proper dimensions
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const imgData = canvas.toDataURL('image/jpeg', isIOS ? 0.8 : 0.95); // Lower quality for iOS to reduce file size
+            
+            // Use appropriate orientation and format
             const pdf = new jsPDF({
                 orientation: printHeight > printWidth ? 'portrait' : 'landscape',
                 unit: 'mm',
@@ -511,10 +635,21 @@ const Invoice = () => {
             // Add image to PDF with proper scaling
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             
-            // Save the PDF
-            pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
+            // For iOS, use a slightly different approach
+            if (isIOS) {
+                // Calculate margins to center content if needed
+                const margin = 0; // or calculate based on content
+                pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth - (margin * 2), pdfHeight - (margin * 2));
+            } else {
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            }
+            
+            // Ensure invoice number is safe for filenames
+            const safeInvoiceNumber = dataItem.invoice_number.toString().replace(/[^\w-]/g, '');
+            
+            // Save the PDF with a filename that works on iOS
+            pdf.save(`Invoice-${safeInvoiceNumber}.pdf`);
             
             // Success message
             Swal.fire({
@@ -523,14 +658,6 @@ const Invoice = () => {
                 text: 'Your invoice has been downloaded successfully.',
                 confirmButtonColor: '#7A0091'
             });
-
-            setTimeout(() => {
-                if (metaViewport) {
-                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-                }
-            }, 3000)
-            
-            
         } catch (error) {
             console.error("Error generating PDF:", error);
             
@@ -540,10 +667,13 @@ const Invoice = () => {
                 text: 'Failed to download the invoice. Please try again.',
                 confirmButtonColor: '#7A0091'
             });
-            
-            if (metaViewport) {
-                metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-            }
+        } finally {
+            // Always reset the viewport, using a timeout to ensure rendering is complete
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 1000);
         }
     };
     
