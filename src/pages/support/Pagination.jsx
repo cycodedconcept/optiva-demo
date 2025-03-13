@@ -35,12 +35,12 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
         onPageChange(Number(page));
     };
     
-    const perPageOptions = [10, 20, 50, 100];
+    // const perPageOptions = [10, 20, 50, 100];
 
     return (
         <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 p-3 bg-white">
           {/* Items per page selector */}
-          <div className="d-flex align-items-center gap-2">
+          {/* <div className="d-flex align-items-center gap-2">
             <span className="text-secondary">Show</span>
             <select
               value={perPage}
@@ -55,7 +55,7 @@ const Pagination = ({ currentPage, totalPages, perPage, total, onPageChange, onP
               ))}
             </select>
             <span className="text-secondary ml-3">entries</span>
-          </div>
+          </div> */}
     
           
           <div className="text-secondary">

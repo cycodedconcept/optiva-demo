@@ -435,97 +435,9 @@ const Invoice = () => {
     const handlePrint = useReactToPrint({
         contentRef: invoiceRef,
         onAfterPrint: () => console.log("Invoice printed successfully!"),
+        documentTitle: dataItem ? `Invoice-${dataItem.invoice_number}` : 'Invoice'
     });
 
-    
-
-    // const handleDownload = async () => {
-    //     const metaViewport = document.querySelector('meta[name="viewport"]');
-        
-    //     // Backup the original content
-    //     const originalContent = metaViewport?.getAttribute('content');
-        
-    //     // Update the content to disable responsiveness
-    //     if (metaViewport) {
-    //         metaViewport.setAttribute('content', 'width=1000');
-    //     }
-        
-    //     if (!invoiceRef.current) return;
-        
-    //     // Show loading alert
-    //     Swal.fire({
-    //         title: 'Generating PDF',
-    //         html: 'Please wait while we prepare your invoice...',
-    //         allowOutsideClick: false,
-    //         didOpen: () => {
-    //             Swal.showLoading();
-    //         }
-    //     });
-        
-    //     try {
-    //         // Calculate optimal dimensions (A4 proportions)
-    //         const printWidth = 210; // A4 width in mm
-    //         const invoiceElement = invoiceRef.current;
-    //         const originalWidth = invoiceElement.offsetWidth;
-    //         const originalHeight = invoiceElement.offsetHeight;
-    //         const aspectRatio = originalHeight / originalWidth;
-    //         const printHeight = printWidth * aspectRatio;
-            
-    //         // Create canvas with higher scale for better quality
-    //         const canvas = await html2canvas(invoiceElement, {
-    //             scale: 3, // Higher scale for better quality
-    //             useCORS: true,
-    //             logging: false,
-    //             allowTaint: true,
-    //             backgroundColor: '#ffffff',
-    //         });
-            
-    //         // Create PDF with proper dimensions
-    //         const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    //         const pdf = new jsPDF({
-    //             orientation: printHeight > printWidth ? 'portrait' : 'landscape',
-    //             unit: 'mm',
-    //             format: 'a4',
-    //         });
-            
-    //         // Add image to PDF with proper scaling
-    //         const pdfWidth = pdf.internal.pageSize.getWidth();
-    //         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-            
-    //         // Save the PDF
-    //         pdf.save(`Invoice-${dataItem.invoice_number}.pdf`);
-            
-    //         // Success message
-    //         Swal.fire({
-    //             icon: 'success',
-    //             title: 'Success!',
-    //             text: 'Your invoice has been downloaded successfully.',
-    //             confirmButtonColor: '#7A0091'
-    //         });
-
-    //         setTimeout(() => {
-    //             if (metaViewport) {
-    //                 metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-    //             }
-    //         }, 3000)
-            
-            
-    //     } catch (error) {
-    //         console.error("Error generating PDF:", error);
-            
-    //         Swal.fire({
-    //             icon: 'error',
-    //             title: 'Oops...',
-    //             text: 'Failed to download the invoice. Please try again.',
-    //             confirmButtonColor: '#7A0091'
-    //         });
-            
-    //         if (metaViewport) {
-    //             metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-    //         }
-    //     }
-    // };
     
 
     const handleDownload = async () => {

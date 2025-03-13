@@ -380,7 +380,10 @@ const dlinvoice = () => {
 const handlePrint = useReactToPrint({
     contentRef: invoiceRef,
     onAfterPrint: () => console.log("Invoice printed successfully!"),
+    documentTitle: shad ? `Invoice-${shad.invoice_number}` : 'Invoice',
+    
 });
+
 
 const handleDownload = async () => {
     const metaViewport = document.querySelector('meta[name="viewport"]');
@@ -436,9 +439,7 @@ const handleDownload = async () => {
             logging: false,
             allowTaint: true,
             backgroundColor: '#ffffff',
-            // Fix for iOS text rendering
             letterRendering: isIOS,
-            // Force canvas size for iOS
             width: originalWidth,
             height: originalHeight,
             // Improve text rendering
@@ -844,7 +845,7 @@ const handleDownload = async () => {
                             {ivDetails ? (
                                 <>
                                 <div style={{background: '#fff'}} className='p-4'>
-                                        <div className="top-section d-flex justify-content-between">
+                                        <div className="top-section d-lg-flex d-block justify-content-between">
                                         <div>
                                             <img src={Inv} alt="img" className='mb-3'/>
                                             <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>

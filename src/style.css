@@ -623,6 +623,29 @@ input, select, textarea {
     font-size: 14px;
 }
 
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    appearance: none;
+    background-color: white;
+    border: 2px solid #7A0091;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Custom checkmark */
+input[type="checkbox"]:checked::before {
+    content: "✔"; 
+    font-size: 16px; 
+    color: black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
 .head-mode {
     display: flex;
 }

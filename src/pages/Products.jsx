@@ -1029,7 +1029,7 @@ const Products = () => {
       {modalVisible ? (
           <>
             <div className="modal-overlay">
-                <div className="modal-content2">
+                <div className="modal-content2 mt-lg-0 mt-5">
                     <div className="head-mode">
                         <h6 style={{color: '#7A0091'}}>Add New Product</h6>
                         <button className="modal-close" onClick={hideModal}>
@@ -1239,7 +1239,7 @@ const Products = () => {
       {upModal ? (
           <>
             <div className="modal-overlay">
-                <div className="modal-content2">
+                <div className="modal-content2 mt-lg-0 mt-5">
                     <div className="head-mode">
                         <h6 style={{color: '#7A0091'}}>Update Product</h6>
                         <button className="modal-close" onClick={hideModal}>
@@ -1564,7 +1564,7 @@ const Products = () => {
                         <div className="table-content">
                             <p className='my-3'>Inches Section</p>
                             <div className="table-container">
-                                <table className="my-table">
+                                <table className="my-table w-100">
                                     <thead>
                                         <tr>
                                             <th>Inches</th>
@@ -1572,7 +1572,7 @@ const Products = () => {
                                             <th>Selling Price</th>
                                             <th>Color</th>
                                             <th>Stock</th>
-                                            <th>Total</th>
+                                            <th style={{width: '20%'}}>Total Stock Value</th>
                                         </tr>
                                     </thead>
                                     <tbody>
