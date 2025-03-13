@@ -646,6 +646,7 @@ input[type="checkbox"]:checked::before {
 }
 
 
+
 .head-mode {
     display: flex;
 }
@@ -768,6 +769,7 @@ input[type="checkbox"]:checked::before {
     .user-details {
         gap: 42px;
     }
+
 }
 
 .nav-toggle {

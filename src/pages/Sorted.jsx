@@ -223,7 +223,7 @@ const Sorted = () => {
         {loading ? (
            <div>Loading...</div>
         ) : error ? (
-          <div>Error: {error?.message || 'Something went erong'}</div> 
+          <div>Error: {error?.message || 'No records available'}</div> 
         ) : (
             <>
               <div className="lp px-0 py-0 px-lg-1">

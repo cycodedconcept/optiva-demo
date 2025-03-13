@@ -190,36 +190,105 @@ const CreateInvoice = () => {
     }
   };
 
-  const handleInchChange = (index, value, product) => {
-    const selectedInch = product.inches.find(i => i.inche.toString() === value.toString());
-    if (selectedInch) {
-      const newItems = [...items];
-      newItems[index].inches = value;
-      newItems[index].sellingPrice = selectedInch.selling_price;
-      newItems[index].amount = (parseInt(selectedInch.selling_price) * parseInt(newItems[index].quantity || 1)).toString();
-      setItems(newItems);
-    }
-  };
 
-  const updateItem = (index, field, value) => {
+const handleInchChange = (index, inchValue, product) => {
+    const newItems = [...items];
+    newItems[index].inches = inchValue;
+    
+    // Find the selected inch data
+    if (product && product.inches && product.inches.length > 0) {
+        const inchData = product.inches.find(inch => inch.inche === inchValue);
+        
+        if (inchData) {
+            // Update price based on the selected inch
+            newItems[index].sellingPrice = inchData.selling_price || getInitialPrice(product, inchValue);
+            
+            // Update color if available in the inch data
+            if (inchData.color) {
+                newItems[index].color = inchData.color;
+            }
+            
+            // Update stock from inch data if available, otherwise use main stock
+            if (inchData.stock !== undefined) {
+                newItems[index].stock = inchData.stock;
+            } else {
+                newItems[index].stock = product.total_product_stock;
+            }
+            
+            // Recalculate amount
+            newItems[index].amount = (
+                parseInt(newItems[index].sellingPrice || 0) * parseInt(newItems[index].quantity || 0)
+            ).toString();
+        }
+    }
+    
+    setItems(newItems);
+};
+
+//   const updateItem = (index, field, value) => {
+//     const newItems = [...items];
+//     newItems[index][field] = value;
+
+//     if (field === 'productId') {
+//       const product = products.find(p => p.id === parseInt(value));
+//       console.log(product)
+//       if (product) {
+//         const defaultPrice = getInitialPrice(product);
+//         newItems[index].sellingPrice = defaultPrice;
+//         newItems[index].color = product.color;
+//         newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
+//         newItems[index].inches = '';
+//         newItems[index].stock = product.total_product_stock;
+
+//         if (product.inches && product.inches.length > 0) {
+//             const defaultInch = product.inches[0].inche;
+//             newItems[index].inches = defaultInch;
+//             newItems[index].color = product.inches[0].color || product.color;
+//             handleInchChange(index, defaultInch, product);
+//             return;
+//         }
+//       }
+//     }
+
+//     if (field === 'quantity') {
+//       newItems[index].amount = (
+//         parseInt(newItems[index].sellingPrice || 0) * parseInt(value || 0)
+//       ).toString();
+//     }
+
+//     setItems(newItems);
+//   };
+
+
+const updateItem = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
 
     if (field === 'productId') {
       const product = products.find(p => p.id === parseInt(value));
-      console.log(product)
+      console.log(product);
+      
       if (product) {
         const defaultPrice = getInitialPrice(product);
         newItems[index].sellingPrice = defaultPrice;
         newItems[index].color = product.color;
         newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
-        newItems[index].inches = '';
+        
+        // Default stock is the main product stock
         newItems[index].stock = product.total_product_stock;
 
+        // If the product has inches data
         if (product.inches && product.inches.length > 0) {
             const defaultInch = product.inches[0].inche;
             newItems[index].inches = defaultInch;
             newItems[index].color = product.inches[0].color || product.color;
+            
+            // Get stock from inches if available
+            const inchData = product.inches.find(inch => inch.inche === defaultInch);
+            if (inchData && inchData.stock !== undefined) {
+                newItems[index].stock = inchData.stock;
+            }
+            
             handleInchChange(index, defaultInch, product);
             return;
         }
@@ -233,7 +302,8 @@ const CreateInvoice = () => {
     }
 
     setItems(newItems);
-  };
+};
+
 
   const handleSearch = (index, searchTerm) => {
     setSearchTerms(prev => ({
@@ -557,13 +627,17 @@ const handleDownload = async () => {
                     </div>
                 </div>
                 <div className="py-4">
-                    <div className="row p-3" style={{background: '#FCF2FF'}}>
-                        <div className="col-sm-12 col-md-12 col-lg-2"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
-                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
-                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Color</b></p></div>
-                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
-                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
-                        <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
+                    <div className="d-none d-md-flex p-3" style={{background: '#FCF2FF'}}>
+                        <div><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
+                        <div><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
+                        <div><p style={{color: '#2E2F41'}}><b>Color</b></p></div>
+                        <div><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
+                        <div><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
+                        <div><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
+                    </div>
+
+                    <div style={{background: '#FCF2FF'}} className='text-center d-md-none p-2'>
+                        <p className='m-0'><b>Add product section below</b></p>
                     </div>
 
                     <div style={{background: '#FEFBFF'}} className='py-5'>

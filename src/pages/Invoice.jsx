@@ -177,6 +177,7 @@ const Invoice = () => {
         setItems([...items, {
           productId: '',
           sellingPrice: '',
+          color: '',
           quantity: 1,
           inches: '',
           amount: ''
@@ -209,16 +210,39 @@ const Invoice = () => {
         });
       }, []);
     
-      const handleInchChange = (index, value, product) => {
-        const selectedInch = product.inches.find(i => i.inche.toString() === value.toString());
-        if (selectedInch) {
-          const newItems = [...items];
-          newItems[index].inches = value;
-          newItems[index].sellingPrice = selectedInch.selling_price;
-          newItems[index].amount = (parseInt(selectedInch.selling_price) * parseInt(newItems[index].quantity || 1)).toString();
-          setItems(newItems);
+      const handleInchChange = (index, inchValue, product) => {
+        const newItems = [...items];
+        newItems[index].inches = inchValue;
+        
+        // Find the selected inch data
+        if (product && product.inches && product.inches.length > 0) {
+            const inchData = product.inches.find(inch => inch.inche === inchValue);
+            
+            if (inchData) {
+                // Update price based on the selected inch
+                newItems[index].sellingPrice = inchData.selling_price || getInitialPrice(product, inchValue);
+                
+                // Update color if available in the inch data
+                if (inchData.color) {
+                    newItems[index].color = inchData.color;
+                }
+                
+                // Update stock from inch data if available, otherwise use main stock
+                if (inchData.stock !== undefined) {
+                    newItems[index].stock = inchData.stock;
+                } else {
+                    newItems[index].stock = product.total_product_stock;
+                }
+                
+                // Recalculate amount
+                newItems[index].amount = (
+                    parseInt(newItems[index].sellingPrice || 0) * parseInt(newItems[index].quantity || 0)
+                ).toString();
+            }
         }
-      };
+        
+        setItems(newItems);
+    };
     
     //   const updateItem = (index, field, value) => {
     //     const newItems = [...items];
@@ -260,12 +284,22 @@ const Invoice = () => {
           if (product) {
             const defaultPrice = getInitialPrice(product);
             newItems[index].sellingPrice = defaultPrice;
+            newItems[index].color = product.color;
             newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
             newItems[index].inches = '';
+
+            newItems[index].stock = product.total_product_stock;
     
             if (product.inches && product.inches.length > 0) {
               const defaultInch = product.inches[0].inche;
               newItems[index].inches = defaultInch;
+              newItems[index].color = product.inches[0].color || product.color;
+
+              const inchData = product.inches.find(inch => inch.inche === defaultInch);
+              if (inchData && inchData.stock !== undefined) {
+                newItems[index].stock = inchData.stock;
+              }
+
               handleInchChange(index, defaultInch, product);
               return;
             }
@@ -278,9 +312,7 @@ const Invoice = () => {
         }
     
         setItems(newItems);
-      };
-      
-    //   new
+    };
     
     
     const handleSearch = (index, searchTerm) => {
@@ -342,7 +374,8 @@ const Invoice = () => {
                 product_name: product?.product_name || '',
                 product_price: item.sellingPrice,
                 quantity: item.quantity.toString(),
-                inches: item.inches || ''
+                inches: item.inches || '',
+                color: item.color || ''
             };
         });
 
@@ -745,11 +778,11 @@ const Invoice = () => {
                             </thead>
                             <tbody>
                                 {invoice?.length > 0 ? (
-                                    invoice.map((item, index) => (
+                                    invoice?.map((item, index) => (
                                         <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showDetails(item.invoice_number)}>
                                             <td>{index + 1}</td>
                                             <td>{item.invoice_number}</td>
-                                            <td>{item.customer_info.name}</td>
+                                            <td>{item.customer_info ? item.customer_info.name : "N/A"}</td>
                                             <td>{item.date}</td>
                                             <td>{item.payment_method}</td>
                                             <td>₦{Number(item.total_amount).toLocaleString()}</td>
@@ -823,22 +856,29 @@ const Invoice = () => {
                                             </div>
                                         </div>
                                         <div className="py-4">
-                                            <div className="row p-3" style={{background: '#FCF2FF'}}>
-                                                <div className="col-sm-12 col-md-12 col-lg-4"><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
-                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
-                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
-                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
-                                                <div className="col-md-2"><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
+                                            <div className="d-none d-md-flex justify-content-between p-3" style={{background: '#FCF2FF'}}>
+                                                <div><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
+                                                <div><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
+                                                <div><p style={{color: '#2E2F41'}}><b>color</b></p></div>
+                                                <div><p style={{color: '#2E2F41'}}><b>Quantity</b></p></div>
+                                                <div><p style={{color: '#2E2F41'}}><b>Inches</b></p></div>
+                                                <div><p style={{color: '#2E2F41'}}><b>Amount</b></p></div>
+                                            </div>
+
+                                            <div style={{background: '#FCF2FF'}} className='text-center d-md-none p-2'>
+                                              <p className='m-0'><b>Add product section below</b></p>
                                             </div>
 
                                             <div style={{background: '#FEFBFF'}} className='py-5'>
                                                 {items.map((item, index) => {
                                                     const filteredProducts = getFilteredProducts(searchTerms[index]);
+                                                    const selectedProduct = item.productId ? products.find(p => p.id === parseInt(item.productId)) : null;
+                                                    const hasInches = selectedProduct?.inches.length > 0;
                                                         
                                                     return (
                                                     <div key={index} className="card-in mb-4 py-1">
                                                         <div className="row">
-                                                            <div className="col-sm-12 col-md-12 col-lg-3">
+                                                            <div className="col-sm-12 col-md-12 col-lg-3 mb-3 ">
                                                                 <div className="input-group mb-2">
                                                                     <span className="input-group-text">
                                                                         <Search size={20} />
@@ -865,7 +905,7 @@ const Invoice = () => {
                                                                 </select>
                                                             </div>
 
-                                                            <div className="col-sm-12 col-md-12 col-lg-2">
+                                                            <div className="col-sm-12 col-md-12 col-lg-2 mb-3">
                                                                 <label className="form-label">Selling Price</label>
                                                                 <input
                                                                     type="number"
@@ -874,8 +914,33 @@ const Invoice = () => {
                                                                 />
                                                             </div>
 
-                                                            <div className="col-sm-12 col-md-12 col-lg-3">
-                                                                <label className="form-label">Quantity</label>
+                                                            {item.productId && !hasInches && (
+                                                                <div className="col-md-2 mb-3">
+                                                                    <label>Color</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className=""
+                                                                        value={item.color || ''}
+                                                                        readOnly
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            {/* Display color from inches data if available */}
+                                                            {hasInches && item.inches && (
+                                                                <div className="col-md-2 mb-3">
+                                                                    <label>Color</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className=""
+                                                                        value={selectedProduct.inches.find(i => i.inche === item.inches)?.color || ''}
+                                                                        readOnly
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            <div className="col-sm-12 col-md-12 col-lg-3 mb-3">
+                                                                <label className="form-label">Quantity:<span className='ml-3'>{item.quantity}</span></label>
                                                                 <div className="input-group">
                                                                     <button
                                                                         onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
@@ -903,7 +968,7 @@ const Invoice = () => {
                                                             </div>
 
                                                             {item.productId && products.find(p => p.id === parseInt(item.productId))?.inches.length > 0 && (
-                                                                <div className="col-sm-12 col-md-12 col-lg-2">
+                                                                <div className="col-sm-12 col-md-12 col-lg-2 mb-3">
                                                                     <label className="form-label">Inches</label>
                                                                     <select
                                                                         value={item.inches}
@@ -969,8 +1034,8 @@ const Invoice = () => {
                                                         <p>Sub Total:</p>
                                                         <p><b>₦{calculateSubTotal().toLocaleString()}</b></p>
                                                     </div>
-                                                    <div className='d-flex justify-content-between'>
-                                                        <p className='mt-3'>Add Discount (%):</p>
+                                                    <div className='d-lg-flex d-block justify-content-between'>
+                                                        <p className='mt-3'>Add Discount(%):</p>
                                                         <div className="form-group">
 
                                                         <select 
@@ -1006,7 +1071,7 @@ const Invoice = () => {
                                                         <div className="spinner-border spinner-border-sm text-light" role="status">
                                                             <span className="sr-only"></span>
                                                         </div>
-                                                        <span>Creating Invoice... </span>
+                                                        <span>Updating Invoice... </span>
                                                         </>
                                                     ) : (
                                                         'Save and Continue'
@@ -1208,15 +1273,15 @@ const Invoice = () => {
                                         <div className="col-sm-12 col-md-12 offset-lg-1 col-lg-5">
                                             <div className='d-flex'>
                                                 <p className='mr-3'>Customer Name: </p>
-                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.customer_info.name}</p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{initem.customer_info ? initem.customer_info.name : "N/A"}</p>
                                                 </div>
                                                 <div className='d-flex'>
                                                 <p className='mr-3'>Customer Email: </p>
-                                                <p className='m-0 p-0' style={{color: '#271F29', fontWeight: '900'}}>{initem.customer_info.email}</p>
+                                                <p className='m-0 p-0' style={{color: '#271F29', fontWeight: '900'}}>{initem.customer_info ? initem.customer_info.email : "N/A"}</p>
                                                 </div>
                                                 <div className='d-flex'>
                                                 <p className='mr-3'>Customer Phone Number: </p>
-                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{(initem.customer_info.phone_number)}</p>
+                                                <p style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{(initem.customer_info ? initem.customer_info.phone_number : "N/A")}</p>
                                             </div>
                                         </div>
                                     </div>
