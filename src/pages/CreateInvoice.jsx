@@ -3,12 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCustomers, addCustomers } from '../features/customerSlice';
 import { getProduct, createInvoice, getDiscount } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEyeSlash, faFilePdf, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import { Def, Inv } from '../assets/images';
 import Swal from 'sweetalert2';
+import { useReactToPrint } from "react-to-print";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable'
 
 const CreateInvoice = () => {
+    const invoiceRef = useRef(null);
     function generateUniqueId() {
         const prefix = "HP";
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -37,6 +42,13 @@ const CreateInvoice = () => {
   const [customerId, setCustomerId] = useState('');
   const [inDetails, setInDetails] = useState(false);
   const [ivDetails, setIvDetails] = useState(null);
+  const [view, setView] = useState(true);
+  const [shad, setShad] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredCustomers = customers.filter((item) => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
@@ -332,6 +344,8 @@ const handleInvoice = async (e) => {
             setDiscount({ name: '', value: 0 });
             setSpro(true);
             setInvoiceNumber(uniqueIdRef.current);
+            setView(false);
+            dlinvoice();
 
         }
         else {
@@ -357,12 +371,151 @@ const previewInvoince = (e) => {
     const getDetails = localStorage.getItem("info");
     setIvDetails(JSON.parse(getDetails));
 }
+
+const dlinvoice = () => {
+    const getDetails = localStorage.getItem("info");
+    setShad(JSON.parse(getDetails));
+}
+
+const handlePrint = useReactToPrint({
+    contentRef: invoiceRef,
+    onAfterPrint: () => console.log("Invoice printed successfully!"),
+});
+
+const handleDownload = async () => {
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    
+    // Backup the original content
+    const originalContent = metaViewport?.getAttribute('content');
+    
+    // Update the content to disable responsiveness
+    if (metaViewport) {
+        metaViewport.setAttribute('content', 'width=1000');
+    }
+    
+    if (!invoiceRef.current) return;
+    
+    // Show loading alert
+    Swal.fire({
+        title: 'Generating PDF',
+        html: 'Please wait while we prepare your invoice...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        // Get device pixel ratio (important for iOS)
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Calculate optimal dimensions (A4 proportions)
+        const printWidth = 210; // A4 width in mm
+        const invoiceElement = invoiceRef.current;
+        const originalWidth = invoiceElement.offsetWidth;
+        const originalHeight = invoiceElement.offsetHeight;
+        const aspectRatio = originalHeight / originalWidth;
+        const printHeight = printWidth * aspectRatio;
+        
+        // Prepare the element for iOS
+        if (isIOS) {
+            // Force any custom fonts to load completely
+            document.fonts && document.fonts.ready && await document.fonts.ready;
+            
+            // Add a small delay for iOS to ensure rendering is complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Create canvas with settings optimized for both Android and iOS
+        const canvas = await html2canvas(invoiceElement, {
+            scale: isIOS ? 2 : 3, // Lower scale for iOS to prevent memory issues
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            // Fix for iOS text rendering
+            letterRendering: isIOS,
+            // Force canvas size for iOS
+            width: originalWidth,
+            height: originalHeight,
+            // Improve text rendering
+            onclone: (clonedDoc) => {
+                // Check if invoiceElement has an ID first
+                if (isIOS && invoiceElement) {
+                    // Instead of trying to query by ID, we can use a different approach
+                    // to enhance text rendering in the cloned document
+                    const textElements = clonedDoc.querySelectorAll('p, span, h1, h2, h3, h4, h5, td, th');
+                    textElements.forEach(el => {
+                        el.style.webkitFontSmoothing = 'antialiased';
+                        el.style.textRendering = 'optimizeLegibility';
+                    });
+                }
+            },
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', isIOS ? 0.8 : 0.95); // Lower quality for iOS to reduce file size
+        
+        const pdf = new jsPDF({
+            orientation: printHeight > printWidth ? 'portrait' : 'landscape',
+            unit: 'mm',
+            format: 'a4',
+        });
+        
+        // Add image to PDF with proper scaling
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        // For iOS, use a slightly different approach
+        if (isIOS) {
+            // Calculate margins to center content if needed
+            const margin = 0; // or calculate based on content
+            pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth - (margin * 2), pdfHeight - (margin * 2));
+        } else {
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+        
+        // Ensure invoice number is safe for filenames
+        const safeInvoiceNumber = shad.invoice_number.toString().replace(/[^\w-]/g, '');
+        
+        // Save the PDF with a filename that works on iOS
+        pdf.save(`Invoice-${safeInvoiceNumber}.pdf`);
+        
+        // Success message
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Your invoice has been downloaded successfully.',
+            confirmButtonColor: '#7A0091'
+        });
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Failed to download the invoice. Please try again.',
+            confirmButtonColor: '#7A0091'
+        });
+    } finally {
+        // Always reset the viewport, using a timeout to ensure rendering is complete
+        setTimeout(() => {
+            if (metaViewport) {
+                metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+            }
+        }, 1000);
+    }
+};
   
 
   return (
     <>
 
-        <div className="mt-lg-5 mt-3 in-bg py-5">
+    {view ? (
+        <>
+           <div className="mt-lg-5 mt-3 in-bg py-5">
             <form onSubmit={handleInvoice}>
                 <div className="row">
                     <div className="col-sm-12 col-md-12 col-lg-6">
@@ -382,11 +535,15 @@ const previewInvoince = (e) => {
                         </div>
                     </div>
                     <div className="col-sm-12 col-md-12 col-lg-6">
+                        <div className="form-group">
+                          <label htmlFor="exampleInputEmail1">Search Customer <span style={{color: '#7A0091'}}>*</span></label>
+                          <input type="text" placeholder='Search customers' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                        </div>
                         <div className="form-group mb-4">
                             <label htmlFor="exampleInputEmail1">Select Customer <span style={{color: '#7A0091'}}>*</span></label>
                             <select value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
                                 <option>--select customer--</option>
-                                {customers.map((item) =>
+                                {filteredCustomers.map((item) =>
                                   <option key={item.id} value={item.id}>{item.name}</option> 
                                 )}
                             </select>
@@ -629,166 +786,296 @@ const previewInvoince = (e) => {
                     </button>
                 </div>
             </form>
-        </div>
+           </div>
 
-        {cmodal ? (
-            <>
+            {cmodal ? (
+                <>
+                    <div className="modal-overlay">
+                        <div className="modal-content2">
+                        <div className="head-mode">
+                            <h6 style={{color: '#7A0091'}}>Add Customer Info</h6>
+                            <button className="modal-close" onClick={hideModal}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <form className='mt-5' onSubmit={handleSubmit}>
+                            <div className="form-group mb-3">
+                                <label htmlFor="exampleInputEmail1" className='mb-2'>Customer Name <span style={{color: '#ED4343'}}>*</span></label>
+                                <input type="text" className=" lo-input" name='customer_name' value={cData.customer_name} onChange={handleChange}/>
+                            </div>
+                            <div className="form-group mb-3">
+                                <label htmlFor="exampleInputEmail1" className='mb-2'>Email <span style={{color: '#ED4343'}}>*</span></label>
+                                <input type="email" className="lo-input" name='customer_email' value={cData.customer_email} onChange={handleChange}/>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="exampleInputPassword1" className='mb-2'>Phone Number <span style={{color: '#ED4343'}}>*</span></label>
+                                <input type="text" className="lo-input" name='customer_phone_number' value={cData.customer_phone_number} onChange={handleChange}/>
+                            </div>
+                            <div className="text-right">
+                                <button className='d-btn mr-2' onClick={hideModal}>Discard</button>
+                                <button type="submit" className='in-btn'>
+                                {loading ? (
+                                    <>
+                                    <div className="spinner-border spinner-border-sm text-light" role="status">
+                                        <span className="sr-only"></span>
+                                    </div>
+                                    <span>Adding Info... </span>
+                                    </>
+                                ) : (
+                                    'Add Info'
+                                )}
+                                </button>
+                            </div>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+                </>
+            ) : ('')}
+
+            {inDetails ? (
+                <>
                 <div className="modal-overlay">
                     <div className="modal-content2">
-                    <div className="head-mode">
-                        <h6 style={{color: '#7A0091'}}>Add Customer Info</h6>
-                        <button className="modal-close" onClick={hideModal}>&times;</button>
-                    </div>
-                    <div className="modal-body">
-                        <form className='mt-5' onSubmit={handleSubmit}>
-                        <div className="form-group mb-3">
-                            <label htmlFor="exampleInputEmail1" className='mb-2'>Customer Name <span style={{color: '#ED4343'}}>*</span></label>
-                            <input type="text" className=" lo-input" name='customer_name' value={cData.customer_name} onChange={handleChange}/>
+                        <div className="head-mode">
+                            <h6 style={{color: '#7A0091'}}>Preview Invoice</h6>
+                            <button className="modal-close" onClick={hideModal}>&times;</button>
                         </div>
-                        <div className="form-group mb-3">
-                            <label htmlFor="exampleInputEmail1" className='mb-2'>Email <span style={{color: '#ED4343'}}>*</span></label>
-                            <input type="email" className="lo-input" name='customer_email' value={cData.customer_email} onChange={handleChange}/>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="exampleInputPassword1" className='mb-2'>Phone Number <span style={{color: '#ED4343'}}>*</span></label>
-                            <input type="text" className="lo-input" name='customer_phone_number' value={cData.customer_phone_number} onChange={handleChange}/>
-                        </div>
-                        <div className="text-right">
-                            <button className='d-btn mr-2' onClick={hideModal}>Discard</button>
-                            <button type="submit" className='in-btn'>
-                            {loading ? (
+                        <div className="modal-body">
+                            {ivDetails ? (
                                 <>
-                                <div className="spinner-border spinner-border-sm text-light" role="status">
-                                    <span className="sr-only"></span>
-                                </div>
-                                <span>Adding Info... </span>
-                                </>
-                            ) : (
-                                'Add Info'
-                            )}
-                            </button>
-                        </div>
-                        </form>
-                    </div>
-                    </div>
-                </div>
-            </>
-        ) : ('')}
-
-        {inDetails ? (
-            <>
-              <div className="modal-overlay">
-                <div className="modal-content2">
-                    <div className="head-mode">
-                        <h6 style={{color: '#7A0091'}}>Preview Invoice</h6>
-                        <button className="modal-close" onClick={hideModal}>&times;</button>
-                    </div>
-                    <div className="modal-body">
-                        {ivDetails ? (
-                            <>
-                              <div style={{background: '#fff'}} className='p-4'>
-                                    <div className="top-section d-flex justify-content-between">
-                                    <div>
-                                        <img src={Inv} alt="img" className='mb-3'/>
-                                        <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                                        <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{ivDetails.customer_info.name}</h5>
-                                        <p style={{color: '#95799B'}}>Professional in hair making business</p>
-                                    </div>
-                                    <div className='text-right'>
-                                        <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
-                                        <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
-                                        <div className='text-right mb-5'>
-                                            <button style={{fontSize: '12px', width: '70px'}} className={ivDetails.payment_status}>{ivDetails.payment_status}</button>
-                                        </div>
-
-                                        <div className="d-flex">
-                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
-                                            <small style={{color: '#271F29'}}>{ivDetails.invoice_number}</small>
-                                        </div>
-                                        <div className="d-flex">
-                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
-                                            <small style={{color: '#271F29'}}>{ivDetails.date}</small>
-                                        </div>
-                                        <div className="d-flex">
-                                            <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
-                                            <small style={{color: '#271F29'}}>{ivDetails.date}</small>
-                                        </div>
-                                    </div>
-                                    </div>
-                                    <hr />
-                                    <div className="d-flex justify-content-between">
+                                <div style={{background: '#fff'}} className='p-4'>
+                                        <div className="top-section d-flex justify-content-between">
                                         <div>
-                                            <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                            <img src={Inv} alt="img" className='mb-3'/>
+                                            <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{ivDetails.customer_info.name}</h5>
+                                            <p style={{color: '#95799B'}}>Professional in hair making business</p>
+                                        </div>
+                                        <div className='text-right'>
+                                            <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                                            <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                                            <div className='text-right mb-5'>
+                                                <button style={{fontSize: '12px', width: '70px'}} className={ivDetails.payment_status}>{ivDetails.payment_status}</button>
+                                            </div>
+
                                             <div className="d-flex">
-                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
-                                                <small style={{color: '#271F29'}}>{ivDetails.customer_info.phone_number}</small>
-                                                </div>
-                                                <div className="d-flex">
-                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
-                                                <small style={{color: '#271F29'}}>{ivDetails.customer_info.email}</small>
-                                                </div>
-                                                <div className="d-flex">
-                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
-                                                <small style={{color: '#271F29'}}>{ivDetails.payment_method}</small>
+                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                                <small style={{color: '#271F29'}}>{ivDetails.invoice_number}</small>
+                                            </div>
+                                            <div className="d-flex">
+                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                                <small style={{color: '#271F29'}}>{ivDetails.date}</small>
+                                            </div>
+                                            <div className="d-flex">
+                                                <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                                <small style={{color: '#271F29'}}>{ivDetails.date}</small>
                                             </div>
                                         </div>
-                                        <div>
-                                            <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
-                                            <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(ivDetails.total_amount).toLocaleString()}</h5>
-                                            <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
-                                            <small style={{color: '#7A0091', fontWeight: '900'}}>{ivDetails.discount_name}</small>
+                                        </div>
+                                        <hr />
+                                        <div className="d-flex justify-content-between">
+                                            <div>
+                                                <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                                <div className="d-flex">
+                                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
+                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info.phone_number}</small>
+                                                    </div>
+                                                    <div className="d-flex">
+                                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
+                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info.email}</small>
+                                                    </div>
+                                                    <div className="d-flex">
+                                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
+                                                    <small style={{color: '#271F29'}}>{ivDetails.payment_method}</small>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
+                                                <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(ivDetails.total_amount).toLocaleString()}</h5>
+                                                <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
+                                                <small style={{color: '#7A0091', fontWeight: '900'}}>{ivDetails.discount_name}</small>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div className="table-content">
+                                            <div className="table-container">
+                                                <table className="w-100 bin">
+                                                    <thead className='th-d'>
+                                                    <tr className='m-0'>
+                                                        <th className="p-2 text-light w-25">Sr. No</th>
+                                                        <th className="p-2 text-light w-50">Product Name </th>
+                                                        <th className="p-2 text-light">Price</th>
+                                                        <th className="p-2 text-light">Quantity</th>
+                                                        <th className="p-2 text-light">Inches</th>
+                                                        <th className="p-2 text-light">Color</th>
+                                                        <th className="p-2 text-light w-25">Amount</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {ivDetails.products_ordered.map((product, index) => (
+                                                        <tr key={index}>
+                                                            <td>{index + 1}</td>
+                                                            <td>{product.product_name}</td>
+                                                            <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                                            <td>{product.quantity}</td>
+                                                            <td>{product.inches}</td>
+                                                            <td>{product.color}</td>
+                                                            <td>₦{product.product_price * product.quantity}</td>
+                                                        </tr>
+                                                    ))}
+                                                    </tbody>
+                                                    <tfoot>
+                                                    <tr className="text-right">
+                                                        <td colSpan="5"></td>
+                                                        <td className="p-2 font-semibold">Subtotal:</td>
+                                                        <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
+                                                    </tr>
+                                                    <tr className="text-right">
+                                                        <td colSpan="5"></td>
+                                                        <td className="p-2 font-semibold w-50">Total:</td>
+                                                        <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
-                                    <hr />
-                                    <table className="w-100 table-borderless bin">
-                                        <thead className='th-d'>
-                                        <tr className='m-0'>
-                                            <th className="p-2 text-light">Sr. No</th>
-                                            <th className="p-2 text-light w-75">Product Name </th>
-                                            <th className="p-2 text-light">Price</th>
-                                            <th className="p-2 text-light">Quantity</th>
-                                            <th className="p-2 text-light">Inches</th>
-                                            <th className="p-2 text-light">Color</th>
-                                            <th className="p-2 text-light">Amount</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {ivDetails.products_ordered.map((product, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{product.product_name}</td>
-                                                <td>₦{Number(product.product_price).toLocaleString()}</td>
-                                                <td>{product.quantity}</td>
-                                                <td>{product.inches}</td>
-                                                <td>{product.color}</td>
-                                                <td>₦{product.product_price * product.quantity}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                        <tfoot>
-                                        <tr className="text-right">
-                                            <td colSpan="5"></td>
-                                            <td className="p-2 font-semibold">Subtotal:</td>
-                                            <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
-                                        </tr>
-                                        <tr className="text-right">
-                                            <td colSpan="5"></td>
-                                            <td className="p-2 font-semibold w-50">Total:</td>
-                                            <td className="p-2 font-semibold">₦{Number(ivDetails.total_amount).toLocaleString()}</td>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </>
-                            ) : (
-                              <p>Loading Invoice...</p>
+                                </>
+                                ) : (
+                                <p>Loading Invoice...</p>
                             )}
+                        </div>
                     </div>
                 </div>
-              </div>
-            </>
-        ) : ('')}
-      
+                </>
+            ) : ('')}
+        </>
+    ) : (
+        <>
+            <div className="d-flex justify-content-end mt-5">
+                <div className='mb-3 mb-lg-0'>
+                <button className='btn ml-lg-3 ml-0 no-print' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
+                </div>
+                <div className="mb-4">
+                    <button className='btn mr-lg-3 mr-0' style={{background: '#fff', color: '#7A0091'}} onClick={() => setView(true)}>Back</button>
+                </div>
+                <div>
+                    <button 
+                        className='btn px-3 no-print' 
+                        style={{background: '#7A0091', color: '#F8F6F8'}}
+                        onClick={handlePrint}
+                    >
+                        <FontAwesomeIcon icon={faPrint} className='mr-4'/>
+                        Print
+                    </button>
+                </div>
+            </div>
+
+            {shad ? (
+                <>
+                    <div ref={invoiceRef} style={{background: '#fff'}} className='p-4'>
+                        <div className="top-section d-lg-flex d-block justify-content-between">
+                        <div>
+                            <img src={Inv} alt="img" className='mb-3'/>
+                            <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
+                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{shad.customer_info.name}</h5>
+                            <p style={{color: '#95799B'}}>Professional in hair making business</p>
+                        </div>
+                        <div className='text-right'>
+                            <h4 style={{color: '#7A0091', fontWeight: '900'}}>INVOICE</h4>
+                            <p style={{color: '#4C3B4F'}} className='m-0 p-0'>Payment Status</p>
+                            <div className='text-right mb-5'>
+                                <button style={{fontSize: '12px', width: '70px'}} className={shad.payment_status}>{shad.payment_status}</button>
+                            </div>
+
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Invoice No: </small>
+                                <small style={{color: '#271F29'}}>{shad.invoice_number}</small>
+                            </div>
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                <small style={{color: '#271F29'}}>{shad.date}</small>
+                            </div>
+                            <div className="d-flex">
+                                <small className='d-block mr-3' style={{color: '#95799B'}}>Date Due: </small>
+                                <small style={{color: '#271F29'}}>{shad.date}</small>
+                            </div>
+                        </div>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
+                                <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
+                                    <small style={{color: '#271F29'}}>{shad.customer_info.phone_number}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
+                                    <small style={{color: '#271F29'}}>{shad.customer_info.email}</small>
+                                    </div>
+                                    <div className="d-flex">
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
+                                    <small style={{color: '#271F29'}}>{shad.payment_method}</small>
+                                </div>
+                            </div>
+                            <div>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
+                                <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(shad.total_amount).toLocaleString()}</h5>
+                                <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
+                                <small style={{color: '#7A0091', fontWeight: '900'}}>{shad.discount_name}</small>
+                            </div>
+                        </div>
+                        <hr />
+                        <div className="table-content">
+                            <div className="table-container">
+                                <table className="w-100 bin">
+                                    <thead className='th-d'>
+                                    <tr className='m-0'>
+                                        <th className="p-2 text-light w-25">Sr. No</th>
+                                        <th className="p-2 text-light w-50">Product Name </th>
+                                        <th className="p-2 text-light">Price</th>
+                                        <th className="p-2 text-light">Quantity</th>
+                                        <th className="p-2 text-light">Inches</th>
+                                        <th className="p-2 text-light">Color</th>
+                                        <th className="p-2 text-light w-25">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {shad.products_ordered.map((product, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{product.product_name}</td>
+                                            <td>₦{Number(product.product_price).toLocaleString()}</td>
+                                            <td>{product.quantity}</td>
+                                            <td>{product.inches}</td>
+                                            <td>{product.color}</td>
+                                            <td>₦{product.product_price * product.quantity}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                    <tfoot>
+                                    <tr className="text-right">
+                                        <td colSpan="5"></td>
+                                        <td className="p-2 font-semibold">Subtotal:</td>
+                                        <td className="p-2 font-semibold">₦{Number(shad.total_amount).toLocaleString()}</td>
+                                    </tr>
+                                    <tr className="text-right">
+                                        <td colSpan="5"></td>
+                                        <td className="p-2 font-semibold w-50">Total:</td>
+                                        <td className="p-2 font-semibold">₦{Number(shad.total_amount).toLocaleString()}</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </>
+                ) : (
+                <p>Loading Invoice...</p>
+            )}
+        </>
+    )}
     </>
   )
 }

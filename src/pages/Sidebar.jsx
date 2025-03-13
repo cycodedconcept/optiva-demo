@@ -242,6 +242,7 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.clear();
         
         window.location.href = '/';
     };

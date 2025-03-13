@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from './Sidebar';
@@ -20,15 +21,54 @@ import '../style.css'
 import { Us } from '../assets/images'
 
 const Dashboard = () => {
-  const [activeContent, setActiveContent] = useState('Dashboard');
+  const { tab } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Initialize activeContent based on URL param, state, or localStorage
+  const [activeContent, setActiveContent] = useState(() => {
+    // First, check if tab parameter exists in URL
+    if (tab) {
+      // Convert URL format (kebab-case) to component format (Title Case)
+      const formattedTab = tab.split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      return formattedTab;
+    }
+    
+    // If no tab in URL, check localStorage
+    return localStorage.getItem('activeContent') || 'Dashboard';
+  });
+  
+  // Update localStorage whenever activeContent changes
+  useEffect(() => {
+    localStorage.setItem('activeContent', activeContent);
+  }, [activeContent]);
+
+  // When a sidebar button is clicked, update state and navigate
+  const handleButtonClick = (content) => {
+    setActiveContent(content);
+    // Convert content to URL slug (lowercase, replace spaces with hyphens)
+    const slug = content.toLowerCase().replace(/\s+/g, '-');
+    // Use React Router navigate to update URL (this works with browser history)
+    navigate(`/dashboard/${slug}`);
+  };
+
+  // Update activeContent when URL changes (e.g., when browser back/forward buttons are clicked)
+  useEffect(() => {
+    if (tab) {
+      // Convert URL format (kebab-case) to component format (Title Case)
+      const formattedTab = tab.split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      setActiveContent(formattedTab);
+    }
+  }, [tab]);
 
   const getItem = localStorage.getItem("user");
   const theItem = JSON.parse(getItem);
   const itemName = theItem.user_name;
-
-  const handleButtonClick = (content) => {
-    setActiveContent(content);
-  };
 
   const upperLetter = (string) => {
     if (!string) return '';
@@ -38,9 +78,10 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    
+    localStorage.clear();
     window.location.href = '/';
   };
+  
   return (
     <>
       <Sidebar onButtonClick={handleButtonClick} activeContent={activeContent}/>
@@ -61,13 +102,13 @@ const Dashboard = () => {
 
           {activeContent === 'Dashboard' && <Cards /> }
           {activeContent === 'Invoice List' && <Invoice /> }
-          {activeContent === 'sort orders' && <Sorted /> }
+          {activeContent === 'Sort Orders' && <Sorted /> }
           {activeContent === 'Create Invoice' && <CreateInvoice /> }
           {activeContent === 'Product List' && <Products /> }
           {activeContent === 'Payment List' && <Payment /> }
           {activeContent === 'Purchase' && <Purchase /> }
-          {activeContent === 'stock history' && <Report /> }
-          {activeContent === 'sales report' && <Sales /> }
+          {activeContent === 'Stock History' && <Report /> }
+          {activeContent === 'Sales Report' && <Sales /> }
           {activeContent === 'Suppliers' && <Suppliers /> }
           {activeContent === 'Users' && <Users /> }
           {activeContent === 'Category' && <Category /> }
@@ -75,7 +116,7 @@ const Dashboard = () => {
           {activeContent === 'Discount' && <Discount /> }
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

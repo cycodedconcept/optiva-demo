@@ -432,26 +432,6 @@ const Invoice = () => {
         }
     }
 
-    // useEffect(() => {
-    //     // Find the existing meta viewport tag
-    //     const metaViewport = document.querySelector('meta[name="viewport"]');
-    
-    //     // Backup the original content
-    //     const originalContent = metaViewport?.getAttribute('content');
-    
-    //     // Update the content to disable responsiveness
-    //     if (metaViewport) {
-    //       metaViewport.setAttribute('content', 'width=1000');
-    //     }
-    
-    //     return () => {
-    //       // Restore the original content when the component unmounts
-    //       if (metaViewport) {
-    //         metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-    //       }
-    //     };
-    // }, []);
-
     const handlePrint = useReactToPrint({
         contentRef: invoiceRef,
         onAfterPrint: () => console.log("Invoice printed successfully!"),
@@ -1132,19 +1112,23 @@ const Invoice = () => {
         <>
           <div className='mt-5'>
             
-            <div className='mb-3 mb-lg-0'>
-              <button className='btn ml-lg-3 ml-0 no-print w-100 w-lg-0' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
-            </div>
-            <div className="text-lg-right text-center mb-4">
-                <button className='btn mr-lg-3 mr-0 w-100 w-lg-0' style={{background: '#fff', color: '#7A0091'}} onClick={getup}>Back</button>
-                <button 
-                        className='btn px-3 no-print w-lg-0 w-100' 
+            <div className="d-flex justify-content-end">
+                <div className='mb-3 mb-lg-0'>
+                <button className='btn ml-lg-3 ml-0 no-print' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
+                </div>
+                <div className="mb-4">
+                    <button className='btn mr-lg-3 mr-0' style={{background: '#fff', color: '#7A0091'}} onClick={getup}>Back</button>
+                </div>
+                <div>
+                    <button 
+                        className='btn px-3 no-print' 
                         style={{background: '#7A0091', color: '#F8F6F8'}}
                         onClick={handlePrint}
                     >
                         <FontAwesomeIcon icon={faPrint} className='mr-4'/>
                         Print
-                </button>
+                    </button>
+                </div>
             </div>
 
             {dataItem ? (
