@@ -430,7 +430,7 @@ const Products = () => {
     const handleAddProduct = async (e) => {
         e.preventDefault();
 
-        if (!productData.product_name || !productData.unit || !productData.product_category || !productData.total_product_stock || !productData.supplier_id || productData.shop_id.length === 0) {
+        if (!productData.product_name || !productData.unit || !productData.product_category || !productData.total_product_stock || !productData.supplier_id || !productData.product_description || productData.shop_id.length === 0) {
             Swal.fire({
                 icon: "info",
                 title: "creating product",
@@ -579,7 +579,7 @@ const Products = () => {
         e.preventDefault();
         const getUpId = localStorage.getItem("prid");
 
-        if (!upProductData.product_name || !upProductData.unit || !upProductData.product_category || !upProductData.total_product_stock || !upProductData.supplier_id || upProductData.shop_id.length === 0) {
+        if (!upProductData.product_name || !upProductData.unit || !upProductData.product_category || !upProductData.total_product_stock || !upProductData.supplier_id || !upProductData.product_description || upProductData.shop_id.length === 0) {
             Swal.fire({
                 icon: "info",
                 title: "updating product",
@@ -643,9 +643,12 @@ const Products = () => {
         formData.append('inches', filteredInputGroups.length ? JSON.stringify(filteredInputGroups) : JSON.stringify([]));
         formData.append('shop_id', JSON.stringify(upProductData.shop_id));
 
-        upProductData.images.forEach((image) => {
-            formData.append('images', image);
-        });
+        if (upProductData.images && Array.isArray(upProductData.images)) {
+            upProductData.images.forEach((image) => {
+                formData.append('images', image);
+            });
+        }
+        
 
         for (let pair of formData.entries()) {
             console.log(`${pair[0]}: ${pair[1]}`);
@@ -1019,7 +1022,7 @@ const Products = () => {
                                                 </td>
                                                 <td>{item.product_name}</td>
                                                 <td>{item.product_category || '----'}</td>
-                                                <td>{item.supplier_name.supplier_name}</td>
+                                                <td>{item.supplier_name?.supplier_name}</td>
                                                 <td>{item.total_buying_price}</td>
                                                 <td>{item.total_selling_price}</td>
                                                 <td>{item.unit}</td>
@@ -1139,7 +1142,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Color <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Color' name='color' value={productData.color} onChange={handleChange}/>
+                                        <input type="text" placeholder='Enter Color' name='color' value={productData.color} onChange={handleChange} disabled={fieldsDisabled}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-3">
@@ -1349,7 +1352,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-3">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Color <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Color' name='color' value={upProductData.color} onChange={handleChange2}/>
+                                        <input type="text" placeholder='Enter Color' name='color' value={upProductData.color} onChange={handleChange2} disabled={fieldsDisabled2}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-3">
