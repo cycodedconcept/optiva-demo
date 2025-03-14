@@ -27,6 +27,9 @@ const Products = () => {
     const [productDetails, setProductDetails] = useState(null);
     const [vm, setVm] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const [fieldsDisabled, setFieldsDisabled] = useState(false);
+    const [fieldsDisabled2, setFieldsDisabled2] = useState(false);
+
 
     const [modalVisible, setModalVisible] = useState(false);
     const [upModal, setUpModal] = useState(false);
@@ -73,6 +76,20 @@ const Products = () => {
         setModalVisible(false);
         setUpModal(false);
         setVm(false)
+        setHasInches(false);
+        setHasInches2(false);
+        setProductData({
+            product_name: '',
+            product_category: '',
+            color: '',
+            unit: '',
+            total_buying_price: '',
+            total_selling_price: '',
+            supplier_id: '',
+            total_stock_value: '',
+            total_product_stock: '',
+            product_description: ''
+          });
     }
 
     const sModal = () => {
@@ -101,17 +118,17 @@ const Products = () => {
         }
     }, [productDetails]);;
 
-    useEffect(() => {
-        const hasNonZeroStock = inputGroups.some((inch) => Number(inch.stock) > 0);
-        setIsMainStockEditable(!hasNonZeroStock);
+    // useEffect(() => {
+    //     const hasNonZeroStock = inputGroups.some((inch) => Number(inch.stock) > 0);
+    //     setIsMainStockEditable(!hasNonZeroStock);
         
-    }, [inputGroups]);
+    // }, [inputGroups]);
 
-    useEffect(() => {
-        const hasNonZeroStock2 = inputGroups2.some((inch) => Number(inch.stock) > 0);
-        setIsMainStockEditable2(!hasNonZeroStock2);
+    // useEffect(() => {
+    //     const hasNonZeroStock2 = inputGroups2.some((inch) => Number(inch.stock) > 0);
+    //     setIsMainStockEditable2(!hasNonZeroStock2);
         
-    }, [inputGroups2]);
+    // }, [inputGroups2]);
     
     const handleAddInputGroup = (e) => {
         e.preventDefault();
@@ -239,19 +256,56 @@ const Products = () => {
         }));
     };
 
+    // const toggleInches = () => {
+    //     setHasInches(prev => !prev);
+    //     // Reset all values when switching to inches mode
+    //     setProductData(prev => ({
+    //         ...prev,
+    //         total_buying_price: '' || 0,
+    //         total_selling_price: '' || 0,
+    //         total_stock_value: '',
+    //         total_product_stock: '',
+    //         color: ''
+    //     }));
+    //     // Reset inches input groups
+    //     setInputGroups([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+    // };
+
     const toggleInches = () => {
+        // Toggle inches mode first
         setHasInches(prev => !prev);
-        // Reset all values when switching to inches mode
-        setProductData(prev => ({
-            ...prev,
-            total_buying_price: '' || 0,
-            total_selling_price: '' || 0,
-            total_stock_value: '',
-            total_product_stock: '',
-            color: ''
-        }));
-        // Reset inches input groups
-        setInputGroups([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+        
+        // Check the NEW state (after toggle) to determine what to do
+        const newHasInches = !hasInches;
+        
+        if (newHasInches) {
+            // If inches mode is being turned ON
+            setFieldsDisabled(true);
+            setProductData(prev => ({
+                ...prev,
+                total_buying_price: '0',
+                total_selling_price: '0',
+                total_product_stock: '0',
+                color: ''
+            }));
+            
+            // Initialize inches input groups
+            setInputGroups([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+        } else {
+            // If inches mode is being turned OFF
+            setFieldsDisabled(false);
+            
+            // Clear the values set when inches was enabled
+            setProductData(prev => ({
+                ...prev,
+                total_buying_price: '',
+                total_selling_price: '',
+                total_product_stock: ''
+            }));
+            
+            // Clear inches data
+            setInputGroups([]);
+        }
     };
 
     // for update product
@@ -315,19 +369,35 @@ const Products = () => {
         }));
     };
 
+    
+
     const toggleInches2 = () => {
         setHasInches2(prev => !prev);
-        // Reset all values when switching to inches mode
-        setUpProductData(prev => ({
-            ...prev,
-            total_buying_price: '' || 0,
-            total_selling_price: '' || 0,
-            total_stock_value: '',
-            total_product_stock: '',
-            color: ''
-        }));
-        // Reset inches input groups
-        setInputGroups2([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+        
+        // Toggle the disabled state for the fields
+        setFieldsDisabled2(prev => !prev);
+        
+        // If we're enabling inches mode (checkbox just got checked)
+        if (!hasInches2) {
+            // Set field values to zero when enabling inches
+            setUpProductData(prev => ({
+                ...prev,
+                total_buying_price: '0',
+                total_selling_price: '0',
+                // You can still clear these other fields if needed
+                total_stock_value: '',
+                total_product_stock: '',
+                color: ''
+            }));
+            
+            // Initialize or reset inches input groups
+            if (inputGroups2.length === 0 || (inputGroups2.length === 1 && !inputGroups2[0].inche)) {
+                setInputGroups2([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+            }
+        } else {
+            // If disabling inches mode, clear the inches data
+            setInputGroups2([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
+        }
     };
     
     // for create product
@@ -457,7 +527,6 @@ const Products = () => {
                 },
             }); 
         
-            // Add 'await' here
             const response = await dispatch(createProduct({ formData, token })).unwrap();
         
             if (response.message === "product created") {
@@ -467,7 +536,6 @@ const Products = () => {
                     text: `${response.message}`,
                 });
         
-                // Reset form fields
                 setProductData({
                     product_name: '',
                     color: '',
@@ -485,10 +553,8 @@ const Products = () => {
                 setInputGroups([{ inche: "", buying_price: "", selling_price: "", color: "", stock: "" }]);
                 setHasInches(false);
         
-                // Close modal
                 hideModal();
         
-                // Refresh product list
                 dispatch(getProduct({ token, shop_id: getId, page: currentPage, per_page: per_page }));
             } else {
                 Swal.fire({
@@ -725,11 +791,11 @@ const Products = () => {
     const getUpmode = (id) => {
         setUpModal(true);
         const getProduct = localStorage.getItem("product");
-        localStorage.setItem("prid", id)
+        localStorage.setItem("prid", id);
         const vProduct = JSON.parse(getProduct);
         const selectedProduct = vProduct.find((item) => item.id === id);
         console.log(selectedProduct);
-
+    
         const shopIds = selectedProduct.assigned_shops.map(shop => shop.id);
         console.log("Extracted Shop IDs:", shopIds);
     
@@ -745,7 +811,11 @@ const Products = () => {
         };
     
         if (selectedProduct.inches && selectedProduct.inches.length > 0) {
+            // For products with inches, set the inches checkbox to true
             setHasInches2(true);
+            
+            // Also set the fields to disabled
+            setFieldsDisabled2(true);
             
             // For products with inches, set color to empty string
             productDataToSet.color = '';
@@ -757,9 +827,9 @@ const Products = () => {
                 return total + (buyingPrice * stock);
             }, 0);
     
-            // Set buying and selling price to empty for products with inches
-            productDataToSet.total_buying_price = '';
-            productDataToSet.total_selling_price = '';
+            // Set buying and selling price to zero for products with inches
+            productDataToSet.total_buying_price = '0';
+            productDataToSet.total_selling_price = '0';
     
             setInputGroups2(
                 selectedProduct.inches.map((inch) => {
@@ -787,6 +857,9 @@ const Products = () => {
             productDataToSet.total_buying_price = selectedProduct.total_buying_price || '';
             productDataToSet.total_selling_price = selectedProduct.total_selling_price || '';
             setHasInches2(false);
+            
+            // Make sure fields are enabled for products without inches
+            setFieldsDisabled2(false);
         }
     
         // Set the total stock value after it's calculated
@@ -955,11 +1028,11 @@ const Products = () => {
                                                     <div className="d-flex gap-5">
                                                         <FontAwesomeIcon icon={faEdit} 
                                                             style={{ color: '#379042', fontSize: '16px', marginRight: '20px', backgroundColor: '#E6FEE8', padding: '5px' }} 
-                                                            onClick={(e) => { getUpmode(item.id); e.stopPropagation(); }} title='update supplier' 
+                                                            onClick={(e) => { getUpmode(item.id); e.stopPropagation(); }} title='update product' 
                                                         />
                                                         <FontAwesomeIcon icon={faTrash} 
                                                             style={{ color: '#DB6454', fontSize: '16px', backgroundColor: '#F4E3E3', padding: '5px' }} 
-                                                            onClick={(e) => { deleteMode(item.id); e.stopPropagation(); }} title='delete supplier' 
+                                                            onClick={(e) => { deleteMode(item.id); e.stopPropagation(); }} title='delete product' 
                                                         />
                                                     </div>
                                                 </td>
@@ -1078,13 +1151,13 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Buying Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Buying Price' name='total_buying_price' value={productData.total_buying_price} onChange={handleChange}/>
+                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={productData.total_buying_price} onChange={handleChange} disabled={fieldsDisabled}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">selling Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Selling Price' name='total_selling_price' value={productData.total_selling_price} onChange={handleChange}/>
+                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={productData.total_selling_price} onChange={handleChange} disabled={fieldsDisabled}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -1113,7 +1186,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Product Stock' name='total_product_stock' value={productData.total_product_stock} onChange={handleChange} disabled={!isMainStockEditable}/>
+                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={productData.total_product_stock} onChange={handleChange} disabled={fieldsDisabled}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">
@@ -1155,21 +1228,21 @@ const Products = () => {
                                         {hasInches && inputGroups.map((group, index) => (
                                             <div key={index} style={{ marginBottom: '20px' }} className="d-lg-flex d-block">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.inche || ''}
                                                     onChange={(e) => handleInchesChange(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.buying_price || ''}
                                                     onChange={(e) => handleInchesChange(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.selling_price || ''}
                                                     onChange={(e) => handleInchesChange(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
@@ -1183,7 +1256,7 @@ const Products = () => {
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
@@ -1288,13 +1361,13 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Buying Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Buying Price' name='total_buying_price' value={upProductData.total_buying_price} onChange={handleChange2}/>
+                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={upProductData.total_buying_price} onChange={handleChange2} disabled={fieldsDisabled2}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">selling Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Selling Price' name='total_selling_price' value={upProductData.total_selling_price} onChange={handleChange2}/>
+                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={upProductData.total_selling_price} onChange={handleChange2} disabled={fieldsDisabled2}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -1326,7 +1399,7 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="text" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={!isMainStockEditable2}/>
+                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={fieldsDisabled2}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">
@@ -1368,21 +1441,21 @@ const Products = () => {
                                         {hasInches2 && inputGroups2.map((group, index) => (
                                             <div key={index} style={{ marginBottom: '20px' }} className="d-lg-flex d-block">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.inche || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.buying_price || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.selling_price || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
@@ -1396,7 +1469,7 @@ const Products = () => {
                                                     className="mx-2 my-g-0 my-3"
                                                 />
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     value={group.stock || ''}
                                                     onChange={(e) => handleInchesChange2(index, 'stock', e.target.value)}
                                                     placeholder="Stock"

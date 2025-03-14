@@ -400,7 +400,7 @@ const Purchase = () => {
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
                                 <label htmlFor="exampleInputEmail1">Quantity <span style={{color: '#7A0091'}}>*</span></label>
-                                <input type="text" placeholder='Enter quantity' value={qty} onChange={(e) => setQty(e.target.value)}/>
+                                <input type="number" placeholder='Enter quantity' value={qty} onChange={(e) => setQty(e.target.value)}/>
                             </div>
                         </div>
                     </div>
@@ -490,7 +490,7 @@ const Purchase = () => {
                         <div className="col-sm-12 col-md-12 col-lg-6">
                             <div className="form-group mb-4">
                                 <label htmlFor="exampleInputEmail1">Quantity <span style={{color: '#7A0091'}}>*</span></label>
-                                <input type="text" placeholder='Enter quantity' value={qty2} onChange={(e) => setQty2(e.target.value)}/>
+                                <input type="number" placeholder='Enter quantity' value={qty2} onChange={(e) => setQty2(e.target.value)}/>
                             </div>
                         </div>
                     </div>

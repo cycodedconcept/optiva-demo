@@ -627,7 +627,7 @@ const handleDownload = async () => {
                     </div>
                 </div>
                 <div className="py-4">
-                    <div className="d-none d-md-flex p-3" style={{background: '#FCF2FF'}}>
+                    <div className="d-none d-lg-flex p-3 justify-content-between" style={{background: '#FCF2FF'}}>
                         <div><p style={{color: '#2E2F41'}}><b>Product Name</b></p></div>
                         <div><p style={{color: '#2E2F41'}}><b>Selling Price</b></p></div>
                         <div><p style={{color: '#2E2F41'}}><b>Color</b></p></div>
@@ -923,7 +923,7 @@ const handleDownload = async () => {
                                         <div>
                                             <img src={Inv} alt="img" className='mb-3'/>
                                             <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{ivDetails.customer_info.name}</h5>
+                                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{ivDetails.customer_info ? ivDetails.customer_info.name : "N/A"}</h5>
                                             <p style={{color: '#95799B'}}>Professional in hair making business</p>
                                         </div>
                                         <div className='text-right'>
@@ -953,11 +953,11 @@ const handleDownload = async () => {
                                                 <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
                                                 <div className="d-flex">
                                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
-                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info.phone_number}</small>
+                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info ? ivDetails.customer_info.phone_number : "N/A"}</small>
                                                     </div>
                                                     <div className="d-flex">
                                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
-                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info.email}</small>
+                                                    <small style={{color: '#271F29'}}>{ivDetails.customer_info ? ivDetails.customer_info.email : "N/A"}</small>
                                                     </div>
                                                     <div className="d-flex">
                                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
@@ -1053,7 +1053,7 @@ const handleDownload = async () => {
                         <div>
                             <img src={Inv} alt="img" className='mb-3'/>
                             <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{shad.customer_info.name}</h5>
+                            <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{shad.customer_info ? shad.customer_info.email : "N/A"}</h5>
                             <p style={{color: '#95799B'}}>Professional in hair making business</p>
                         </div>
                         <div className='text-right'>
@@ -1083,11 +1083,11 @@ const handleDownload = async () => {
                                 <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
                                 <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
-                                    <small style={{color: '#271F29'}}>{shad.customer_info.phone_number}</small>
+                                    <small style={{color: '#271F29'}}>{shad.customer_info ? shad.customer_info.phone_number : "N/A"}</small>
                                     </div>
                                     <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
-                                    <small style={{color: '#271F29'}}>{shad.customer_info.email}</small>
+                                    <small style={{color: '#271F29'}}>{shad.customer_info ? shad.customer_info.email : "N/A"}</small>
                                     </div>
                                     <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>

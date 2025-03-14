@@ -241,7 +241,7 @@ const Discount = () => {
                         ))
                     ) : (
                         <tr>
-                        <td colSpan="7">No user available</td>
+                        <td colSpan="7">No discount available</td>
                         </tr>
                     )}
                 </tbody>

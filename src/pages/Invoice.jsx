@@ -1115,7 +1115,7 @@ const Invoice = () => {
                             <div>
                                 <img src={Inv} alt="img" className='mb-3'/>
                                 <p className='m-0 p-0' style={{color: '#4C3B4F', fontWeight: '800'}}>Invoice To</p>
-                                <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info.name}</h5>
+                                <h5 style={{color: '#271F29', fontWeight: '900'}} className='m-0 p-0'>{dataItem.customer_info ? dataItem.customer_info.name : "N/A"}</h5>
                                 <p style={{color: '#95799B'}}>Professional in hair making business</p>
                             </div>
                             <div className='text-right'>
@@ -1140,23 +1140,23 @@ const Invoice = () => {
                             </div>
                         </div>
                         <hr />
-                        <div className="d-flex justify-content-between">
+                        <div className="d-lg-flex d-block justify-content-between">
                             <div>
                                 <small className='d-block' style={{color: '#4C3B4F'}}>Contact person</small>
                                 <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Phone No: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.phone_number}</small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info ? dataItem.customer_info.phone_number : "N/A"}</small>
                                     </div>
                                     <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Email: </small>
-                                    <small style={{color: '#271F29'}}>{dataItem.customer_info.email}</small>
+                                    <small style={{color: '#271F29'}}>{dataItem.customer_info ? dataItem.customer_info.email : "N/A"}</small>
                                     </div>
                                     <div className="d-flex">
                                     <small className='d-block mr-3' style={{color: '#95799B'}}>Payment Method: </small>
                                     <small style={{color: '#271F29'}}>{dataItem.payment_method}</small>
                                 </div>
                             </div>
-                            <div>
+                            <div className='mt-3 mt-lg-0'>
                                 <small className='d-block' style={{color: '#4C3B4F'}}>Total Amount</small> 
                                 <h5 style={{color: '#7A0091', fontWeight: '900'}}>₦{Number(dataItem.total_amount).toLocaleString()}</h5>
                                 <small className='d-block' style={{color: '#4C3B4F'}}>Discount</small> 
