@@ -974,11 +974,11 @@ const Products = () => {
             <input type="text" placeholder="Search product..." className="search-input mb-3" style={{borderRadius: '5px',}} value={inputValue} onChange={handleSearch}/>
             <span className="search-icon" style={{position: "absolute",
                 right: "10px",
-                top: "8px",
+                top: "20px",
                 fontSize: "20px",
                 color: "#222",
                 cursor: "pointer"}}>&#128269;</span>
-            </div>
+        </div>
     </div>
 
     {loading ? (
@@ -1154,13 +1154,34 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Buying Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={productData.total_buying_price} onChange={handleChange} disabled={fieldsDisabled}/>
+                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={productData.total_buying_price} onChange={handleChange} disabled={fieldsDisabled} onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                        onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">selling Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={productData.total_selling_price} onChange={handleChange} disabled={fieldsDisabled}/>
+                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={productData.total_selling_price} onChange={handleChange} disabled={fieldsDisabled} onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -1189,7 +1210,17 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={productData.total_product_stock} onChange={handleChange} disabled={fieldsDisabled}/>
+                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={productData.total_product_stock} onChange={handleChange} disabled={fieldsDisabled} onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">
@@ -1236,6 +1267,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1243,6 +1285,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1250,6 +1303,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="text"
@@ -1257,6 +1321,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'color', e.target.value)}
                                                     placeholder="Color"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1264,6 +1339,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="text"
@@ -1364,13 +1450,33 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Buying Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={upProductData.total_buying_price} onChange={handleChange2} disabled={fieldsDisabled2}/>
+                                        <input type="number" placeholder='Enter Buying Price' name='total_buying_price' value={upProductData.total_buying_price} onChange={handleChange2} disabled={fieldsDisabled2} onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">selling Price <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={upProductData.total_selling_price} onChange={handleChange2} disabled={fieldsDisabled2}/>
+                                        <input type="number" placeholder='Enter Selling Price' name='total_selling_price' value={upProductData.total_selling_price} onChange={handleChange2} disabled={fieldsDisabled2} onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-6">
@@ -1402,7 +1508,17 @@ const Products = () => {
                                 <div className="col-sm-12 col-md-12 col-lg-6">
                                     <div className="form-group mb-4">
                                         <label htmlFor="exampleInputEmail1">Total Product Stock <span style={{color: '#7A0091'}}>*</span></label>
-                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={fieldsDisabled2}/>
+                                        <input type="number" placeholder='Enter Product Stock' name='total_product_stock' value={upProductData.total_product_stock} onChange={handleChange2} disabled={fieldsDisabled2} onKeyPress={(e) => {
+                                            if (!/[0-9]/.test(e.key)) {
+                                            e.preventDefault();
+                                            }
+                                        }}
+                                        onPaste={(e) => {
+                                            const paste = e.clipboardData.getData('text');
+                                            if (!/^\d+$/.test(paste)) {
+                                            e.preventDefault();
+                                            }
+                                        }}/>
                                     </div>
                                 </div>
                                 <div className="col-sm-12 col-md-12 col-lg-12">
@@ -1449,6 +1565,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'inche', e.target.value)}
                                                     placeholder="Inches"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1456,6 +1583,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'buying_price', e.target.value)}
                                                     placeholder="Buying Price"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1463,6 +1601,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'selling_price', e.target.value)}
                                                     placeholder="Selling Price"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="text"
@@ -1470,6 +1619,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'color', e.target.value)}
                                                     placeholder="Color"
                                                     className="mx-2 my-g-0 my-3"
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1477,6 +1637,17 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'stock', e.target.value)}
                                                     placeholder="Stock"
                                                     className="mx-2 my-g-0 my-3" 
+                                                    onKeyPress={(e) => {
+                                                        if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onPaste={(e) => {
+                                                        const paste = e.clipboardData.getData('text');
+                                                        if (!/^\d+$/.test(paste)) {
+                                                        e.preventDefault();
+                                                        }
+                                                    }}
                                                 />
                                                 <input
                                                     type="text"

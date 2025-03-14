@@ -429,7 +429,7 @@ const Users = () => {
             <input type="text" placeholder="Search Users..." className="search-input mb-3" style={{borderRadius: '5px',}}/>
             <span className="search-icon" style={{position: "absolute",
               right: "10px",
-              top: "8px",
+              top: "20px",
               fontSize: "20px",
               color: "#222",
               cursor: "pointer"}}>&#128269;</span>

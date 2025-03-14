@@ -540,7 +540,7 @@ canvas {
 
 /* product styling */
 .search-input {
-    padding: 10px 20px 10px 40px; 
+    padding: 10px 20px 10px 40px; /* Ensure enough padding for icon */
     width: 500px;
     border: 1px solid #ccc;
     border-radius: 20px;
@@ -549,17 +549,20 @@ canvas {
 
 .search-icon {
     position: absolute;
-    left: 10px;
-    top: 8px;
+    left: 12px; /* Adjusted to not overlap the input */
+    top: 50%;
+    transform: translateY(-50%); /* Centers vertically */
     font-size: 20px;
     color: #222;
     cursor: pointer;
+    pointer-events: none; /* Prevents blocking input */
 }
 
 .search-container {
     position: relative;
     margin-top: 14px;
 }
+
 
 .modal-overlay {
     position: fixed;
@@ -645,6 +648,18 @@ input[type="checkbox"]:checked::before {
     transform: translate(-50%, -50%);
 }
 
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+  
 
 
 .head-mode {

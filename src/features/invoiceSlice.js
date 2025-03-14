@@ -41,6 +41,9 @@ export const getInvoice = createAsyncThunk(
                 total_pages: response.data.total_pages
             };
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -57,6 +60,9 @@ export const getProduct = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -74,6 +80,9 @@ export const createInvoice = createAsyncThunk(
             localStorage.setItem("info", JSON.stringify(response.data))
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -91,6 +100,9 @@ export const getDiscount = createAsyncThunk(
             localStorage.setItem("dis", JSON.stringify(response.data))
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -108,6 +120,9 @@ export const createDiscount = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -125,8 +140,10 @@ export const updateDiscount = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
-            
         }
     }
 );
@@ -142,6 +159,9 @@ export const updateInvoice = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -162,6 +182,9 @@ export const validatePin = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -183,6 +206,9 @@ export const invoicePaymentStatus = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -199,6 +225,9 @@ export const cancelValidatePin = createAsyncThunk(
             })
             return response.data
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }

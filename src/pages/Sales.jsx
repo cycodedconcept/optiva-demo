@@ -253,7 +253,7 @@ const Sales = () => {
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
-          <div>Error: {error?.message || 'Something went wrong'}</div>
+          <div>Waiting: {error?.message || 'waiting on data'}</div>
         ) : (
             <>
 

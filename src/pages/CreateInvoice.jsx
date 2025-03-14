@@ -420,18 +420,36 @@ const handleInvoice = async (e) => {
         }
         else {
             Swal.fire({
-              icon: "info",
-              title: "creating invoice",
-              text: `${response.message}`,
+                icon: "info",
+                title: "Creating Invoice",
+                text: Array.isArray(response) ? response.map(item => item.message).join(", ") : response.message,
             });
+        }        
+    }
+    catch (error) {
+        console.error("Invoice Creation Failed:", error);
+    
+        let errorMessage = "Something went wrong";
+    
+        if (error && typeof error === "object") {
+            if (Array.isArray(error)) {
+                errorMessage = error.map(item => item.message).join(", ");
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else if (error.response && error.response.data) {
+                errorMessage = Array.isArray(error.response.data) 
+                    ? error.response.data.map(item => item.message).join(", ") 
+                    : error.response.data.message || JSON.stringify(error.response.data);
+            }
         }
-    } catch (error) {
+    
         Swal.fire({
             icon: "error",
             title: "Error Occurred",
-            text: error.message || "Something went wrong while creating invoice. Please try again.",
+            text: errorMessage,
         });
-    }
+    }    
+    
 
 }
 
