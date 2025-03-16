@@ -570,7 +570,7 @@ const deleteMode = (id) => {
       {suMode ? (
         <>
           <div className="modal-overlay">
-            <div className="modal-content2">
+            <div className="modal-content2 mt-lg-0 mt-5">
               <div className="head-mode">
                 <h6 style={{color: '#7A0091'}}>Create Supplier</h6>
                 <button className="modal-close" onClick={hideModal}>&times;</button>

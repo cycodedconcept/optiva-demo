@@ -1321,17 +1321,6 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange(index, 'color', e.target.value)}
                                                     placeholder="Color"
                                                     className="mx-2 my-g-0 my-3"
-                                                    onKeyPress={(e) => {
-                                                        if (!/[0-9]/.test(e.key)) {
-                                                        e.preventDefault();
-                                                        }
-                                                    }}
-                                                    onPaste={(e) => {
-                                                        const paste = e.clipboardData.getData('text');
-                                                        if (!/^\d+$/.test(paste)) {
-                                                        e.preventDefault();
-                                                        }
-                                                    }}
                                                 />
                                                 <input
                                                     type="number"
@@ -1619,17 +1608,6 @@ const Products = () => {
                                                     onChange={(e) => handleInchesChange2(index, 'color', e.target.value)}
                                                     placeholder="Color"
                                                     className="mx-2 my-g-0 my-3"
-                                                    onKeyPress={(e) => {
-                                                        if (!/[0-9]/.test(e.key)) {
-                                                        e.preventDefault();
-                                                        }
-                                                    }}
-                                                    onPaste={(e) => {
-                                                        const paste = e.clipboardData.getData('text');
-                                                        if (!/^\d+$/.test(paste)) {
-                                                        e.preventDefault();
-                                                        }
-                                                    }}
                                                 />
                                                 <input
                                                     type="number"
