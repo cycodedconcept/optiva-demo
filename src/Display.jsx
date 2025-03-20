@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 const Display = () => {
   return (
     <>
-    <BrowserRouter>
+    <BrowserRouter basename='/IVMS'>
     <Routes>
       <Route path='/' element={<Login />}/>
       <Route path='/shop' element={<Shop />}/>

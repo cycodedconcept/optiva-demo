@@ -391,7 +391,7 @@ const Sales = () => {
         {mode ? (
             <>
               <div className="modal-overlay">
-                <div className="modal-content2">
+                <div className="modal-content2 mt-3 mt-lg-0">
                     <div className="head-mode">
                         <h6 style={{color: '#7A0091'}}>Sales Details</h6>
                         <button className="modal-close" onClick={hideModal}>
