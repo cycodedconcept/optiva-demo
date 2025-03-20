@@ -60,6 +60,9 @@ export const getStockSummary = createAsyncThunk(
                 }
             };
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -87,6 +90,9 @@ export const summaryData = createAsyncThunk(
                 total_pages: response.data.total_pages
             }
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -108,6 +114,9 @@ export const getSalesChart = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -138,6 +147,9 @@ export const getSales = createAsyncThunk(
                 total_pages: response.data.total_pages
             }
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -168,7 +180,10 @@ export const getSearchValueData = createAsyncThunk(
                 total_pages: response.data.total_pages
             }
         } catch (error) {
-            
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

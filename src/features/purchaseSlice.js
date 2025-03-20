@@ -36,6 +36,9 @@ export const getPurchase = createAsyncThunk(
                 total_pages: response.data.total_pages
             };
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -53,6 +56,9 @@ export const createPurchase = createAsyncThunk(
         })
         return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -69,6 +75,9 @@ export const updatePurchase = createAsyncThunk(
             })
           return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }

@@ -22,7 +22,10 @@ export const createCategory = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -41,7 +44,10 @@ export const getCategories = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -61,7 +67,10 @@ export const updateCategory = createAsyncThunk(
             return response.data;
 
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -77,8 +86,10 @@ export const deleteCategory = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'Something went wrong');
-            
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

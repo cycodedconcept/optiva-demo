@@ -120,11 +120,24 @@ const Discount = () => {
         }
 
     } catch (error) {
-       console.error("Discount creation failed:", error);
-       Swal.fire({
-        icon: "error",
-        title: "Error Occurred",
-        text: error.message || "Something went wrong while creating discount. Please try again.",
+       let errorMessage = "Something went wrong";
+                       
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
+      Swal.fire({
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
       });
     }
   }
@@ -195,11 +208,24 @@ const Discount = () => {
             });
         }
     } catch (error) {
-       console.error("Discount update failed:", error);
-       Swal.fire({
-        icon: "error",
-        title: "Error Occurred",
-        text: error.message || "Something went wrong while updating discount. Please try again.",
+       let errorMessage = "Something went wrong";
+                       
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
+      Swal.fire({
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
       });
     }
 
@@ -210,44 +236,51 @@ const Discount = () => {
           <button className='in-btn' onClick={() => setDisModal(true)}>+ Create Discount</button>
       </div>
 
-      <div className="table-content mt-5">
-            <div className="table-container">
-                <table className="my-table">
-                <thead>
-                    <tr>
-                        <th><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Discount Name</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Discount Value</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Expiration Date</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Status</p><div><img src={Fil} alt="" /></div></div></th>
-                        <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
+      {loading ? (
+        <div className="text-center mt-5">
+          <p>Loading discounts...</p>
+        </div>
+      ) : (
+        <div className="table-content mt-5">
+          <div className="table-container">
+            <table className="my-table">
+              <thead>
+                <tr>
+                  <th><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
+                  <th><div className='d-flex justify-content-between'><p>Discount Name</p><div><img src={Fil} alt="" /></div></div></th>
+                  <th><div className='d-flex justify-content-between'><p>Discount Value</p><div><img src={Fil} alt="" /></div></div></th>
+                  <th><div className='d-flex justify-content-between'><p>Expiration Date</p><div><img src={Fil} alt="" /></div></div></th>
+                  <th><div className='d-flex justify-content-between'><p>Status</p><div><img src={Fil} alt="" /></div></div></th>
+                  <th><div className='d-flex justify-content-between'><p>Actions</p><div><img src={Fil} alt="" /></div></div></th>
+                </tr>
+              </thead>
+              <tbody>
+                {discountItem && discountItem.length > 0 ? (
+                  discountItem.map((discount, index) => (
+                    <tr key={discount.id}>
+                      <td>{index + 1}</td>
+                      <td>{discount.discount_name}</td>
+                      <td>{discount.discount_value}</td>
+                      <td>{discount.expiration_date}</td>
+                      <td><button className={discount.status} style={{ padding: '10px' }}>{discount.status}</button></td>
+                      <td>
+                        <div className="d-flex gap-5">
+                          <FontAwesomeIcon icon={faEdit} style={{ color: '#379042', fontSize: '16px', marginRight: '20px' }} onClick={(e) => { getUpModal(discount.id); e.stopPropagation(); }} title='update discount' />
+                        </div>
+                      </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {discountItem && discountItem.length > 0 ? (
-                        discountItem.map((discount, index) => (
-                        <tr key={discount.id}>
-                            <td>{index + 1}</td>
-                            <td>{discount.discount_name}</td>
-                            <td>{discount.discount_value}</td>
-                            <td>{discount.expiration_date}</td>
-                            <td><button className={discount.status} style={{padding: '10px'}}>{discount.status}</button></td>
-                            <td>
-                            <div className="d-flex gap-5">
-                                <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(discount.id); e.stopPropagation();}} title='update discount'/>
-                            </div>
-                            </td>
-                        </tr>
-                        ))
-                    ) : (
-                        <tr>
-                        <td colSpan="7">No discount available</td>
-                        </tr>
-                    )}
-                </tbody>
-                </table>
-            </div>
-      </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7">No discount available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
 
       {disModal ? (
         <>

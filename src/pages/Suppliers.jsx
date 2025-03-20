@@ -273,12 +273,24 @@ const handleSubmit = async (e) => {
     
 
   } catch (error) {
-    console.error("Supplier creation failed:", error);
+    let errorMessage = "Something went wrong";
+        
+    if (error && typeof error === "object") {
+        if (Array.isArray(error)) {
+            errorMessage = error.map(item => item.message).join(", ");
+        } else if (error.message) {
+            errorMessage = error.message;
+        } else if (error.response && error.response.data) {
+            errorMessage = Array.isArray(error.response.data) 
+                ? error.response.data.map(item => item.message).join(", ") 
+                : error.response.data.message || JSON.stringify(error.response.data);
+        }
+    }
 
     Swal.fire({
-      icon: "error",
-      title: "Error Occurred",
-      text: error.message || "Something went wrong while creating the supplier. Please try again.",
+        icon: "error",
+        title: "Error Occurred",
+        text: errorMessage,
     });
   }
 };
@@ -412,12 +424,24 @@ const updateSubmit = async (e) => {
     }
 
   } catch (error) {
-    console.error("Supplier update failed:", error);
+    let errorMessage = "Something went wrong";
+        
+    if (error && typeof error === "object") {
+        if (Array.isArray(error)) {
+            errorMessage = error.map(item => item.message).join(", ");
+        } else if (error.message) {
+            errorMessage = error.message;
+        } else if (error.response && error.response.data) {
+            errorMessage = Array.isArray(error.response.data) 
+                ? error.response.data.map(item => item.message).join(", ") 
+                : error.response.data.message || JSON.stringify(error.response.data);
+        }
+    }
 
     Swal.fire({
-      icon: "error",
-      title: "Error Occurred",
-      text: error.message || "Something went wrong while updating the supplier. Please try again.",
+        icon: "error",
+        title: "Error Occurred",
+        text: errorMessage,
     });
   }
 }

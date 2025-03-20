@@ -20,7 +20,7 @@ const initialState = {
 
 export const loginForm = createAsyncThunk(
     'user/login',
-    async ({ login, password }, thunkAPI) => {
+    async ({ login, password }, {rejectWithValue}) => {
         try {
             const response = await axios.post(`${API_URL}/login_user`, {
                 login,
@@ -36,8 +36,10 @@ export const loginForm = createAsyncThunk(
             return response.data;
         } 
         catch (error) {
-            console.error('Error response:', error.response || error.message);
-            return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -57,8 +59,10 @@ export const getAllUsers = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            console.error('Error fetching users:', error);
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -76,7 +80,10 @@ export const shopUser = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -92,7 +99,10 @@ export const getUserRole = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -108,7 +118,10 @@ export const getShop = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -149,8 +162,10 @@ export const createUsers = createAsyncThunk(
 
             return result;
         } catch (error) {
-            console.error('Error in createUsers:', error);
-            return thunkAPI.rejectWithValue(error.message);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -170,7 +185,10 @@ export const deleteUser = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -190,7 +208,10 @@ export const updatePassword = createAsyncThunk(
         })
         return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 ); 
@@ -235,8 +256,10 @@ export const updateUsers = createAsyncThunk(
             return result;
 
         } catch (error) {
-            console.error('Error in updatingUsers:', error);
-            return thunkAPI.rejectWithValue(error.message);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

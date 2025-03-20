@@ -40,7 +40,10 @@ export const getSorted = createAsyncThunk(
             total_pages: response.data.total_pages
           };
         } catch (error) {
-            return rejectWithValue(error.message || "Something went wrong");
+          if (error.response && error.response.data) {
+            return rejectWithValue(error.response.data);
+          }
+          return rejectWithValue(error.message || "Something went wrong");
         }
     } 
 );
@@ -68,9 +71,12 @@ export const getSortedValue = createAsyncThunk(
             total_pages: response.data.total_pages
           };
         } catch (error) {
+          if (error.response && error.response.data) {
+            return rejectWithValue(error.response.data);
+          }
             return rejectWithValue(error.message || "Something went wrong");
         }
-    } 
+     } 
 );
 
 export const sortUpdateStatus = createAsyncThunk(
@@ -88,7 +94,10 @@ export const sortUpdateStatus = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.message || "Something went wrong");
+          if (error.response && error.response.data) {
+            return rejectWithValue(error.response.data);
+          }
+          return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

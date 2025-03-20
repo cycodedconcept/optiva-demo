@@ -191,10 +191,24 @@ const proDetails = (iNumber) => {
     } 
     catch (error) {
         Swal.close();
+        let errorMessage = "Something went wrong";
+            
+        if (error && typeof error === "object") {
+            if (Array.isArray(error)) {
+                errorMessage = error.map(item => item.message).join(", ");
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else if (error.response && error.response.data) {
+                errorMessage = Array.isArray(error.response.data) 
+                    ? error.response.data.map(item => item.message).join(", ") 
+                    : error.response.data.message || JSON.stringify(error.response.data);
+            }
+        }
+    
         Swal.fire({
             icon: "error",
             title: "Error Occurred",
-            text: error.message || "Something went wrong while validating Pin. Please try again.",
+            text: errorMessage,
         });
     }
   }
@@ -234,11 +248,25 @@ const proDetails = (iNumber) => {
             });
         }
     } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Error Occurred",
-            text: error.message || "Something went wrong while updating invoice payment status. Please try again.",
-        });
+      let errorMessage = "Something went wrong";
+          
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
+      Swal.fire({
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
+      });
     }
   }
 
@@ -277,11 +305,25 @@ const proDetails = (iNumber) => {
             });
         }
     } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Error Occurred",
-            text: error.message || "Something went wrong while canceling invoice payment status. Please try again.",
-        });
+      let errorMessage = "Something went wrong";
+          
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
+      Swal.fire({
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
+      });
     }
 }
 

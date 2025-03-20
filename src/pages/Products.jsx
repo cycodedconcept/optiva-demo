@@ -118,17 +118,7 @@ const Products = () => {
         }
     }, [productDetails]);;
 
-    // useEffect(() => {
-    //     const hasNonZeroStock = inputGroups.some((inch) => Number(inch.stock) > 0);
-    //     setIsMainStockEditable(!hasNonZeroStock);
-        
-    // }, [inputGroups]);
-
-    // useEffect(() => {
-    //     const hasNonZeroStock2 = inputGroups2.some((inch) => Number(inch.stock) > 0);
-    //     setIsMainStockEditable2(!hasNonZeroStock2);
-        
-    // }, [inputGroups2]);
+    
     
     const handleAddInputGroup = (e) => {
         e.preventDefault();
@@ -255,21 +245,6 @@ const Products = () => {
             total_product_stock: totalStock.toString()
         }));
     };
-
-    // const toggleInches = () => {
-    //     setHasInches(prev => !prev);
-    //     // Reset all values when switching to inches mode
-    //     setProductData(prev => ({
-    //         ...prev,
-    //         total_buying_price: '' || 0,
-    //         total_selling_price: '' || 0,
-    //         total_stock_value: '',
-    //         total_product_stock: '',
-    //         color: ''
-    //     }));
-    //     // Reset inches input groups
-    //     setInputGroups([{ inche: '', buying_price: '', selling_price: '', color: '', stock: '', total: '' }]);
-    // };
 
     const toggleInches = () => {
         // Toggle inches mode first
@@ -564,12 +539,24 @@ const Products = () => {
                 });
             }
         } catch (error) {
-            console.error("Product creation failed:", error);
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
         
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while creating the product. Please try again.",
+                text: errorMessage,
             });
         }
         
@@ -710,12 +697,24 @@ const Products = () => {
                 });
             }
         } catch (error) {
-            console.error("Product Update failed:", error);
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
         
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while creating the product. Please try again.",
+                text: errorMessage,
             });
         }
 

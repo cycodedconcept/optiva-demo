@@ -431,10 +431,24 @@ const Invoice = () => {
                 });
             }
         } catch (error) {
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
+        
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while updating invoice. Please try again.",
+                text: errorMessage,
             });
         }
     }
@@ -593,7 +607,6 @@ const Invoice = () => {
                 confirmButtonColor: '#7A0091'
             });
         } finally {
-            // Always reset the viewport, using a timeout to ensure rendering is complete
             setTimeout(() => {
                 if (metaViewport) {
                     metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
@@ -658,10 +671,24 @@ const Invoice = () => {
         } 
         catch (error) {
             Swal.close();
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
+        
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while validating Pin. Please try again.",
+                text: errorMessage,
             });
         }
     }
@@ -701,10 +728,24 @@ const Invoice = () => {
                 });
             }
         } catch (error) {
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
+        
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while updating invoice payment status. Please try again.",
+                text: errorMessage,
             });
         }
 
@@ -745,10 +786,24 @@ const Invoice = () => {
                 });
             }
         } catch (error) {
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
+        
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while canceling invoice payment status. Please try again.",
+                text: errorMessage,
             });
         }
     }
@@ -777,7 +832,13 @@ const Invoice = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {invoice?.length > 0 ? (
+                                {loading ? ( 
+                                    <tr>
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                            <p>Loading invoices...</p> {/* Replace with a spinner if available */}
+                                        </td>
+                                    </tr>
+                                ) : invoice?.length > 0 ? (
                                     invoice?.map((item, index) => (
                                         <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showDetails(item.invoice_number)}>
                                             <td>{index + 1}</td>
@@ -786,14 +847,22 @@ const Invoice = () => {
                                             <td>{item.date}</td>
                                             <td>{item.payment_method}</td>
                                             <td>₦{Number(item.total_amount).toLocaleString()}</td>
-                                            <td><button className={item.payment_status} onClick={(e) => {changeStatus(item.payment_status, item.invoice_number); e.stopPropagation();}}>{item.payment_status}</button></td>
+                                            <td>
+                                                <button className={item.payment_status} 
+                                                    onClick={(e) => {
+                                                        changeStatus(item.payment_status, item.invoice_number);
+                                                        e.stopPropagation();
+                                                    }}>
+                                                    {item.payment_status}
+                                                </button>
+                                            </td>
                                             <td>
                                                 <div className="d-flex">
                                                     <div className="d-flex gap-5">
-                                                        <FontAwesomeIcon icon={faEye} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { showInvoiceDetails(item.invoice_number); e.stopPropagation();}} title='update discount'/>
+                                                        <FontAwesomeIcon icon={faEye} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { showInvoiceDetails(item.invoice_number); e.stopPropagation();}} title='View Invoice'/>
                                                     </div>
                                                     <div className="d-flex gap-5">
-                                                        <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='update discount'/>
+                                                        <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='Edit Invoice'/>
                                                     </div>
                                                 </div>
                                             </td>
@@ -801,12 +870,16 @@ const Invoice = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7">No invoice available</td>
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                            No invoices available
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
                     <div className="sticky-pagination">
                         <Pagination
                             currentPage={currentPage}
@@ -823,8 +896,8 @@ const Invoice = () => {
                             }}
                         />
                     </div>
-
                 </div>
+
 
                 {mode ? (
                     <>

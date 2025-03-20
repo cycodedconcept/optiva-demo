@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+ import React, { useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { getSorted, clearSearch, getSortedValue, sortUpdateStatus } from '../features/sortedSlice';
 import { Fil, Inv } from '../assets/images';
@@ -64,12 +64,12 @@ const Sorted = () => {
     const cardItems = [
         {
           id: 0,
-          cvalue: card.totalsorted,
+          cvalue: card.totalsorted || "loading...",
           content: "Total Sorted Orders"
         },
         {
           id: 1,
-          cvalue: card.totalnotsorted,
+          cvalue: card.totalnotsorted ? Number(card.totalnotsorted).toLocaleString() : "0",
           content: "Not Sorted Orders",
         }
     ]
@@ -189,10 +189,24 @@ const Sorted = () => {
                 }); 
             }
         } catch (error) {
+            let errorMessage = "Something went wrong";
+                
+            if (error && typeof error === "object") {
+                if (Array.isArray(error)) {
+                    errorMessage = error.map(item => item.message).join(", ");
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = Array.isArray(error.response.data) 
+                        ? error.response.data.map(item => item.message).join(", ") 
+                        : error.response.data.message || JSON.stringify(error.response.data);
+                }
+            }
+        
             Swal.fire({
                 icon: "error",
                 title: "Error Occurred",
-                text: error.message || "Something went wrong while sorting invoice. Please try again.",
+                text: errorMessage,
             });
         }
     }
@@ -223,7 +237,7 @@ const Sorted = () => {
         {loading ? (
            <div>Loading...</div>
         ) : error ? (
-          <div>Error: {error?.message || 'No records available'}</div> 
+          <div className='text-center'>{error?.message || 'No records available'}</div> 
         ) : (
             <>
               <div className="lp px-0 py-0 px-lg-1">

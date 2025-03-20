@@ -32,8 +32,10 @@ export const getAllSuppliers = createAsyncThunk(
 
             return response.data;
         } catch (error) {
-            console.error('Error fetching suppliers:', error);
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -87,7 +89,7 @@ export const getCountries = createAsyncThunk(
         
         // Otherwise use hardcoded fallback
         const fallbackData = { 
-            data: [
+             data: [
                 {
                 "name": "Afghanistan",
                 "iso3": "AFG",
@@ -20265,6 +20267,9 @@ export const createSupplier = createAsyncThunk(
 
             return data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -20302,6 +20307,9 @@ export const updateSupplier = createAsyncThunk(
 
             return data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -20322,6 +20330,9 @@ export const deleteSupplier = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }

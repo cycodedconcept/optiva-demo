@@ -24,6 +24,9 @@ export const getCustomers = createAsyncThunk(
             return response.data
 
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -44,7 +47,10 @@ export const addCustomers = createAsyncThunk(
             console.log(response.data)
             return response.data
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -60,7 +66,10 @@ export const searchCustomer = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

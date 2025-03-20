@@ -141,13 +141,25 @@ const CreateInvoice = () => {
         });
       }
     } catch (error) {
-      console.error("Customer creation failed:", error);
+      let errorMessage = "Something went wrong";
+                      
+    if (error && typeof error === "object") {
+        if (Array.isArray(error)) {
+            errorMessage = error.map(item => item.message).join(", ");
+        } else if (error.message) {
+            errorMessage = error.message;
+        } else if (error.response && error.response.data) {
+            errorMessage = Array.isArray(error.response.data) 
+                ? error.response.data.map(item => item.message).join(", ") 
+                : error.response.data.message || JSON.stringify(error.response.data);
+        }
+    }
 
-      Swal.fire({
+    Swal.fire({
         icon: "error",
         title: "Error Occurred",
-        text: error.message || "Something went wrong while creating the customer. Please try again.",
-      });
+        text: errorMessage,
+    });
     }
   }
 

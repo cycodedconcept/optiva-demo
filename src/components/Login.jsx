@@ -31,12 +31,27 @@ const Login = () => {
 
   useEffect(() => {
     if (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: error.message || 'An error occurred during login. Please try again.',
-        confirmButtonColor: '#7A0091'
-      });
+      console.error("Login Failed:", error);
+          
+        let errorMessage = "Something went wrong";
+    
+        if (error && typeof error === "object") {
+            if (Array.isArray(error)) {
+                errorMessage = error.map(item => item.message).join(", ");
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else if (error.response && error.response.data) {
+                errorMessage = Array.isArray(error.response.data) 
+                    ? error.response.data.map(item => item.message).join(", ") 
+                    : error.response.data.message || JSON.stringify(error.response.data);
+            }
+        }
+    
+        Swal.fire({
+            icon: "error",
+            title: "Error Occurred",
+            text: errorMessage,
+        });
     }
   }, [error]);
 

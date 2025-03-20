@@ -60,14 +60,6 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
         setIsSidebarVisible(prev => !prev);
     };
 
-    // const handleMenuClick = (menuName) => {
-    //     onButtonClick(menuName);
-        
-    //     if (isMobile) {
-    //         setIsSidebarVisible(false);
-    //     }
-    // };
-
     const handleMenuClick = (menuItem) => {
         if (menuItem.child_menu && menuItem.child_menu.length > 0) {
             // Toggle dropdown when the parent is clicked
@@ -101,7 +93,7 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
         localStorage.removeItem('token');
         localStorage.clear();
         
-        window.location.href = '/';
+        window.location.href = '/IVMS';
     };
 
     const renderMenu = menus.map((menuItem) => {

@@ -79,7 +79,7 @@ const Dashboard = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.clear();
-    window.location.href = '/';
+    window.location.href = '/IVMS';
   };
   
   return (

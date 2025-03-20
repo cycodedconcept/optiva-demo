@@ -24,6 +24,9 @@ export const getDashData = createAsyncThunk(
         })
         return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -41,6 +44,9 @@ export const getLatestItems = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -50,6 +56,33 @@ const dashboardSlice = createSlice({
     name: 'dashboard',
     initialState,
     reducers: {},
+    // extraReducers: (builder) => {
+    //     builder
+    //     .addCase(getDashData.pending, (state) => {
+    //         state.loading = true;
+    //         state.error = null;
+    //     })
+    //     .addCase(getDashData.fulfilled, (state, action) => {
+    //         state.loading = false;
+    //         state.item = action.payload;
+    //     })
+    //     .addCase(getDashData.rejected, (state, action) => {
+    //         state.loading = false;
+    //         state.error = action.payload;
+    //     })
+    //     .addCase(getLatestItems.pending, (state) => {
+    //         state.loading = true;
+    //         state.error = null;
+    //     })
+    //     .addCase(getLatestItems.fulfilled, (state, action) => {
+    //         state.loading = false;
+    //         state.payments = action.payload;
+    //     })
+    //     .addCase(getLatestItems.rejected, (state, action) => {
+    //         state.loading = false;
+    //         state.error = action.payload;
+    //     })
+    // }
     extraReducers: (builder) => {
         builder
         .addCase(getDashData.pending, (state) => {
@@ -75,8 +108,9 @@ const dashboardSlice = createSlice({
         .addCase(getLatestItems.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
-        })
+        });
     }
+    
 })
 
 export default dashboardSlice.reducer;

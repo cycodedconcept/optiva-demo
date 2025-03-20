@@ -41,6 +41,9 @@ export const getProduct = createAsyncThunk(
                 total_pages: response.data.total_pages
             };
         } catch (error) {
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
             return rejectWithValue(error.message || "Something went wrong");
         }
     }
@@ -58,7 +61,10 @@ export const createProduct = createAsyncThunk(
             console.log(response.data)
             return response.data;
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -74,7 +80,10 @@ export const updateProduct = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -93,7 +102,10 @@ export const deleteProduct = createAsyncThunk(
             })
             return response.data;
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 );
@@ -116,7 +128,10 @@ export const searchProduct = createAsyncThunk(
             console.log(response.data)
             return response.data;
         } catch (error) {
-          return rejectWithValue(error.response?.data || 'Something went wrong');
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
         }
     }
 )

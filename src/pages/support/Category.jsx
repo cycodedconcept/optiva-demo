@@ -121,12 +121,24 @@ const Category = () => {
         });
       }
     } catch (error) {
-      console.error("Category creation failed:", error);
-
+      let errorMessage = "Something went wrong";
+                      
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
       Swal.fire({
-        icon: "error",
-        title: "Error Occurred",
-        text: error.message || "Something went wrong while creating the supplier. Please try again.",
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
       });
     }
   }
@@ -214,12 +226,24 @@ const Category = () => {
       }
 
     } catch (error) {
-      console.error("Category update failed:", error);
-
+      let errorMessage = "Something went wrong";
+                      
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
       Swal.fire({
-        icon: "error",
-        title: "Error Occurred",
-        text: error.message || "Something went wrong while updating the category. Please try again.",
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
       });
     }
   }
@@ -269,7 +293,7 @@ const Category = () => {
               <input type="text" placeholder="Search Supplier..." className="search-input mb-3" style={{borderRadius: '5px',}}/>
               <span className="search-icon" style={{position: "absolute",
                 right: "10px",
-                top: "8px",
+                top: "20px",
                 fontSize: "20px",
                 color: "#222",
                 cursor: "pointer"}}>&#128269;</span>
@@ -305,7 +329,7 @@ const Category = () => {
                           ))
                         ) : (
                           <tr>
-                          <td colSpan="7">No category available</td>
+                            <td colSpan="7">No category available</td>
                           </tr>
                         )
                       }

@@ -14,7 +14,8 @@ import {
     Legend,
     PointElement,
     BarController,
-    LineController
+    LineController,
+    Filler
 } from 'chart.js';
 import { Chart, Line } from 'react-chartjs-2';
 
@@ -28,8 +29,9 @@ ChartJS.register(
     Title, 
     Tooltip, 
     Legend,
-    BarController,  // Add this
-    LineController  // Add this
+    BarController,
+    LineController,
+    Filler
 );
 
 export const MixedChart = () => {
