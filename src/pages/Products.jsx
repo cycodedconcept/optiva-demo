@@ -70,7 +70,9 @@ const Products = () => {
     const [isMainStockEditable2, setIsMainStockEditable2] = useState(true);
 
 
-    
+    const sModal = () => {
+        setModalVisible(true)
+    }
 
     const hideModal = () => {
         setModalVisible(false);
@@ -78,6 +80,7 @@ const Products = () => {
         setVm(false)
         setHasInches(false);
         setHasInches2(false);
+        setFieldsDisabled(false);
         setProductData({
             product_name: '',
             product_category: '',
@@ -92,9 +95,7 @@ const Products = () => {
           });
     }
 
-    const sModal = () => {
-        setModalVisible(true)
-    }
+    
     const dmodal = () => {
         setUpModal(true)
     }
@@ -527,6 +528,7 @@ const Products = () => {
                 });
                 setInputGroups([{ inche: "", buying_price: "", selling_price: "", color: "", stock: "" }]);
                 setHasInches(false);
+                setFieldsDisabled(false);
         
                 hideModal();
         

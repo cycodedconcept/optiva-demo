@@ -125,7 +125,8 @@ export const searchProduct = createAsyncThunk(
                     Authorization: `Bearer ${token}`
                 }
             })
-            console.log(response.data)
+            localStorage.setItem("product", JSON.stringify(response.data.data));
+
             return response.data;
         } catch (error) {
             if (error.response && error.response.data) {

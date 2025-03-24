@@ -876,7 +876,7 @@ const handleDownload = async () => {
                 </div>
 
                 <div className="text-right">
-                    <button className='btn' onClick={previewInvoince}><FontAwesomeIcon icon={faEyeSlash} style={{color: '#7A0091', backgroundColor: '#F1EDF2', padding: '18px', marginTop: '10px'}}/></button>
+                    {/* <button className='btn' onClick={previewInvoince}><FontAwesomeIcon icon={faEyeSlash} style={{color: '#7A0091', backgroundColor: '#F1EDF2', padding: '18px', marginTop: '10px'}}/></button> */}
                     <button className='in-btn'>
                         {loading ? (
                                 <>

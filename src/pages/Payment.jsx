@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPayments, clearPayment, searchPayment, updatePaymentPin, updatePaymentStatus, cancelPaymentPinProcess } from '../features/paymentSlice';
+import { getPayments, clearPayment, updatePaymentPin, updatePaymentStatus, cancelPaymentPinProcess, filterPayment, searchPayment } from '../features/paymentSlice';
 import { Fil, Inv } from '../assets/images';
 import Swal from 'sweetalert2';
 import Pagination from './support/Pagination';
 import { debounce }  from 'lodash';
 
-
 const Payment = () => {
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
   const getId = localStorage.getItem("sid");
-  const { error, loading, isSearching, payment, search, currentPage, per_page, total, total_pages} = useSelector((state) => state.payment);
-  const [inputValue, setInputValue] = useState('');
+  const { error, loading, payment, currentPage, per_page, total, total_pages, fillItem, fillCurrentPage, fillPerPage, fillTotal, fillTotalPages, search, sCurrentPage, sTotalPages, sTotal, sPerPage} = useSelector((state) => state.payment);
   const [payData, setPayData] = useState(null);
   const [mod, setMod] = useState(false)
   const [statusInv, setStatusInv] = useState(false);
@@ -27,18 +25,62 @@ const Payment = () => {
     { label: "Refunded", value: "Refund" }
   ];
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSearch = (e) => {
+    let value = e.target.value
+    setInputValue(value)
+
+    if (value.trim() === '') {
+      setIsSearching(false);
+      dispatch(getPayments({token, shop_id: getId, page: currentPage, per_page: per_page}));
+    } else {
+      setIsSearching(true);
+      setIsFiltering(false); // Turn off filtering when searching
+      
+      if (token) {
+        dispatch(searchPayment({token, shop_id: getId, search_value: value, page: sCurrentPage, per_page: sPerPage}));
+      }
+    }
+  }
 
   const handleFilterClick = (status) => {
     setSelectedStatus(status.label);
-    debouncedSearch(status.value);
+    setActiveFilter(status.value);
+    setInputValue(''); // Clear search input when filtering
+    
+    if (token) {
+      if (status.value === "All") {
+        setIsFiltering(false);
+        setIsSearching(false);
+        dispatch(getPayments({
+          token, 
+          shop_id: getId, 
+          page: 1, 
+          per_page
+        }));
+      } else {
+        setIsFiltering(true);
+        setIsSearching(false);
+        dispatch(filterPayment({
+          token, 
+          shop_id: getId, 
+          search_value: status.value, 
+          page: 1,
+          per_page: fillPerPage
+        }));
+      }
+    }
   };
-  
+
   const itemFilter = filterStatus.map((item) => (
     <button 
       key={item.value} 
       className="btn"
       onClick={() => handleFilterClick(item)}
-
       style={{
         backgroundColor: selectedStatus === item.label ? "#7A0091" : "",
         color: selectedStatus === item.label ? "#fff" : "#000",
@@ -56,88 +98,77 @@ const Payment = () => {
     </button>
   ));
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setInputValue(value);
-    debouncedSearch(value);
-  };
-
   useEffect(() => {
     if (token) {
       dispatch(getPayments({token, shop_id: getId, page: currentPage, per_page: per_page}))
     }
   }, [token, dispatch, currentPage, per_page])
 
-  // const debouncedSearch = useCallback(
-  //   debounce((value) => {
-  //       if (value.trim() === "") {
-  //           dispatch(clearPayment());
-  //           dispatch(getPayments({ 
-  //               token, 
-  //               shop_id: getId, 
-  //               page: 1, 
-  //               per_page: per_page 
-  //           }));
-  //       } else {
-  //           dispatch(searchPayment({ 
-  //               token, 
-  //               shop_id: getId, 
-  //               search_value: value, 
-  //               page: 1, 
-  //               per_page: per_page 
-  //           }));
-  //       }
-  //   }, 300),
-  //   [dispatch, token, getId, per_page]
-  // );
-
   const debouncedSearch = useCallback(
-    debounce((statusValue) => {
-      if (statusValue === "All") {
-        dispatch(clearPayment());
-        dispatch(getPayments({ token, shop_id: getId, page: 1, per_page }));
-      } else {
-        dispatch(searchPayment({ 
-          token, 
-          shop_id: getId, 
-          search_value: statusValue, 
-          page: 1, 
-          per_page 
-        }));
-      }
+    debounce((searchValue) => {
+      dispatch(clearPayment());
+      dispatch(getPayments({ token, shop_id: getId, page: 1, per_page }));
     }, 300),
     [dispatch, token, getId, per_page]
   );
-
   
   useEffect(() => {
     return () => {
         debouncedSearch.cancel();
     };
-}, [debouncedSearch]);
+  }, [debouncedSearch]);
 
-const hideModal = () => {
-  setMod(false)
-  setStatusInv(false);
-  setSecond(false);
-
-}
-
-
-const displayData = isSearching ? search : payment;
-
-const proDetails = (iNumber) => {
-  setMod(true)
-  const payItem = localStorage.getItem("payment");
-  const det = JSON.parse(payItem);
-
-  const selectedPayment = det.data.find((item) => item.invoice_number === iNumber);
-  console.log(selectedPayment)
-
-  if (selectedPayment) {
-    setPayData(selectedPayment)
+  const hideModal = () => {
+    setMod(false)
+    setStatusInv(false);
+    setSecond(false);
   }
-}
+
+  // Determine which data to display based on filters and search
+  const getDisplayData = () => {
+    if (isSearching) return search;
+    if (isFiltering) return fillItem;
+    return payment;
+  };
+
+  // Get pagination parameters based on current mode
+  const getPaginationParams = () => {
+    if (isSearching) {
+      return {
+        currentPage: sCurrentPage,
+        totalPages: sTotalPages,
+        perPage: sPerPage,
+        total: sTotal
+      };
+    }
+    if (isFiltering) {
+      return {
+        currentPage: fillCurrentPage,
+        totalPages: fillTotalPages,
+        perPage: fillPerPage,
+        total: fillTotal
+      };
+    }
+    return {
+      currentPage: currentPage,
+      totalPages: total_pages,
+      perPage: per_page,
+      total: total
+    };
+  };
+
+  const proDetails = (iNumber) => {
+    setMod(true)
+    const payItem = localStorage.getItem("payment");
+    const det = JSON.parse(payItem);
+
+    const selectedPayment = det.data.find((item) => item.invoice_number === iNumber);
+    console.log(selectedPayment)
+
+    if (selectedPayment) {
+      setPayData(selectedPayment)
+    }
+  }
 
   const changeStatus = (payment, inum) => {
     if (payment === "Paid" || payment === "paid") {
@@ -325,44 +356,57 @@ const proDetails = (iNumber) => {
           text: errorMessage,
       });
     }
-}
+  }
+
+  // Get pagination parameters
+  const paginationParams = getPaginationParams();
+  const displayData = getDisplayData();
 
   return (
     <>
-
-
       <div className='mt-5 py-3 px-4' style={{background: '#fff'}}>
         {itemFilter}
 
-
         <hr/>
-        <div className="mt-5 mt-lg-2 text-right">
-          <div className="search-container text-right mt-3">
-            <input type="text" placeholder="Search Supplier..." className="search-input" style={{borderRadius: '5px'}} value={inputValue} onChange={handleSearch}/>
-            <span className="search-icon" style={{position: "absolute",
-              right: "10px",
-              top: "20px",
-              fontSize: "20px",
-              color: "#222",
-              cursor: "pointer"}}>&#128269;</span>
-         </div>
+        <div className="search-container text-right">
+          <input 
+              type="text" 
+              placeholder="Search..." 
+              className="search-input" 
+              style={{borderRadius: '5px'}} 
+              value={inputValue} 
+              onChange={handleSearch}
+          />
+          <span 
+              className="search-icon" 
+              style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "20px",
+                  fontSize: "20px",
+                  color: "#222",
+                  cursor: "pointer"
+              }}
+          >
+              &#128269;
+          </span>
         </div>
 
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
-          <div>Error: {error?.message || 'Something went erong'}</div>
+          <div>Error: {error?.message || 'Something went wrong'}</div>
         ) : (
           <div className="table-content">
             <div className="table-container mt-5">
-              <table className="my-table w-100" data={displayData}>
+              <table className="my-table w-100">
                 <thead>
                   <tr>
                     <th style={{width: '5%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
                     <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Customer Name</p><div><img src={Fil} alt="" /></div></div></th>
                     <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Invoice Number</p><div><img src={Fil} alt="" /></div></div></th>
                     <th style={{width: '12%'}}><div className='d-flex justify-content-between'><p>Date</p><div><img src={Fil} alt="" /></div></div></th>
-                    <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Pament Method</p><div><img src={Fil} alt="" /></div></div></th>
+                    <th style={{width: '13%'}}><div className='d-flex justify-content-between'><p>Payment Method</p><div><img src={Fil} alt="" /></div></div></th>
                     <th style={{width: '18%'}}><div className='d-flex justify-content-between'><p>Discount Name</p><div><img src={Fil} alt="" /></div></div></th>
                     <th style={{width: '25%'}}><div className='d-flex justify-content-between'><p>Payment Status</p><div><img src={Fil} alt="" /></div></div></th>
                   </tr>
@@ -370,79 +414,100 @@ const proDetails = (iNumber) => {
                 <tbody>
                   {loading ? (
                     <tr><td colSpan="9">Loading...</td></tr>
-                  ) : (isSearching ? search : payment).length > 0 ? (
-                      (isSearching ? search : payment).map((item, index) => (
-                        <tr key={index} onClick={() => proDetails(item.invoice_number)} style={{ cursor: 'pointer' }}>
-                          <td>{index + 1}</td>
-                          <td>{item.customer_name}</td>
-                          <td>{item.invoice_number}</td>
-                          <td>{item.date}</td>
-                          <td>{item.payment_method}</td>
-                          <td>{item.invoicedata.discount_name || '-------'}</td>
-                          <td onClick={(e) => {changeStatus(item.payment_status, item.invoice_number); e.stopPropagation();}}><button className={item.payment_status}>{item.payment_status}</button></td>
-                        </tr>
-                      ))
+                  ) : displayData && displayData.length > 0 ? (
+                    displayData.map((item, index) => (
+                      <tr key={index} onClick={() => proDetails(item.invoice_number)} style={{ cursor: 'pointer' }}>
+                        <td>{index + 1}</td>
+                        <td>{item.customer_name}</td>
+                        <td>{item.invoice_number}</td>
+                        <td>{item.date}</td>
+                        <td>{item.payment_method}</td>
+                        <td>{item.invoicedata.discount_name || '-------'}</td>
+                        <td onClick={(e) => {changeStatus(item.payment_status, item.invoice_number); e.stopPropagation();}}>
+                          <button className={item.payment_status}>{item.payment_status}</button>
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="9">No Payments Available</td>
+                      <td colSpan="9">
+                        {isSearching ? 'No search results found' : 
+                         isFiltering ? 'No filtered payments available' : 
+                         'No payments available'}
+                      </td>
                     </tr>
                   )}
                 </tbody>
               </table>
-          </div>
-          <div className="sticky-pagination">
-            <Pagination
-                currentPage={currentPage}
-                totalPages={total_pages}
-                perPage={per_page}
-                total={total}
+            </div>
+
+            <div className="sticky-pagination">
+              <Pagination
+                currentPage={paginationParams.currentPage}
+                totalPages={paginationParams.totalPages}
+                perPage={paginationParams.perPage}
+                total={paginationParams.total}
                 onPageChange={(newPage) => {
-                    if (isSearching) {
-                        dispatch(searchPayment({
-                            token,
-                            shop_id: getId,
-                            search_value: inputValue,
-                            page: newPage,
-                            per_page: per_page
-                        }));
-                    } else {
-                        dispatch(getPayments({
-                            token,
-                            shop_id: getId,
-                            page: newPage,
-                            per_page: per_page
-                        }));
-                    }
+                  if (isSearching) {
+                    dispatch(searchPayment({
+                      token,
+                      shop_id: getId,
+                      search_value: inputValue,
+                      page: newPage,
+                      per_page: sPerPage
+                    }));
+                  } else if (isFiltering) {
+                    dispatch(filterPayment({
+                      token,
+                      shop_id: getId,
+                      search_value: activeFilter,
+                      page: newPage,
+                      per_page: fillPerPage
+                    }));
+                  } else {
+                    dispatch(getPayments({
+                      token,
+                      shop_id: getId,
+                      page: newPage,
+                      per_page
+                    }));
+                  }
                 }}
                 onPerPageChange={(newPerPage) => {
-                    if (isSearching) {
-                        dispatch(searchPayment({
-                            token,
-                            shop_id: getId,
-                            search_value: inputValue,
-                            page: 1,
-                            per_page: newPerPage
-                        }));
-                    } else {
-                        dispatch(getPayments({
-                            token,
-                            shop_id: getId,
-                            page: 1,
-                            per_page: newPerPage
-                        }));
-                    }
+                  if (isSearching) {
+                    dispatch(searchPayment({
+                      token,
+                      shop_id: getId,
+                      search_value: inputValue,
+                      page: 1,
+                      per_page: newPerPage
+                    }));
+                  } else if (isFiltering) {
+                    dispatch(filterPayment({
+                      token,
+                      shop_id: getId,
+                      search_value: activeFilter,
+                      page: 1,
+                      per_page: newPerPage
+                    }));
+                  } else {
+                    dispatch(getPayments({
+                      token,
+                      shop_id: getId,
+                      page: 1,
+                      per_page: newPerPage
+                    }));
+                  }
                 }}
-            />
-
+              />
+            </div>
           </div>
-        </div>
         )}
       </div>
       
-
-      {mod ? (
-        <>
-         <div className="modal-overlay">
+      {/* Modal for Transaction Details */}
+      {mod && (
+        <div className="modal-overlay">
           <div className="modal-content2">
             <div className="head-mode">
               <h6 style={{color: '#7A0091'}}>Transaction Details</h6>
@@ -525,65 +590,59 @@ const proDetails = (iNumber) => {
                   </table>
                   </div>
                 </div>
-
-              </>) : ('')}
+              </>) : null}
             </div>
           </div>
-         </div>
-        </>
-      ) : ('')}
+        </div>
+      )}
 
-    {statusInv ? (
-      <>
-
+      {/* Modal for Pin Validation */}
+      {statusInv && (
         <div className="modal-overlay">
           <div className="modal-content2">
-              <div className="head-mode">
-                  <h6 style={{color: '#7A0091'}}>Update Payment Pin</h6>
-                  <button className="modal-close" onClick={hideModal}>&times;</button>
-              </div>
-              <div className="modal-body">
-                  <form onSubmit={handlePinChange}>
-                      <div className="form-group mb-4">
-                          <label htmlFor="exampleInputEmail1">Payment Pin <span style={{color: '#7A0091'}}>*</span></label>
-                          <input type="text" placeholder='Enter Pin' value={dvalue} onChange={(e) => setDvalue(e.target.value)}/>
+            <div className="head-mode">
+              <h6 style={{color: '#7A0091'}}>Update Payment Pin</h6>
+              <button className="modal-close" onClick={hideModal}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={handlePinChange}>
+                <div className="form-group mb-4">
+                  <label htmlFor="exampleInputEmail1">Payment Pin <span style={{color: '#7A0091'}}>*</span></label>
+                  <input type="text" placeholder='Enter Pin' value={dvalue} onChange={(e) => setDvalue(e.target.value)}/>
+                </div>
+                <button className='in-btn'>
+                  {loading ? (
+                    <>
+                      <div className="spinner-border spinner-border-sm text-light" role="status">
+                        <span className="sr-only"></span>
                       </div>
-                      <button className='in-btn'>
-                          {loading ? (
-                                  <>
-                                  <div className="spinner-border spinner-border-sm text-light" role="status">
-                                      <span className="sr-only"></span>
-                                  </div>
-                                  <span>Validating Pin... </span>
-                                  </>
-                              ) : (
-                                  'Validate Pin'
-                          )}
-                      </button>
-                  </form>
-              </div>
+                      <span>Validating Pin... </span>
+                    </>
+                  ) : (
+                    'Validate Pin'
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </>
-    ) : ('')}
+      )}
 
-    {second ? (
-      <>
+      {/* Modal for Payment Actions */}
+      {second && (
         <div className="modal-overlay">
           <div className="modal-content2" style={{width: '35%'}}>
-              <div className="head-mode">
-                <h6 style={{color: '#7A0091'}}>Update Invoice Status</h6>
-                <button className="modal-close" onClick={hideModal}>&times;</button>
-              </div>
-              <div className="modal-body text-center d-flex justify-content-between">
-                  <button className='in-btn w-50 mr-3' onClick={handlePaid}>Refund</button>
-                  <button className='in-btn c-btn w-50' onClick={handleCancle}>Cancel</button>
-              </div>
+            <div className="head-mode">
+              <h6 style={{color: '#7A0091'}}>Update Invoice Status</h6>
+              <button className="modal-close" onClick={hideModal}>&times;</button>
+            </div>
+            <div className="modal-body text-center d-flex justify-content-between">
+              <button className='in-btn w-50 mr-3' onClick={handlePaid}>Refund</button>
+              <button className='in-btn c-btn w-50' onClick={handleCancle}>Cancel</button>
+            </div>
           </div>
         </div>
-      </>
-    ) : ('')}
-      
+      )}
     </>
   );
 };
