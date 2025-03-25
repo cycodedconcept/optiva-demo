@@ -474,10 +474,11 @@ const Products = () => {
         formData.append('shop_id', JSON.stringify(productData.shop_id));
         
 
-        // Handle images (files)
-        productData.images.forEach((image) => {
-            formData.append('images', image);
-        });
+        if (productData.images && productData.images.length > 0) {
+            productData.images.forEach((image) => {
+                formData.append('images', image);
+            });
+        }
 
 
         for (let pair of formData.entries()) {
@@ -1367,8 +1368,8 @@ const Products = () => {
                             </div>
 
                             <div className="text-right">
-                                <button className='d-btn mr-2'>Discard</button>
-                                <button className='in-btn'>
+                                <button className='d-btn mr-2' type='button'>Discard</button>
+                                <button className='in-btn' type='submit'>
                                     {loading ? (
                                             <>
                                             <div className="spinner-border spinner-border-sm text-light" role="status">
