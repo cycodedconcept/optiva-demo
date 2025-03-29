@@ -68,7 +68,7 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
                 [menuItem.parent_menu.id]: !prev[menuItem.parent_menu.id],
             }));
         } else {
-            // Navigate if there are no child menus
+            // Force a re-render by passing a unique identifier
             onButtonClick(menuItem.parent_menu.menu_name);
             
             if (isMobile) {
@@ -77,10 +77,10 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
         }
     };
     
-
     const handleSubmenuClick = (childMenuName, event) => {
         event.stopPropagation();
         
+        // Trigger button click for submenu item
         onButtonClick(childMenuName);
         
         if (isMobile) {

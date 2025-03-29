@@ -4,6 +4,7 @@ import axios from 'axios';
 
 const initialState = {
   invoice: [],
+  search: [],
   products: [],
   discountItem: [],
   card: {},
@@ -16,6 +17,11 @@ const initialState = {
   per_page: 10,
   total: 0,
   total_pages: 0,
+
+  searchCurrentPage: 1,
+  searchPerPage: 10,
+  searchTotal: 0,
+  searchTotalPages: 0,
 }
 
 export const getInvoice = createAsyncThunk(
@@ -233,6 +239,42 @@ export const cancelValidatePin = createAsyncThunk(
     }
 );
 
+export const searchInvoice = createAsyncThunk(
+    'invoice/searchInvoice',
+    async ({token, shop_id, search_value, page = 1, per_page = 10}, { rejectWithValue }) => {
+        try {
+           const response = await axios.get(`${API_URL}/get_allinvoice`, {
+            params: {
+                shop_id: shop_id,
+                page: page,
+                per_page: per_page,
+                search_value: search_value
+            },
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+           })
+           
+           localStorage.setItem("invoice", JSON.stringify(response.data.data));
+
+           
+           return {
+            data: response.data.data,
+            page: response.data.page,
+            per_page: response.data.per_page,
+            total: response.data.total,
+            total_pages: response.data.total_pages
+          };
+        } catch (error) {
+            console.error('Search API Error:', error);
+            if (error.response && error.response.data) {
+                return rejectWithValue(error.response.data);
+            }
+            return rejectWithValue(error.message || "Something went wrong");
+        }
+    }
+)
+
 
 const invoiceSlice = createSlice({
     name: 'invoice',
@@ -376,6 +418,44 @@ const invoiceSlice = createSlice({
         .addCase(cancelValidatePin.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
+        })
+        .addCase(searchInvoice.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(searchInvoice.fulfilled, (state, action) => {
+            state.loading = false;
+            
+            // Ensure we have data to work with
+            if (action.payload && action.payload.data) {
+              // Store search results - note the nested data structure
+              state.search = action.payload.data.data || [];
+              
+              // Set pagination information from the nested data object
+              state.searchCurrentPage = Number(action.payload.data.page) || 1;
+              state.searchTotalPages = Number(action.payload.data.total_pages) || 1;
+              state.searchTotal = Number(action.payload.data.total) || 0;
+              state.searchPerPage = Number(action.payload.data.per_page) || 10;
+              
+              // Set searching state based on whether a search is active
+              state.isSearching = true;
+              
+              console.log('Search results loaded:', {
+                results: state.search.length,
+                page: state.searchCurrentPage,
+                totalPages: state.searchTotalPages,
+                total: state.searchTotal
+              });
+            } else {
+              // Handle empty payload case
+              state.search = [];
+              state.isSearching = false;
+              console.log('No search results found');
+            }
+          })
+        .addCase(searchInvoice.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload || 'Something went wrong';
         })
     }
 })

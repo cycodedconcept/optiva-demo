@@ -16,12 +16,13 @@ const Payment = () => {
   const [statusInv, setStatusInv] = useState(false);
   const [dvalue, setDvalue] = useState('');
   const [second, setSecond] = useState(false);
+  const [second2, setSecond2] = useState(false);
 
   const filterStatus = [
     { label: "All", value: "All" },
     { label: "Paid", value: "Paid" },
     { label: "Pending", value: "Pending" },
-    { label: "Cancelled", value: "Cancelled" },
+    { label: "Cancelled", value: "Cancel" },
     { label: "Refunded", value: "Refund" }
   ];
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -122,6 +123,8 @@ const Payment = () => {
     setMod(false)
     setStatusInv(false);
     setSecond(false);
+    setSecond2(false);
+    localStorage.removeItem("p-status");
   }
 
   // Determine which data to display based on filters and search
@@ -174,7 +177,13 @@ const Payment = () => {
     if (payment === "Paid" || payment === "paid") {
       localStorage.setItem("ivv2", inum)
       setStatusInv(true)
-    }else {
+    }else if (payment === "Pending" || "pending") {
+      localStorage.setItem("ivv2", inum);
+      localStorage.setItem("p-status", payment)
+      setStatusInv(true)
+      console.log("this is pending")
+    }
+    else {
       setStatusInv(false)
     }
   }
@@ -182,6 +191,7 @@ const Payment = () => {
   const handlePinChange = async (e) => {
     e.preventDefault();
     const getIn = localStorage.getItem("ivv2");
+    const getSta = localStorage.getItem("p-status");
 
     if (dvalue === "") {
         Swal.fire({
@@ -208,9 +218,13 @@ const Payment = () => {
         Swal.close();
 
         if (response.message === "success") {
-            hideModal();
-            setDvalue('');
-            setSecond(true);
+          hideModal();
+          setDvalue('');
+          if (getSta) {
+           setSecond2(true);
+          }else {
+           setSecond(true);
+          }
         }
         else {
             Swal.fire({
@@ -332,6 +346,63 @@ const Payment = () => {
             Swal.fire({
               icon: "info",
               title: "canceling payment status",
+              text: `${response.message}`,
+            });
+        }
+    } catch (error) {
+      let errorMessage = "Something went wrong";
+          
+      if (error && typeof error === "object") {
+          if (Array.isArray(error)) {
+              errorMessage = error.map(item => item.message).join(", ");
+          } else if (error.message) {
+              errorMessage = error.message;
+          } else if (error.response && error.response.data) {
+              errorMessage = Array.isArray(error.response.data) 
+                  ? error.response.data.map(item => item.message).join(", ") 
+                  : error.response.data.message || JSON.stringify(error.response.data);
+          }
+      }
+  
+      Swal.fire({
+          icon: "error",
+          title: "Error Occurred",
+          text: errorMessage,
+      });
+    }
+  }
+
+  const handlePending = async (e) => {
+    e.preventDefault();
+    const getIn = localStorage.getItem("ivv2");
+
+    try {
+        Swal.fire({
+            title: "Validating Payment Status...",
+            text: "Please wait while we process your request.",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        const response = await dispatch(updatePaymentStatus({token, invoice_number: getIn, shop_id: getId, status: 'Cancel'})).unwrap();
+
+        if (response.message === "Payment updated") {
+            Swal.fire({
+                icon: "success",
+                title: "updating payment status",
+                text: `${response.message}`,
+            });
+
+            hideModal();
+            dispatch(getPayments({token, shop_id: getId, page: currentPage, per_page: per_page}))
+        }
+        else {
+            Swal.fire({
+              icon: "info",
+              title: "updating payment status",
               text: `${response.message}`,
             });
         }
@@ -639,6 +710,20 @@ const Payment = () => {
             <div className="modal-body text-center d-flex justify-content-between">
               <button className='in-btn w-50 mr-3' onClick={handlePaid}>Refund</button>
               <button className='in-btn c-btn w-50' onClick={handleCancle}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {second2 && (
+        <div className="modal-overlay">
+          <div className="modal-content2" style={{width: '35%'}}>
+            <div className="head-mode">
+              <h6 style={{color: '#7A0091'}}>Update Invoice Status</h6>
+              <button className="modal-close" onClick={hideModal}>&times;</button>
+            </div>
+            <div className="modal-body text-center d-flex justify-content-between">
+              <button className='in-btn w-100 mr-3' onClick={handlePending}>Cancel</button>
             </div>
           </div>
         </div>

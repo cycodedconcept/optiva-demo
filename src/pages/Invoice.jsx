@@ -1,7 +1,7 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useCallback} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Pi, Up, Ca, Torder, Fil, Inv } from '../assets/images';
-import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice, validatePin, invoicePaymentStatus, cancelValidatePin } from '../features/invoiceSlice';
+import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice, validatePin, invoicePaymentStatus, cancelValidatePin, searchInvoice } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faPrint, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
@@ -10,7 +10,9 @@ import Swal from 'sweetalert2';
 import { useReactToPrint } from "react-to-print";
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable'
+import 'jspdf-autotable';
+import { debounce }  from 'lodash';
+
 
 
 const Invoice = () => {
@@ -18,7 +20,7 @@ const Invoice = () => {
   const dispatch = useDispatch();
   let token = localStorage.getItem("token");
   const getId = localStorage.getItem("sid");
-  const {error, loading, invoice, card, currentPage, per_page, total, total_pages, products, discountItem} = useSelector((state) => state.invoice);
+  const {error, loading, invoice, card, currentPage, per_page, total, total_pages, products, discountItem, search, isSearching, searchCurrentPage, searchTotalPages, searchTotal, searchPerPage} = useSelector((state) => state.invoice);
   const [mode, setMode] = useState(false);
   const [searchTerms, setSearchTerms] = useState({});
   const [items, setItems] = useState([]);
@@ -33,6 +35,11 @@ const Invoice = () => {
   const [statusInv, setStatusInv] = useState(false);
   const [dvalue, setDvalue] = useState('');
   const [second, setSecond] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+//   const [searchResults, setSearchResults] = useState([]);
+//   const [isSearching, setIsSearching] = useState([]);
+
 
   useEffect(() => {
     if (token) {
@@ -244,36 +251,6 @@ const Invoice = () => {
         setItems(newItems);
     };
     
-    //   const updateItem = (index, field, value) => {
-    //     const newItems = [...items];
-    //     newItems[index][field] = value;
-    
-    //     if (field === 'productId') {
-    //       const product = products.find(p => p.id === parseInt(value));
-    //       if (product) {
-    //         const defaultPrice = getInitialPrice(product);
-    //         newItems[index].sellingPrice = defaultPrice;
-    //         newItems[index].amount = (parseInt(defaultPrice) * newItems[index].quantity).toString();
-    //         newItems[index].inches = '';
-    
-    //         if (product.inches && product.inches.length > 0) {
-    //             const defaultInch = product.inches[0].inche;
-    //             newItems[index].inches = defaultInch;
-    //             // Update price based on the default inch
-    //             handleInchChange(index, defaultInch, product);
-    //             return; // Return here since handleInchChange will call setItems
-    //         }
-    //       }
-    //     }
-    
-    //     if (field === 'quantity') {
-    //       newItems[index].amount = (
-    //         parseInt(newItems[index].sellingPrice || 0) * parseInt(value || 0)
-    //       ).toString();
-    //     }
-    
-    //     setItems(newItems);
-    //   };
     
     const updateItem = (index, field, value) => {
         const newItems = [...items];
@@ -808,6 +785,77 @@ const Invoice = () => {
         }
     }
 
+    const debouncedSearch = useCallback(
+        debounce((value) => {
+            if (value.trim() === "") {
+                dispatch(clearSearch());
+                dispatch(getInvoice({token, shop_id: getId, page: 1, per_page: per_page}));
+            } else {
+                dispatch(searchInvoice({ 
+                    token, 
+                    shop_id: getId, 
+                    search_value: value, 
+                    page: 1, 
+                    per_page: searchPerPage 
+                }));
+            }
+        }, 300),
+        [dispatch, token, getId, per_page]
+    );
+
+    // const handleSearchItem = (e) => {
+        // e.preventDefault()
+    //     debouncedSearch(inputValue); 
+    //     console.log(inputValue)
+    // };
+
+    const handleSearchItem = (e) => {
+        e.preventDefault();
+        
+        if (!inputValue || inputValue.trim() === "") {
+          // Clear search and return to normal invoice view
+          dispatch(clearSearch());
+          dispatch(getInvoice({
+            token,
+            shop_id: getId,
+            page: 1,
+            per_page: per_page
+          }));
+          return;
+        }
+        
+        console.log('Searching for:', inputValue);
+        
+        // Dispatch search with the first page
+        dispatch(searchInvoice({
+          token,
+          shop_id: getId,
+          search_value: inputValue,
+          page: 1,
+          per_page: searchPerPage || 10
+        })).then((response) => {
+          console.log('Search response:', response);
+          if (response.error) {
+            console.error('Search error:', response.error);
+          }
+        }).catch(error => {
+          console.error('Search action error:', error);
+        });
+    };
+
+    useEffect(() => {
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [debouncedSearch]);
+
+    const displayData = isSearching ? search : invoice;
+
+    const filteredProductsItem = products.filter((item) =>
+        item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+
   return (
     <>
         {inDetails ? (
@@ -816,9 +864,34 @@ const Invoice = () => {
                     { showCard }
                 </div>
 
+                <div className="mt-5 d-block">
+                    <form onSubmit={handleSearchItem} className='in-form'>
+                        <input type="text" placeholder="Search product..." className="mb-3" style={{borderRadius: '5px'}} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value) }/>
+                        <span className="search-icon" style={{position: "absolute",
+                            right: "10px",
+                            top: "20px",
+                            fontSize: "20px",
+                            color: "#222",
+                            cursor: "pointer"}}>&#128269;</span>
+                            <div className="row">
+                                <div className="col-sm-12 col-md-12 col-lg-6 p-0">
+                                    <select value={inputValue} onChange={(e) => setInputValue(e.target.value)} className="form-select d-block">
+                                        <option>--select product--</option>
+                                        {filteredProductsItem.map((item) => (
+                                            <option key={item.id} value={item.id}>{item.product_name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-sm-12 col-md-12 col-lg-6 p-0">
+                                  <button className='b-sum ml-lg-2 ml-0 mt-3 mt-lg-0'>Filter Invoice</button>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+
                 <div className="table-content">
                     <div className="table-container mt-5">
-                        <table className="my-table w-100">
+                        <table className="my-table w-100" data={displayData}>
                             <thead>
                                 <tr>
                                     <th style={{width: '5%'}}><div className='d-flex justify-content-between'><p>S/N</p><div><img src={Fil} alt="" /></div></div></th>
@@ -833,54 +906,63 @@ const Invoice = () => {
                             </thead>
                             <tbody>
                                 {loading ? ( 
-                                    <tr>
-                                        <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
-                                            <p>Loading invoices...</p> {/* Replace with a spinner if available */}
-                                        </td>
-                                    </tr>
-                                ) : invoice?.length > 0 ? (
-                                    invoice?.map((item, index) => (
-                                        <tr key={item.invoice_number} style={{cursor: 'pointer'}} onClick={() => showDetails(item.invoice_number)}>
-                                            <td>{index + 1}</td>
-                                            <td>{item.invoice_number}</td>
-                                            <td>{item.customer_info ? item.customer_info.name : "N/A"}</td>
-                                            <td>{item.date}</td>
-                                            <td>{item.payment_method}</td>
-                                            <td>₦{Number(item.total_amount).toLocaleString()}</td>
-                                            <td>
-                                                <button className={item.payment_status} 
-                                                    onClick={(e) => {
-                                                        changeStatus(item.payment_status, item.invoice_number);
-                                                        e.stopPropagation();
-                                                    }}>
-                                                    {item.payment_status}
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <div className="d-flex">
-                                                    <div className="d-flex gap-5">
-                                                        <FontAwesomeIcon icon={faEye} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { showInvoiceDetails(item.invoice_number); e.stopPropagation();}} title='View Invoice'/>
+                                <tr>
+                                    <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                        <p>Loading invoices...</p>
+                                    </td>
+                                </tr>
+                                ) : (
+                                    displayData.length > 0 ? (
+                                        displayData.map((item, index) => (
+                                            <tr key={item.invoice_number} style={{ cursor: 'pointer' }} onClick={() => showDetails(item.invoice_number)}>
+                                                <td>{index + 1}</td>
+                                                <td>{item.invoice_number}</td>
+                                                <td>{item.customer_info ? item.customer_info.name : "N/A"}</td>
+                                                <td>{item.date}</td>
+                                                <td>{item.payment_method}</td>
+                                                <td>₦{Number(item.total_amount || 0).toLocaleString()}</td>
+                                                <td>
+                                                    <button className={item.payment_status} 
+                                                        onClick={(e) => {
+                                                            changeStatus(item.payment_status, item.invoice_number);
+                                                            e.stopPropagation();
+                                                        }}>
+                                                        {item.payment_status}
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <div className="d-flex">
+                                                        <div className="d-flex gap-5">
+                                                            <FontAwesomeIcon icon={faEye} style={{ color: '#379042', fontSize: '16px', marginRight: '20px' }} 
+                                                                onClick={(e) => { showInvoiceDetails(item.invoice_number); e.stopPropagation(); }} 
+                                                                title='View Invoice'
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex gap-5">
+                                                            <FontAwesomeIcon icon={faEdit} style={{ color: '#379042', fontSize: '16px', marginRight: '20px' }} 
+                                                                onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation(); }} 
+                                                                title='Edit Invoice'
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div className="d-flex gap-5">
-                                                        <FontAwesomeIcon icon={faEdit} style={{color: '#379042', fontSize: '16px', marginRight: '20px'}} onClick={(e) => { getUpModal(item.invoice_number); e.stopPropagation();}} title='Edit Invoice'/>
-                                                    </div>
-                                                </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                {isSearching ? 'No search results found' : 'No invoices available'}
                                             </td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
-                                            No invoices available
-                                        </td>
-                                    </tr>
+                                    )
                                 )}
                             </tbody>
+
                         </table>
                     </div>
 
                     {/* Pagination */}
-                    <div className="sticky-pagination">
+                    {/* <div className="sticky-pagination">
                         <Pagination
                             currentPage={currentPage}
                             totalPages={total_pages}
@@ -895,6 +977,55 @@ const Invoice = () => {
                                 dispatch(getInvoice({ token, shop_id: getId, page: 1, per_page: newPerPage }));
                             }}
                         />
+                    </div> */}
+
+                    <div className="sticky-pagination">
+                    <Pagination
+                        currentPage={isSearching ? searchCurrentPage : currentPage}
+                        totalPages={isSearching ? searchTotalPages : total_pages}
+                        perPage={isSearching ? searchPerPage : per_page}
+                        total={isSearching ? searchTotal : total}
+                        onPageChange={(newPage) => {
+                            if (newPage < 1) return;
+                            
+                            if (isSearching) {
+                            dispatch(searchInvoice({
+                                token,
+                                shop_id: getId,
+                                search_value: inputValue,
+                                page: newPage,
+                                per_page: searchPerPage
+                            }));
+                            } else {
+                            dispatch(getInvoice({
+                                token,
+                                shop_id: getId,
+                                page: newPage,
+                                per_page: per_page
+                            }));
+                            }
+                        }}
+                        onPerPageChange={(newPerPage) => {
+                            if (newPerPage < 1) return;
+                            
+                            if (isSearching) {
+                            dispatch(searchInvoice({
+                                token,
+                                shop_id: getId,
+                                search_value: inputValue,
+                                page: 1,
+                                per_page: newPerPage
+                            }));
+                            } else {
+                            dispatch(getInvoice({
+                                token,
+                                shop_id: getId,
+                                page: 1,
+                                per_page: newPerPage
+                            }));
+                            }
+                        }}
+                    />
                     </div>
                 </div>
 
@@ -1203,7 +1334,7 @@ const Invoice = () => {
                                     <small style={{color: '#271F29'}}>{dataItem.invoice_number}</small>
                                 </div>
                                 <div className="d-flex">
-                                    <small className='d-block mr-3' style={{color: '#95799B'}}>Issued Date: </small>
+                                    <small className='d-block mr-3' style={{color: '#95799B'}}> ued Date: </small>
                                     <small style={{color: '#271F29'}}>{dataItem.date}</small>
                                 </div>
                                 <div className="d-flex">

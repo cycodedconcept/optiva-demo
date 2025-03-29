@@ -376,9 +376,9 @@ const Sales = () => {
                         total={active ? salesTotal : sTotal}
                         onPageChange={(newPage) => {
                             if (active) {
-                                dispatch(getSales({ token, shop_id, month, year, page: newPage, per_page: salesPerPage }));
+                                dispatch(getSales({ token, shop_id: getId, month, year, page: newPage, per_page: salesPerPage }));
                             } else {
-                                dispatch(getSearchValueData({ token, shop_id, month, year, search_value, page: newPage, per_page: sPerPage }));
+                                dispatch(getSearchValueData({ token, shop_id: getId, month, year, search_value, page: newPage, per_page: sPerPage }));
                             }
                         }}
                     />

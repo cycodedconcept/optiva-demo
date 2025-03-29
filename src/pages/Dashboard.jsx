@@ -47,20 +47,80 @@ const Dashboard = () => {
 
   // When a sidebar button is clicked, update state and navigate
   const handleButtonClick = (content) => {
-    setActiveContent(content);
-    // Convert content to URL slug (lowercase, replace spaces with hyphens)
-    const slug = content.toLowerCase().replace(/\s+/g, '-');
-    // Use React Router navigate to update URL (this works with browser history)
+    // Specific handling for known variations
+    const contentMap = {
+      'Sales Report': 'Sales Report',
+      'Stock History': 'Stock History'
+      // Add other known variations if needed
+    };
+  
+    // Use mapped content or keep original
+    const standardizedContent = contentMap[content] || content;
+  
+    console.log('Button Clicked - Original:', content);
+    console.log('Standardized Content:', standardizedContent);
+  
+    // Set active content with standardized content
+    setActiveContent(standardizedContent);
+  
+    // Convert to URL-friendly slug, ensuring lowercase
+    const slug = standardizedContent.toLowerCase().replace(/\s+/g, '-');
+  
+    // Navigate to the specific route
     navigate(`/dashboard/${slug}`);
   };
+
+  const renderContent = () => {
+    const contentMap = {
+      'Dashboard': <Cards />,
+      'Invoice List': <Invoice />,
+      'Sort Orders': <Sorted />,
+      'Create Invoice': <CreateInvoice />,
+      'Product List': <Products />,
+      'Payment List': <Payment />,
+      'Purchase': <Purchase />,
+      'Stock History': <Report />,
+      'Sales Report': <Sales />,
+      'Suppliers': <Suppliers />,
+      'Users': <Users />,
+      'Category': <Category />,
+      'Customers': <Customer />,
+      'Discount': <Discount />
+    };
+  
+    console.log('Current Active Content:', activeContent); // Debugging log
+  
+    // Try exact match first
+    if (contentMap[activeContent]) {
+      return contentMap[activeContent];
+    }
+  
+    // If no exact match, try some fallback strategies
+    const normalizedContent = activeContent.trim();
+    const foundComponent = Object.keys(contentMap).find(
+      key => key.toLowerCase() === normalizedContent.toLowerCase()
+    );
+  
+    if (foundComponent) {
+      return contentMap[foundComponent];
+    }
+  
+    console.warn(`No component found for: ${activeContent}`);
+    return <Cards />; // Default fallback
+  };
+
+  // useEffect(() => {
+  //   console.log('Current Active Content (useEffect):', activeContent);
+  //   console.log('Current URL Parameter:', tab);
+  // }, [activeContent, tab]);
 
   // Update activeContent when URL changes (e.g., when browser back/forward buttons are clicked)
   useEffect(() => {
     if (tab) {
       // Convert URL format (kebab-case) to component format (Title Case)
       const formattedTab = tab.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
       
       setActiveContent(formattedTab);
     }
@@ -100,23 +160,12 @@ const Dashboard = () => {
               </div>
           </header>
 
-          {activeContent === 'Dashboard' && <Cards /> }
-          {activeContent === 'Invoice List' && <Invoice /> }
-          {activeContent === 'Sort Orders' && <Sorted /> }
-          {activeContent === 'Create Invoice' && <CreateInvoice /> }
-          {activeContent === 'Product List' && <Products /> }
-          {activeContent === 'Payment List' && <Payment /> }
-          {activeContent === 'Purchase' && <Purchase /> }
-          {activeContent === 'Stock History' && <Report /> }
-          {activeContent === 'Sales Report' && <Sales /> }
-          {activeContent === 'Suppliers' && <Suppliers /> }
-          {activeContent === 'Users' && <Users /> }
-          {activeContent === 'Category' && <Category /> }
-          {activeContent === 'Customers' && <Customer /> }
-          {activeContent === 'Discount' && <Discount /> }
+          {renderContent()}
       </div>
     </>
   );
 };
 
 export default Dashboard;
+
+

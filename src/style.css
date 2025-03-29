@@ -57,7 +57,7 @@ body {
     border: 1px solid #F3F3F3;
 }
 
-.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund, .b-sum, .b-sum2, .Sorted, .Not {
+.log-btn, .in-btn, .p-btn, .u-btn, .pro-btn, .d-btn, .a-btn, .Paid, .Unpaid, .inactive, .Pending, .p2-btn, .c-btn, .Refund, .b-sum, .b-sum2, .Sorted, .Not, .Cancel {
     outline: none;
     border: 0;
     box-shadow: none;
@@ -106,6 +106,12 @@ body {
 
 .c-btn {
     background: #B34017;
+}
+
+.Cancel {
+    color: #B34017;
+    background: #f3bfac;
+    padding: 5px;
 }
 
 
@@ -621,6 +627,10 @@ input, select, textarea {
     color: #222;
 }
 
+.form-item {
+    width: 50%;
+}
+
 ::placeholder {
     color: rgba(0, 0, 0, 0.3);
     font-size: 14px;
@@ -660,7 +670,9 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
   
-
+.in-form {
+    width: 50%;
+}
 
 .head-mode {
     display: flex;
@@ -786,6 +798,10 @@ input[type="number"] {
 
     .user-details {
         gap: 42px;
+    }
+
+    .in-form {
+        width: 100%;
     }
 
 }
