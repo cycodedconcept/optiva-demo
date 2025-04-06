@@ -8,7 +8,7 @@ const Display = () => {
   return (
     <>
     <BrowserRouter 
-    basename='/IVMS/'
+    // basename='/IVMS/'
     >
     <Routes>
       <Route path='/' element={<Login />}/>
