@@ -93,7 +93,7 @@ const Sidebar = ({ onButtonClick, activeContent }) => {
         localStorage.removeItem('token');
         localStorage.clear();
         
-        window.location.href = '/IVMS';
+        window.location.href = '/';
     };
 
     const renderMenu = menus.map((menuItem) => {
