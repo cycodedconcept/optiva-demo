@@ -1054,16 +1054,7 @@ const Invoice = () => {
     };
 
     const handleShareAsImage = async () => {
-        const metaViewport = document.querySelector('meta[name="viewport"]');
-        
-        // Backup the original content
-        const originalContent = metaViewport?.getAttribute('content');
-        
-        // Update the content to disable responsiveness
-        if (metaViewport) {
-            metaViewport.setAttribute('content', 'width=1000');
-        }
-        // Show loading
+        // Show loading immediately to prevent layout shifts
         Swal.fire({
             title: 'Preparing Image',
             html: 'Getting your invoice ready to share...',
@@ -1076,18 +1067,142 @@ const Invoice = () => {
         try {
             if (!invoiceRef.current) return;
             
-            // Create canvas
-            const canvas = await html2canvas(invoiceRef.current, {
-                scale: 2,
+            // Detect iOS device
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            // === CRITICAL iOS PREPARATION ===
+            
+            // Create a clone of the invoice for rendering that won't affect the display
+            const originalInvoice = invoiceRef.current;
+            
+            // Create a fixed-size container for the clone
+            const containerDiv = document.createElement('div');
+            containerDiv.style.position = 'absolute';
+            containerDiv.style.left = '-9999px';
+            containerDiv.style.top = '-9999px';
+            containerDiv.style.width = '1200px'; // Fixed width for iOS
+            document.body.appendChild(containerDiv);
+            
+            // Clone the invoice
+            const clonedInvoice = originalInvoice.cloneNode(true);
+            
+            // Apply critical iOS-specific styling to prevent responsive behavior
+            clonedInvoice.style.width = '1200px';
+            clonedInvoice.style.maxWidth = '1200px';
+            clonedInvoice.style.minWidth = '1200px';
+            clonedInvoice.style.position = 'relative';
+            clonedInvoice.style.transform = 'none';
+            clonedInvoice.style.transformOrigin = '0 0';
+            clonedInvoice.style.margin = '0';
+            clonedInvoice.style.padding = '20px';
+            
+            // Force all internal elements to use fixed widths
+            if (isIOS) {
+                const allElements = clonedInvoice.querySelectorAll('*');
+                allElements.forEach(el => {
+                    // For tables, set fixed widths
+                    if (el.tagName === 'TABLE') {
+                        el.style.width = '1160px';
+                        el.style.maxWidth = '1160px';
+                        el.style.tableLayout = 'fixed';
+                    }
+                    
+                    // Enhance text rendering
+                    if (['P', 'SPAN', 'H1', 'H2', 'H3', 'H4', 'H5', 'TD', 'TH'].includes(el.tagName)) {
+                        el.style.webkitFontSmoothing = 'antialiased';
+                        el.style.textRendering = 'optimizeLegibility';
+                    }
+                    
+                    // Remove any responsive classes or styles
+                    if (el.classList.contains('col-lg') || 
+                        el.classList.contains('col-md') || 
+                        el.classList.contains('col-sm') || 
+                        el.className.includes('d-lg-') || 
+                        el.className.includes('d-md-') || 
+                        el.className.includes('d-sm-')) {
+                        
+                        // Replace responsive classes with fixed widths
+                        el.className = el.className
+                            .replace(/col-(lg|md|sm)-\d+/g, '')
+                            .replace(/d-(lg|md|sm)-(flex|block|none)/g, 'd-flex');
+                        
+                        // Apply fixed dimensions
+                        el.style.flexBasis = 'auto';
+                        el.style.width = 'auto';
+                        el.style.display = 'block';
+                    }
+                    
+                    // Remove any media queries effect
+                    el.style.float = 'none';
+                    
+                    // Force elements to render in place
+                    if (window.getComputedStyle(el).position === 'relative' || 
+                        window.getComputedStyle(el).position === 'absolute') {
+                        el.style.position = 'static';
+                    }
+                });
+                
+                // Fix specific layout issues for invoice components
+                const topSections = clonedInvoice.querySelectorAll('.top-section');
+                topSections.forEach(section => {
+                    section.style.display = 'flex';
+                    section.style.flexDirection = 'row';
+                    section.style.justifyContent = 'space-between';
+                    section.style.width = '100%';
+                });
+                
+                // Fix any responsive table issues
+                const tables = clonedInvoice.querySelectorAll('table');
+                tables.forEach(table => {
+                    table.style.width = '100%';
+                    table.style.tableLayout = 'fixed';
+                    
+                    // Fix table headers
+                    const ths = table.querySelectorAll('th');
+                    ths.forEach(th => {
+                        th.style.width = `${100 / ths.length}%`;
+                        th.style.padding = '10px';
+                        th.style.textAlign = 'left';
+                    });
+                });
+            }
+            
+            // Add the clone to our container
+            containerDiv.appendChild(clonedInvoice);
+            
+            // Force layout calculation and wait for fonts
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+            
+            // Add a longer delay for iOS to ensure everything is rendered properly
+            if (isIOS) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Capture with html2canvas using the clone
+            const canvas = await html2canvas(clonedInvoice, {
+                scale: isIOS ? 2 : 2, // Higher scale for iOS
                 useCORS: true,
                 logging: false,
                 allowTaint: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                width: 1200, // Fixed width
+                height: clonedInvoice.offsetHeight,
+                windowWidth: 1200,
+                windowHeight: clonedInvoice.offsetHeight
             });
             
-            // Convert to PNG blob (more compatible than PDF for direct sharing)
+            // Cleanup - remove the temporary elements
+            document.body.removeChild(containerDiv);
+            
+            // Convert to image format
+            const imgFormat = isIOS ? 'image/jpeg' : 'image/png';
+            const imgQuality = isIOS ? 0.95 : 0.9;
+            
+            // Convert to blob
             const imgBlob = await new Promise(resolve => {
-                canvas.toBlob(blob => resolve(blob), 'image/png', 0.9);
+                canvas.toBlob(blob => resolve(blob), imgFormat, imgQuality);
             });
             
             // Create URL for the image
@@ -1103,13 +1218,15 @@ const Invoice = () => {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             
             if (isMobile) {
-                // On mobile, first try Web Share API with image file
+                // On mobile, try Web Share API first
+                const fileExtension = isIOS ? 'jpg' : 'png';
+                
                 if (navigator.share && navigator.canShare && 
-                    navigator.canShare({ files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.png`, { type: 'image/png' })] })) {
+                    navigator.canShare({ files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.${fileExtension}`, { type: imgFormat })] })) {
                     
                     try {
                         await navigator.share({
-                            files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.png`, { type: 'image/png' })],
+                            files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.${fileExtension}`, { type: imgFormat })],
                             title: `Invoice ${dataItem.invoice_number}`,
                             text: `Invoice for ${dataItem.customer_info?.name || 'Customer'}`
                         });
@@ -1129,24 +1246,61 @@ const Invoice = () => {
                     }
                 }
                 
-                // Fallback to download + instructions
-                Swal.fire({
-                    title: 'Share to WhatsApp',
-                    html: `
-                        <p>Download the image and share it manually:</p>
-                        <a id="download-img" href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.png" 
-                           class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%; text-decoration: none;">
-                            Download Invoice Image
-                        </a>
-                        <p style="font-size: 12px; margin-top: 5px;">
-                            After downloading, open WhatsApp and select the image from your gallery.
-                        </p>
-                    `,
-                    showConfirmButton: false,
-                    showCloseButton: true
-                });
+                // For iOS devices, show special instructions
+                if (isIOS) {
+                    Swal.fire({
+                        title: 'Share to WhatsApp',
+                        html: `
+                            <p style="margin-bottom: 15px;">For iPhone/iPad users:</p>
+                            <ol style="text-align: left; margin-bottom: 20px;">
+                                <li>Tap and hold the image preview below</li>
+                                <li>Select "Share..." from the menu</li>
+                                <li>Choose WhatsApp or "Save Image" first</li>
+                            </ol>
+                            
+                            <div style="border: 1px solid #ddd; margin-bottom: 15px; max-height: 300px; overflow: auto;">
+                                <img src="${imgUrl}" style="width: 100%;" alt="Invoice Preview" />
+                            </div>
+                            
+                            <p style="margin-top: 10px;">Or download directly:</p>
+                            <a id="download-img-ios" href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.jpg" 
+                               class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%; text-decoration: none;">
+                                Save Invoice Image
+                            </a>
+                        `,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                        width: '90%',
+                        didOpen: () => {
+                            // Add tap-and-hold handler for iOS image
+                            const imgElement = document.querySelector('img[alt="Invoice Preview"]');
+                            if (imgElement) {
+                                imgElement.addEventListener('contextmenu', (e) => {
+                                    // This allows the context menu to appear on long-press
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Android fallback
+                    Swal.fire({
+                        title: 'Share to WhatsApp',
+                        html: `
+                            <p>Download the image and share it manually:</p>
+                            <a id="download-img" href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.png" 
+                               class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%; text-decoration: none;">
+                                Download Invoice Image
+                            </a>
+                            <p style="font-size: 12px; margin-top: 5px;">
+                                After downloading, open WhatsApp and select the image from your gallery.
+                            </p>
+                        `,
+                        showConfirmButton: false,
+                        showCloseButton: true
+                    });
+                }
             } else {
-                // On desktop
+                // Desktop experience
                 Swal.fire({
                     title: 'Share to WhatsApp',
                     html: `
@@ -1159,7 +1313,7 @@ const Invoice = () => {
                             <li>Click the attachment icon (📎) and select the downloaded image</li>
                         </ol>
                         
-                        <a href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.png" id="download-invoice-img" 
+                        <a href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.${isIOS ? 'jpg' : 'png'}" id="download-invoice-img" 
                            class="btn" style="background-color: #25D366; color: white; width: 100%; margin-bottom: 15px; padding: 10px;">
                             1. Download Invoice Image
                         </a>
@@ -1178,7 +1332,7 @@ const Invoice = () => {
             // Clean up the URL
             setTimeout(() => {
                 URL.revokeObjectURL(imgUrl);
-            }, 60000); // Give the user 1 minute to download
+            }, 60000); // Give the user 1 minute to download/share
             
         } catch (error) {
             console.error("Error preparing image for WhatsApp:", error);
@@ -1190,58 +1344,60 @@ const Invoice = () => {
                 confirmButtonColor: '#7A0091'
             });
         }
-        finally {
-            setTimeout(() => {
-                if (metaViewport) {
-                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-                }
-            }, 4000);
-        }
     };
 
     const SimpleShareButton = () => {
         const handleShareClick = () => {
-            Swal.fire({
-                title: 'Share Invoice',
-                html: `
-                    <p>Choose how you want to share your invoice:</p>
-                    <button id="share-pdf" class="btn" style="background-color: #7A0091; color: white; margin: 10px 0; padding: 10px; width: 100%;">
-                        <i class="far fa-file-pdf mr-2"></i> Share as PDF
-                    </button>
-                    <button id="share-img" class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%;">
-                        <i class="far fa-image mr-2"></i> Share as Image
-                    </button>
-                `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                didOpen: () => {
-                    document.getElementById('share-pdf').addEventListener('click', () => {
-                        Swal.close();
-                        handleShareToWhatsApp();
-                    });
-                    
-                    document.getElementById('share-img').addEventListener('click', () => {
-                        Swal.close();
-                        handleShareAsImage();
-                    });
-                }
-            });
+            // Detect if on iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                // For iOS devices, just go directly to image sharing
+                handleShareAsImage();
+            } else {
+                // For other devices, show options
+                Swal.fire({
+                    title: 'Share Invoice',
+                    html: `
+                        <p>Choose how you want to share your invoice:</p>
+                        <button id="share-pdf" class="btn" style="background-color: #7A0091; color: white; margin: 10px 0; padding: 10px; width: 100%;">
+                            <i class="far fa-file-pdf mr-2"></i> Share as PDF
+                        </button>
+                        <button id="share-img" class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%;">
+                            <i class="far fa-image mr-2"></i> Share as Image
+                        </button>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    didOpen: () => {
+                        document.getElementById('share-pdf').addEventListener('click', () => {
+                            Swal.close();
+                            handleShareToWhatsApp();
+                        });
+                        
+                        document.getElementById('share-img').addEventListener('click', () => {
+                            Swal.close();
+                            handleShareAsImage();
+                        });
+                    }
+                });
+            }
         };
-
+        
         return (
             <button 
-              onClick={handleShareClick} 
-              className="btn" 
-              style={{
-                backgroundColor: '#7A0091', 
-                color: 'white',
-                borderRadius: '8px',
-                padding: '8px 15px'
-              }}
+                onClick={handleShareClick} 
+                className="btn" 
+                style={{
+                    backgroundColor: '#7A0091', 
+                    color: 'white',
+                    borderRadius: '8px',
+                    padding: '8px 15px'
+                }}
             >
-              <i className="fas fa-share-alt mr-1"></i> Share
+                <i className="fas fa-share-alt mr-1"></i> Share
             </button>
-          );
+        );
     };
     
 
