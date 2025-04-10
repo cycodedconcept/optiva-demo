@@ -1044,13 +1044,13 @@ const Invoice = () => {
                 confirmButtonColor: '#7A0091'
             });
         } 
-        // finally {
-        //     setTimeout(() => {
-        //         if (metaViewport) {
-        //             metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
-        //         }
-        //     }, 1000);
-        // }
+        finally {
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 4000);
+        }
     };
 
     const handleShareAsImage = async () => {
@@ -1189,6 +1189,13 @@ const Invoice = () => {
                 text: 'Failed to prepare the invoice for sharing. Please try again.',
                 confirmButtonColor: '#7A0091'
             });
+        }
+        finally {
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 4000);
         }
     };
 
