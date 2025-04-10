@@ -855,6 +855,360 @@ const Invoice = () => {
         item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleShareToWhatsApp = async () => {
+        // Show loading alert
+        Swal.fire({
+            title: 'Preparing Invoice',
+            html: 'Getting your invoice ready to share to WhatsApp...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        try {
+            if (!invoiceRef.current) return;
+            
+            // Method 1: Generate PDF as we did before
+            const canvas = await html2canvas(invoiceRef.current, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            // Create PDF
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+            });
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            
+            // Generate PDF as blob and create URL
+            const pdfBlob = await pdf.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            
+            // Ensure invoice number is safe for filenames
+            const safeInvoiceNumber = dataItem.invoice_number.toString().replace(/[^\w-]/g, '');
+            
+            // Close loading dialog
+            Swal.close();
+            
+            // Check if on mobile
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            // Different approaches based on device
+            if (isMobile) {
+                // On mobile, we'll try three different approaches
+                
+                // First check if the Web Share API with files is supported
+                if (navigator.share && navigator.canShare && 
+                    navigator.canShare({ files: [new File([pdfBlob], `Invoice-${safeInvoiceNumber}.pdf`, { type: 'application/pdf' })] })) {
+                    
+                    try {
+                        await navigator.share({
+                            files: [new File([pdfBlob], `Invoice-${safeInvoiceNumber}.pdf`, { type: 'application/pdf' })],
+                            title: `Invoice ${dataItem.invoice_number}`,
+                            text: `Invoice for ${dataItem.customer_info?.name || 'Customer'}`
+                        });
+                        
+                        // Success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Shared!',
+                            text: 'Use WhatsApp from the share menu to complete sharing.',
+                            confirmButtonColor: '#7A0091'
+                        });
+                        
+                        return;
+                    } catch (err) {
+                        console.log("Web Share API error:", err);
+                        // Continue to fallback methods
+                    }
+                }
+                
+                // Fallback to WhatsApp direct URL with text only
+                Swal.fire({
+                    title: 'Share to WhatsApp',
+                    html: `
+                        <p>Option 1: Share with message only (no PDF)</p>
+                        <button id="message-only" class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%;">
+                            Share Message Only
+                        </button>
+                        
+                        <p style="margin-top: 20px;">Option 2: Download PDF and share manually</p>
+                        <a id="download-pdf" href="${pdfUrl}" download="Invoice-${safeInvoiceNumber}.pdf" 
+                           class="btn" style="background-color: #7A0091; color: white; margin: 10px 0; padding: 10px; width: 100%; text-decoration: none;">
+                            Download PDF
+                        </a>
+                        <p style="font-size: 12px; margin-top: 5px;">
+                            After downloading, open WhatsApp and select the PDF from your downloads folder.
+                        </p>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    didOpen: () => {
+                        // Message only button
+                        document.getElementById('message-only').addEventListener('click', () => {
+                            const invoiceDetails = `
+    *Invoice ${dataItem.invoice_number}*
+    Customer: ${dataItem.customer_info?.name || 'N/A'}
+    Date: ${dataItem.date}
+    Amount: ₦${Number(dataItem.total_amount).toLocaleString()}
+    Status: ${dataItem.payment_status}
+    
+    Products:
+    ${dataItem.products_ordered.map((product, index) => 
+      `${index + 1}. ${product.product_name} - ₦${Number(product.product_price).toLocaleString()} x ${product.quantity}`
+    ).join('\n')}
+    
+    *Total: ₦${Number(dataItem.total_amount).toLocaleString()}*
+    `;
+                            
+                            window.open(`https://wa.me/?text=${encodeURIComponent(invoiceDetails)}`, '_blank');
+                            Swal.close();
+                        });
+                        
+                        // Download button (already has href and download attributes)
+                        document.getElementById('download-pdf').addEventListener('click', () => {
+                            setTimeout(() => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'PDF Downloaded',
+                                    text: 'Now open WhatsApp and share the PDF from your downloads folder.',
+                                    confirmButtonColor: '#7A0091'
+                                });
+                            }, 1000);
+                        });
+                    }
+                });
+            } else {
+                // On desktop, provide download + WhatsApp Web instructions
+                Swal.fire({
+                    title: 'Share to WhatsApp',
+                    html: `
+                        <p style="margin-bottom: 15px;">Follow these steps to share your invoice:</p>
+                        
+                        <ol style="text-align: left; margin-bottom: 20px;">
+                            <li>Download the PDF using the button below</li>
+                            <li>Open WhatsApp Web or WhatsApp Desktop</li>
+                            <li>Select the chat where you want to share the invoice</li>
+                            <li>Click the attachment icon (📎) and select the downloaded PDF</li>
+                        </ol>
+                        
+                        <a href="${pdfUrl}" download="Invoice-${safeInvoiceNumber}.pdf" id="download-invoice" 
+                           class="btn" style="background-color: #25D366; color: white; width: 100%; margin-bottom: 15px; padding: 10px;">
+                            1. Download Invoice PDF
+                        </a>
+                        
+                        <a href="https://web.whatsapp.com/" target="_blank" id="open-whatsapp" 
+                           class="btn" style="background-color: #7A0091; color: white; width: 100%; padding: 10px;">
+                            2. Open WhatsApp Web
+                        </a>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    width: '500px',
+                });
+            }
+            
+            // Clean up the URL
+            setTimeout(() => {
+                URL.revokeObjectURL(pdfUrl);
+            }, 60000); // Give the user 1 minute to download
+            
+        } catch (error) {
+            console.error("Error preparing invoice for WhatsApp:", error);
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to prepare the invoice for sharing. Please try again.',
+                confirmButtonColor: '#7A0091'
+            });
+        }
+    };
+    const handleShareAsImage = async () => {
+        // Show loading
+        Swal.fire({
+            title: 'Preparing Image',
+            html: 'Getting your invoice ready to share...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        try {
+            if (!invoiceRef.current) return;
+            
+            // Create canvas
+            const canvas = await html2canvas(invoiceRef.current, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            // Convert to PNG blob (more compatible than PDF for direct sharing)
+            const imgBlob = await new Promise(resolve => {
+                canvas.toBlob(blob => resolve(blob), 'image/png', 0.9);
+            });
+            
+            // Create URL for the image
+            const imgUrl = URL.createObjectURL(imgBlob);
+            
+            // Ensure invoice number is safe for filenames
+            const safeInvoiceNumber = dataItem.invoice_number.toString().replace(/[^\w-]/g, '');
+            
+            // Close loading dialog
+            Swal.close();
+            
+            // Check if on mobile
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // On mobile, first try Web Share API with image file
+                if (navigator.share && navigator.canShare && 
+                    navigator.canShare({ files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.png`, { type: 'image/png' })] })) {
+                    
+                    try {
+                        await navigator.share({
+                            files: [new File([imgBlob], `Invoice-${safeInvoiceNumber}.png`, { type: 'image/png' })],
+                            title: `Invoice ${dataItem.invoice_number}`,
+                            text: `Invoice for ${dataItem.customer_info?.name || 'Customer'}`
+                        });
+                        
+                        // Success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Shared!',
+                            text: 'Select WhatsApp from the share menu to complete sharing.',
+                            confirmButtonColor: '#7A0091'
+                        });
+                        
+                        return;
+                    } catch (err) {
+                        console.log("Web Share API error:", err);
+                        // Continue to fallback methods
+                    }
+                }
+                
+                // Fallback to download + instructions
+                Swal.fire({
+                    title: 'Share to WhatsApp',
+                    html: `
+                        <p>Download the image and share it manually:</p>
+                        <a id="download-img" href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.png" 
+                           class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%; text-decoration: none;">
+                            Download Invoice Image
+                        </a>
+                        <p style="font-size: 12px; margin-top: 5px;">
+                            After downloading, open WhatsApp and select the image from your gallery.
+                        </p>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true
+                });
+            } else {
+                // On desktop
+                Swal.fire({
+                    title: 'Share to WhatsApp',
+                    html: `
+                        <p style="margin-bottom: 15px;">Follow these steps to share your invoice:</p>
+                        
+                        <ol style="text-align: left; margin-bottom: 20px;">
+                            <li>Download the image using the button below</li>
+                            <li>Open WhatsApp Web or WhatsApp Desktop</li>
+                            <li>Select the chat where you want to share the invoice</li>
+                            <li>Click the attachment icon (📎) and select the downloaded image</li>
+                        </ol>
+                        
+                        <a href="${imgUrl}" download="Invoice-${safeInvoiceNumber}.png" id="download-invoice-img" 
+                           class="btn" style="background-color: #25D366; color: white; width: 100%; margin-bottom: 15px; padding: 10px;">
+                            1. Download Invoice Image
+                        </a>
+                        
+                        <a href="https://web.whatsapp.com/" target="_blank" id="open-whatsapp-web" 
+                           class="btn" style="background-color: #7A0091; color: white; width: 100%; padding: 10px;">
+                            2. Open WhatsApp Web
+                        </a>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    width: '500px',
+                });
+            }
+            
+            // Clean up the URL
+            setTimeout(() => {
+                URL.revokeObjectURL(imgUrl);
+            }, 60000); // Give the user 1 minute to download
+            
+        } catch (error) {
+            console.error("Error preparing image for WhatsApp:", error);
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to prepare the invoice for sharing. Please try again.',
+                confirmButtonColor: '#7A0091'
+            });
+        }
+    };
+
+    const SimpleShareButton = () => {
+        const handleShareClick = () => {
+            Swal.fire({
+                title: 'Share Invoice',
+                html: `
+                    <p>Choose how you want to share your invoice:</p>
+                    <button id="share-pdf" class="btn" style="background-color: #7A0091; color: white; margin: 10px 0; padding: 10px; width: 100%;">
+                        <i class="far fa-file-pdf mr-2"></i> Share as PDF
+                    </button>
+                    <button id="share-img" class="btn" style="background-color: #25D366; color: white; margin: 10px 0; padding: 10px; width: 100%;">
+                        <i class="far fa-image mr-2"></i> Share as Image
+                    </button>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                didOpen: () => {
+                    document.getElementById('share-pdf').addEventListener('click', () => {
+                        Swal.close();
+                        handleShareToWhatsApp();
+                    });
+                    
+                    document.getElementById('share-img').addEventListener('click', () => {
+                        Swal.close();
+                        handleShareAsImage();
+                    });
+                }
+            });
+        };
+
+        return (
+            <button 
+              onClick={handleShareClick} 
+              className="btn" 
+              style={{
+                backgroundColor: '#7A0091', 
+                color: 'white',
+                borderRadius: '8px',
+                padding: '8px 15px'
+              }}
+            >
+              <i className="fas fa-share-alt mr-1"></i> Share
+            </button>
+          );
+        };
+    
 
   return (
     <>
@@ -1309,6 +1663,9 @@ const Invoice = () => {
                         <FontAwesomeIcon icon={faPrint} className='mr-4'/>
                         Print
                     </button>
+                </div>
+                <div>
+                <SimpleShareButton />
                 </div>
             </div>
 
