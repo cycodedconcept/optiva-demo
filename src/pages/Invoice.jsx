@@ -856,6 +856,17 @@ const Invoice = () => {
     );
 
     const handleShareToWhatsApp = async () => {
+
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        
+        // Backup the original content
+        const originalContent = metaViewport?.getAttribute('content');
+        
+        // Update the content to disable responsiveness
+        if (metaViewport) {
+            metaViewport.setAttribute('content', 'width=1000');
+        }
+
         // Show loading alert
         Swal.fire({
             title: 'Preparing Invoice',
@@ -1032,9 +1043,26 @@ const Invoice = () => {
                 text: 'Failed to prepare the invoice for sharing. Please try again.',
                 confirmButtonColor: '#7A0091'
             });
+        } finally {
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 1000);
         }
     };
+
     const handleShareAsImage = async () => {
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        
+        // Backup the original content
+        const originalContent = metaViewport?.getAttribute('content');
+        
+        // Update the content to disable responsiveness
+        if (metaViewport) {
+            metaViewport.setAttribute('content', 'width=1000');
+        }
+
         // Show loading
         Swal.fire({
             title: 'Preparing Image',
@@ -1161,6 +1189,12 @@ const Invoice = () => {
                 text: 'Failed to prepare the invoice for sharing. Please try again.',
                 confirmButtonColor: '#7A0091'
             });
+        } finally {
+            setTimeout(() => {
+                if (metaViewport) {
+                    metaViewport.setAttribute('content', originalContent || 'width=device-width, initial-scale=1.0');
+                }
+            }, 1000);
         }
     };
 
