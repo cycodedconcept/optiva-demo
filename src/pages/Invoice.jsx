@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Pi, Up, Ca, Torder, Fil, Inv } from '../assets/images';
 import { getInvoice, clearSearch, getProduct, getDiscount, updateInvoice, validatePin, invoicePaymentStatus, cancelValidatePin, searchInvoice } from '../features/invoiceSlice';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPrint, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPrint, faEye, faFilePdf, faShare } from '@fortawesome/free-solid-svg-icons';
 import Pagination from './support/Pagination';
 import { Plus, Minus, Search, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -1777,7 +1777,7 @@ const Invoice = () => {
         return (
             <button 
                 onClick={handleShareClick} 
-                className="btn" 
+                className="btn no-print2 mb-3 mb-lg-0" 
                 style={{
                     backgroundColor: '#7A0091', 
                     color: 'white',
@@ -1785,7 +1785,7 @@ const Invoice = () => {
                     padding: '8px 15px'
                 }}
             >
-                <i className="fas fa-share-alt mr-1"></i> Share
+                <FontAwesomeIcon icon={faShare} /> Share
             </button>
         );
     };
@@ -2226,26 +2226,27 @@ const Invoice = () => {
         ) : (
         <>
           <div className='mt-5'>
-            
-            <div className="d-flex justify-content-end">
-                <div className='mb-3 mb-lg-0'>
-                <button className='btn ml-lg-3 ml-0 no-print' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
-                </div>
-                <div className="mb-4">
-                    <button className='btn mr-lg-3 mr-0' style={{background: '#fff', color: '#7A0091'}} onClick={getup}>Back</button>
-                </div>
+            <div className="d-block d-lg-flex justify-content-between">
                 <div>
-                    <button 
-                        className='btn px-3 no-print' 
-                        style={{background: '#7A0091', color: '#F8F6F8'}}
-                        onClick={handlePrint}
-                    >
-                        <FontAwesomeIcon icon={faPrint} className='mr-4'/>
-                        Print
-                    </button>
+                 <SimpleShareButton />
                 </div>
-                <div>
-                <SimpleShareButton />
+                <div className="d-flex justify-content-end">
+                    <div className='mb-3 mb-lg-0'>
+                    <button className='btn mx-lg-3 ml-0 no-print' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
+                    </div>
+                    <div className="mb-4">
+                        <button className='btn mr-lg-3 mr-0' style={{background: '#fff', color: '#7A0091'}} onClick={getup}>Back</button>
+                    </div>
+                    <div>
+                        <button 
+                            className='btn px-3 no-print' 
+                            style={{background: '#7A0091', color: '#F8F6F8'}}
+                            onClick={handlePrint}
+                        >
+                            <FontAwesomeIcon icon={faPrint} className='mr-4'/>
+                            Print
+                        </button>
+                    </div>
                 </div>
             </div>
 

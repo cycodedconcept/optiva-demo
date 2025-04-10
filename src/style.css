@@ -724,6 +724,11 @@ input[type="number"] {
     .box-item {
         width: 100%;
     }
+
+    .no-print2 {
+        width: 100%;
+    }
+
     br {
         display: none;
     }
