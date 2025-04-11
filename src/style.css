@@ -725,8 +725,9 @@ input[type="number"] {
         width: 100%;
     }
 
-    .no-print2 {
+    .no-print {
         width: 100%;
+        font-size: 12px !important;
     }
 
     br {
