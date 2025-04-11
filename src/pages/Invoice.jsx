@@ -2230,7 +2230,7 @@ const Invoice = () => {
                 <div>
                  <SimpleShareButton />
                 </div>
-                <div className="d-flex justify-content-end">
+                <div className="d-flex justify-content-between">
                     <div className='mb-3 mb-lg-0'>
                     <button className='btn mx-lg-3 ml-0 no-print' style={{background: '#7A0091', color: '#F8F6F8'}} onClick={handleDownload}><FontAwesomeIcon icon={faFilePdf} className='mr-2'/>Download as Pdf</button>
                     </div>
